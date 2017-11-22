@@ -101,18 +101,18 @@ float cpu_uptime_init;
 // struct for a UDP packet
 struct sensors {
   float nodeID;
+  float cpu_uptime = 0;
   float mcpTempTop = -99;
   float mcpTempMid = -99;
   float mcpTempBot = -99;
   float htuTemp = -99;
   float htuHumid = -99;
-  byte serial;
   bool snap_relay = false;
   bool fem = false;
   bool pam = false;
   bool snapv2_0_1 = false;
   bool snapv2_2_3 = false;
-  float cpu_uptime = 0;
+  byte serial;
   byte mac[7];
 } sensorArray;
 
