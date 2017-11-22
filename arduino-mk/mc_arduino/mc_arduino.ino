@@ -289,7 +289,7 @@ void loop() {
 
     
     // Find bot temp sensor and read its value
-    if (mcpTop.begin(TEMP_BOT)) {
+    if (mcpBot.begin(TEMP_BOT)) {
       sensorArray.mcpTempBot = mcpBot.readTempC();    
     }
     else {
