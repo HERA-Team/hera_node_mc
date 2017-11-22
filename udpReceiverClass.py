@@ -125,7 +125,7 @@ class UdpClient():
                #server.send('heranodemc@gmail.com','recipientemail@gmail.com','The temperature values are approaching critical levels, shutdown sequence initiated') 
             # Set hashes in Redis composed of sensor temperature values
 
-            self.r.hmset('status:node:%d'%node, {'mac':unpacked_mac,'tempTop':unpacked_mcptemp_top[0],
+            self.r.hmset('status:node:%d'%node,{'serial':unpacked_serial[0],'mac':unpacked_mac,'tempTop':unpacked_mcptemp_top[0],
             'tempMid':unpacked_mcptemp_mid[0],'tempBot':unpacked_mcptemp_bot[0],'tempHumid':unpacked_htutemp[0],
             'humid':unpacked_htuhumid[0],'power_snap_relay': bin(unpacked_snap_relay[0]),
             'power_fem': bin(unpacked_fem[0]),'power_pam': bin(unpacked_pam[0]),
