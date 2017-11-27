@@ -289,6 +289,7 @@ void loop() {
     else {
       Serial.println("MCP9808 TOP not found");
       serialUdp("MCP9808 TOP not found");
+      sensorArray.mcpTempTop = -99; 
     }
  
     
@@ -299,6 +300,7 @@ void loop() {
     else {
       Serial.println("MCP9808 MID not found");
       serialUdp("MCP9808 MID not found"); 
+      sensorArray.mcpTempMid = -99; 
     }
 
     
@@ -309,6 +311,7 @@ void loop() {
     else {
       Serial.println("MCP9808 BOT not found");
       serialUdp("MCP9808 BOT not found");
+      sensorArray.mcpTempBot = -99; 
     }
 
 
