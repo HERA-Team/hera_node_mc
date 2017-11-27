@@ -111,14 +111,15 @@ class UdpClient():
             unpacked_snapv2_1 = struct.unpack('=?',data[32])
             unpacked_snapv2_2 = struct.unpack('=?',data[33])
             unpacked_snapv2_3 = struct.unpack('=?',data[34])
-            unpacked_serial = struct.unpack('=s',data[35])
-            unpacked_mac[0]=(struct.unpack('=s',data[36])[0])
-            unpacked_mac[1]=(struct.unpack('=s',data[37])[0])
-            unpacked_mac[2]=(struct.unpack('=s',data[38])[0])
-            unpacked_mac[3]=(struct.unpack('=s',data[39])[0])
-            unpacked_mac[4]=(struct.unpack('=s',data[40])[0])
-            unpacked_mac[5]=(struct.unpack('=s',data[41])[0])
-            unpacked_mac[6]=(struct.unpack('=s',data[42])[0])
+            unpacked_serialLb = struct.unpack('=s',data[35])
+            unpacked_serialHb = struct.unpack('=s',data[36])
+            unpacked_mac[0]=(struct.unpack('=s',data[37])[0])
+            unpacked_mac[1]=(struct.unpack('=s',data[38])[0])
+            unpacked_mac[2]=(struct.unpack('=s',data[39])[0])
+            unpacked_mac[3]=(struct.unpack('=s',data[40])[0])
+            unpacked_mac[4]=(struct.unpack('=s',data[41])[0])
+            unpacked_mac[5]=(struct.unpack('=s',data[42])[0])
+            unpacked_mac[6]=(struct.unpack('=s',data[43])[0])
 
 
             node = int(unpacked_nodeID[0])
@@ -128,7 +129,8 @@ class UdpClient():
             # Set hashes in Redis composed of sensor temperature values
 
             self.r.hmset('status:node:%d'%node,
-            {'serial':unpacked_serial[0],
+            {'serialLbyte':unpacked_serialLb[0],
+            'serialHbyte':unpacked_serialHb[0],
             'mac':unpacked_mac,
             'tempTop':unpacked_mcptemp_top[0],
             'tempMid':unpacked_mcptemp_mid[0],

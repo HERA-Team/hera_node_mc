@@ -21,8 +21,8 @@
 //      4              ---- ----       MAC byte 4
 //      5              ---- ----       MAC byte 5
 //      6              ---- ----        Node ID 
-//      7              ---- ----       Serial Number
-//      8              ---- ----       unassigned
+//      7              ---- ----       Serial Low byte
+//      8              ---- ----       Serial High byte
 //      9              ---- ----       unassigned
 //      10             ---- ----       unassigned
 //      .              ---- ----       unassigned
@@ -84,7 +84,8 @@ String command; // String for data
 unsigned int EEPROM_SIZE = 1024;
 unsigned int eeadr = 0; // MACburner.bin writes MAC addres to the first 6 addresses of EEPROM
 unsigned int eeNodeAdr = 6; // EEPROM node ID address
-unsigned int eeSerialAdr = 7;
+unsigned int eeSerialAdrL = 7;
+unsigned int eeSerialAdrH = 8;
 
 // I2C digital i/o serial board
 const byte SX1509_ADDRESS = 0x3E;
@@ -116,7 +117,8 @@ struct sensors {
   bool snapv2_1 = false;
   bool snapv2_2 = false;
   bool snapv2_3 = false;
-  byte serial;
+  byte serialLb;
+  byte serialHb;
   byte mac[7];
 } sensorArray;
 
@@ -272,10 +274,14 @@ void setup() {
       io.pinMode(14,OUTPUT);    //   .
       io.pinMode(15,OUTPUT);    //   .
       
-      for (int i=0; i<6; i++){
-          sensorArray.serial |= io.digitalRead(i) << i; 
+      for (int i=0; i<8; i++){
+          sensorArray.serialLb |= io.digitalRead(i) << i; 
       }
-      EEPROM.write(eeSerialAdr, sensorArray.serial);
+      for (int i=8; i<15; i++){
+          sensorArray.serialHb |= io.digitalRead(i) << i; 
+      }
+      EEPROM.write(eeSerialAdrL, sensorArray.serialLb);
+      EEPROM.write(eeSerialAdrH, sensorArray.serialHb);
   }
   else {
     Serial.println("Digital io card not found"); 
