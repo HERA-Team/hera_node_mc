@@ -107,16 +107,18 @@ class UdpClient():
             unpacked_snap_relay = struct.unpack('=?',data[28])
             unpacked_fem = struct.unpack('=?',data[29])
             unpacked_pam = struct.unpack('=?',data[30])
-            unpacked_snapv2_0_1 = struct.unpack('=?',data[31])
-            unpacked_snapv2_2_3 = struct.unpack('=?',data[32])
-            unpacked_serial = struct.unpack('=s',data[33])
-            unpacked_mac[0]=(struct.unpack('=s',data[34])[0])
-            unpacked_mac[1]=(struct.unpack('=s',data[35])[0])
-            unpacked_mac[2]=(struct.unpack('=s',data[36])[0])
-            unpacked_mac[3]=(struct.unpack('=s',data[37])[0])
-            unpacked_mac[4]=(struct.unpack('=s',data[38])[0])
-            unpacked_mac[5]=(struct.unpack('=s',data[39])[0])
-            unpacked_mac[6]=(struct.unpack('=s',data[40])[0])
+            unpacked_snapv2_0 = struct.unpack('=?',data[31])
+            unpacked_snapv2_1 = struct.unpack('=?',data[32])
+            unpacked_snapv2_2 = struct.unpack('=?',data[33])
+            unpacked_snapv2_3 = struct.unpack('=?',data[34])
+            unpacked_serial = struct.unpack('=s',data[35])
+            unpacked_mac[0]=(struct.unpack('=s',data[36])[0])
+            unpacked_mac[1]=(struct.unpack('=s',data[37])[0])
+            unpacked_mac[2]=(struct.unpack('=s',data[38])[0])
+            unpacked_mac[3]=(struct.unpack('=s',data[39])[0])
+            unpacked_mac[4]=(struct.unpack('=s',data[40])[0])
+            unpacked_mac[5]=(struct.unpack('=s',data[41])[0])
+            unpacked_mac[6]=(struct.unpack('=s',data[42])[0])
 
 
             node = int(unpacked_nodeID[0])
@@ -125,12 +127,23 @@ class UdpClient():
                #server.send('heranodemc@gmail.com','recipientemail@gmail.com','The temperature values are approaching critical levels, shutdown sequence initiated') 
             # Set hashes in Redis composed of sensor temperature values
 
-            self.r.hmset('status:node:%d'%node,{'serial':unpacked_serial[0],'mac':unpacked_mac,'tempTop':unpacked_mcptemp_top[0],
-            'tempMid':unpacked_mcptemp_mid[0],'tempBot':unpacked_mcptemp_bot[0],'tempHumid':unpacked_htutemp[0],
-            'humid':unpacked_htuhumid[0],'power_snap_relay': bin(unpacked_snap_relay[0]),
-            'power_fem': bin(unpacked_fem[0]),'power_pam': bin(unpacked_pam[0]),
-            'power_snapv2_0_1': bin(unpacked_snapv2_0_1[0]),'power_snapv2_2_3': bin(unpacked_snapv2_2_3[0]),
-            'cpu_uptime': unpacked_cpu_uptime[0],'timestamp':datetime.datetime.now()})
+            self.r.hmset('status:node:%d'%node,
+            {'serial':unpacked_serial[0],
+            'mac':unpacked_mac,
+            'tempTop':unpacked_mcptemp_top[0],
+            'tempMid':unpacked_mcptemp_mid[0],
+            'tempBot':unpacked_mcptemp_bot[0],
+            'tempHumid':unpacked_htutemp[0],
+            'humid':unpacked_htuhumid[0],
+            'power_snap_relay': bin(unpacked_snap_relay[0]),
+            'power_fem': bin(unpacked_fem[0]),
+            'power_pam': bin(unpacked_pam[0]),
+            'power_snapv2_0': bin(unpacked_snapv2_0[0]),
+            'power_snapv2_1': bin(unpacked_snapv2_1[0]),
+            'power_snapv2_2': bin(unpacked_snapv2_2[0]),
+            'power_snapv2_3': bin(unpacked_snapv2_3[0]),
+            'cpu_uptime': unpacked_cpu_uptime[0],
+            'timestamp':datetime.datetime.now()})
 
 
             # Check if Redis flags were set through the nodeControlClass
@@ -142,19 +155,35 @@ class UdpClient():
                     self.client_socket.sendto('snapRelay_off',self.arduinoSocket) 
                 self.r.hmset('status:node:%d'%node, {'power_snap_relay_ctrl': False})
             
-            if ((self.r.hmget('status:node:%d'%node, 'power_snapv2_0_1_ctrl')[0]) == 'True'):
-                if (self.r.hmget('status:node:%d'%node, 'power_snapv2_0_1_cmd')[0] == 'on'):
-                    self.client_socket.sendto('snapv2_0_1_on',self.arduinoSocket) 
+            if ((self.r.hmget('status:node:%d'%node, 'power_snapv2_0_ctrl')[0]) == 'True'):
+                if (self.r.hmget('status:node:%d'%node, 'power_snapv2_0_cmd')[0] == 'on'):
+                    self.client_socket.sendto('snapv2_0_on',self.arduinoSocket) 
                 else:
-                    self.client_socket.sendto('snapv2_0_1_off',self.arduinoSocket) 
-                self.r.hset('status:node:%d'%node, 'power_snapv2_0_1_ctrl', False)
+                    self.client_socket.sendto('snapv2_0_off',self.arduinoSocket) 
+                self.r.hset('status:node:%d'%node, 'power_snapv2_0_ctrl', False)
 
-            if ((self.r.hmget('status:node:%d'%node, 'power_snapv2_2_3_ctrl')[0]) == 'True'):
-                if (self.r.hmget('status:node:%d'%node, 'power_snapv2_2_3_cmd')[0] == 'on'):
-                    self.client_socket.sendto('snapv2_2_3_on',self.arduinoSocket)
+            if ((self.r.hmget('status:node:%d'%node, 'power_snapv2_1_ctrl')[0]) == 'True'):
+                if (self.r.hmget('status:node:%d'%node, 'power_snapv2_1_cmd')[0] == 'on'):
+                    self.client_socket.sendto('snapv2_1_on',self.arduinoSocket)
                 else:
-                    self.client_socket.sendto('snapv2_2_3_off',self.arduinoSocket)
-                self.r.hset('status:node:%d'%node, 'power_snapv2_2_3_ctrl', False)
+                    self.client_socket.sendto('snapv2_1_off',self.arduinoSocket)
+                self.r.hset('status:node:%d'%node, 'power_snapv2_1_ctrl', False)
+
+            if ((self.r.hmget('status:node:%d'%node, 'power_snapv2_2_ctrl')[0]) == 'True'):
+                if (self.r.hmget('status:node:%d'%node, 'power_snapv2_2_cmd')[0] == 'on'):
+                    self.client_socket.sendto('snapv2_2_on',self.arduinoSocket)
+                else:
+                    self.client_socket.sendto('snapv2_2_off',self.arduinoSocket)
+                self.r.hset('status:node:%d'%node, 'power_snapv2_2_ctrl', False)
+
+            if ((self.r.hmget('status:node:%d'%node, 'power_snapv2_3_ctrl')[0]) == 'True'):
+                if (self.r.hmget('status:node:%d'%node, 'power_snapv2_3_cmd')[0] == 'on'):
+                    self.client_socket.sendto('snapv2_3_on',self.arduinoSocket)
+                else:
+                    self.client_socket.sendto('snapv2_3_off',self.arduinoSocket)
+                self.r.hset('status:node:%d'%node, 'power_snapv2_3_ctrl', False)
+
+
 
             if (self.r.hmget('status:node:%d'%node, 'power_fem_ctrl')[0] == 'True'):
                 if (self.r.hmget('status:node:%d'%node, 'power_fem_cmd')[0] == 'on'):

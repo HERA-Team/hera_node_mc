@@ -39,16 +39,28 @@ class NodeControl():
         print("Snap relay power is %s"%command)
 
 
-    def power_snapv2_0_1(self, node, command):
-        self.r.hset("status:node:%d"%node,"power_snapv2_0_1_ctrl",True)
-        self.r.hset("status:node:%d"%node,"power_snapv2_0_1_cmd",command)
-        print("SNAPv2_0_1 power is %s"%command)
+    def power_snapv2_0(self, node, command):
+        self.r.hset("status:node:%d"%node,"power_snapv2_0_ctrl",True)
+        self.r.hset("status:node:%d"%node,"power_snapv2_0_cmd",command)
+        print("SNAPv2_0 power is %s"%command)
 
 
-    def power_snapv2_2_3(self, node, command):
-        self.r.hset("status:node:%d"%node,"power_snapv2_2_3_ctrl",True)
-        self.r.hset("status:node:%d"%node,"power_snapv2_2_3_cmd",command)
-        print("SNAPv2_2_3 power is %s"%command)
+    def power_snapv2_1(self, node, command):
+        self.r.hset("status:node:%d"%node,"power_snapv2_1_ctrl",True)
+        self.r.hset("status:node:%d"%node,"power_snapv2_1_cmd",command)
+        print("SNAPv2_1 power is %s"%command)
+
+
+    def power_snapv2_2(self, node, command):
+        self.r.hset("status:node:%d"%node,"power_snapv2_2_ctrl",True)
+        self.r.hset("status:node:%d"%node,"power_snapv2_2_cmd",command)
+        print("SNAPv2_2 power is %s"%command)
+
+
+    def power_snapv2_3(self, node, command):
+        self.r.hset("status:node:%d"%node,"power_snapv2_3_ctrl",True)
+        self.r.hset("status:node:%d"%node,"power_snapv2_3_cmd",command)
+        print("SNAPv2_3 power is %s"%command)
 
 
     def power_fem(self, node, command):
