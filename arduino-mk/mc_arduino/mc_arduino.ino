@@ -323,6 +323,8 @@ void loop() {
     else {
       Serial.println("HTU21DF not found!");
       serialUdp("HTU21DF not found!");
+      sensorArray.htuTemp = -99;
+      sensorArray.htuHumid = -99;
     }
     
     // Calculate the cpu uptime since the last Setup in seconds.
