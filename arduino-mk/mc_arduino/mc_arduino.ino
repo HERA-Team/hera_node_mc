@@ -59,8 +59,8 @@
 
 
 // I2C addresses for the two MCP9808 temperature sensors
-#define TEMP_TOP 0x1A
-#define TEMP_MID 0x1B
+#define TEMP_TOP 0x1B
+#define TEMP_MID 0x1A
 #define TEMP_BOT 0x18
 
 
