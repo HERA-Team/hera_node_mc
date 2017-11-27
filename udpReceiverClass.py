@@ -118,8 +118,7 @@ class UdpClient():
             unpacked_mac[2]=(struct.unpack('=s',data[39])[0])
             unpacked_mac[3]=(struct.unpack('=s',data[40])[0])
             unpacked_mac[4]=(struct.unpack('=s',data[41])[0])
-            unpacked_mac[5]=(struct.unpack('=s',data[42])[0])
-            unpacked_mac[6]=(struct.unpack('=s',data[43])[0])
+            unpacked_mac[5]=hex(ord(struct.unpack('=s',data[42])[0]))
 
 
             node = int(unpacked_nodeID[0])
@@ -129,8 +128,8 @@ class UdpClient():
             # Set hashes in Redis composed of sensor temperature values
 
             self.r.hmset('status:node:%d'%node,
-            {'serialLbyte':unpacked_serialLb[0],
-            'serialHbyte':unpacked_serialHb[0],
+            {'serialLbyte':hex(ord(unpacked_serialLb[0])),
+            'serialHbyte':hex(ord(unpacked_serialHb[0])),
             'mac':unpacked_mac,
             'tempTop':unpacked_mcptemp_top[0],
             'tempMid':unpacked_mcptemp_mid[0],
