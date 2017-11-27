@@ -242,23 +242,35 @@ void setup() {
   // Find Digital IO card and initialize its pin modes 
   if (io.begin(SX1509_ADDRESS)) {
       Serial.println("Digital IO card found!");
-     serialUdp("Digital IO card found!");
-      io.pinMode(0,INPUT);   // Serial
-      io.pinMode(1,INPUT);   //   .
-      io.pinMode(2,INPUT);   //   .
-      io.pinMode(3,INPUT);   //   .
-      io.pinMode(4,INPUT);   //   .
-      io.pinMode(5,INPUT);   //   .
-      io.pinMode(6,INPUT);   // Rev Number
-      io.pinMode(7,INPUT);   //   .
-      io.pinMode(8,INPUT);   // 1=production, 0=prototype
-      io.pinMode(9,INPUT);   //  TBD
-      io.pinMode(10,INPUT);  //   .
-      io.pinMode(11,INPUT);  //   .
-      io.pinMode(12,OUTPUT); //   .
-      io.pinMode(13,OUTPUT); //   .
-      io.pinMode(14,OUTPUT); //   .
-      io.pinMode(15,OUTPUT); //   .
+      serialUdp("Digital IO card found!");
+      io.pinMode(0,INPUT);      // Serial
+      io.digitalWrite(0,LOW);   // Activating PULL DOWN resistor on pin
+      io.pinMode(1,INPUT);      //   .
+      io.digitalWrite(1,LOW);   // Activating PULL DOWN resistor on pin
+      io.pinMode(2,INPUT);      //   .
+      io.digitalWrite(2,LOW);   // Activating PULL DOWN resistor on pin
+      io.pinMode(3,INPUT);      //   .
+      io.digitalWrite(3,LOW);   // Activating PULL DOWN resistor on pin
+      io.pinMode(4,INPUT);      //   .
+      io.digitalWrite(4,LOW);   // Activating PULL DOWN resistor on pin
+      io.pinMode(5,INPUT);      //   .
+      io.digitalWrite(5,LOW);   // Activating PULL DOWN resistor on pin
+      io.pinMode(6,INPUT);      // Rev Number
+      io.digitalWrite(6,LOW);   // Activating PULL DOWN resistor on pin
+      io.pinMode(7,INPUT);      //   .
+      io.digitalWrite(7,LOW);   // Activating PULL DOWN resistor on pin
+      io.pinMode(8,INPUT);      // 1=production, 0=prototype
+      io.digitalWrite(8,LOW);   // Activating PULL DOWN resistor on pin
+      io.pinMode(9,INPUT);      //  TBD
+      io.digitalWrite(9,LOW);   // Activating PULL DOWN resistor on pin
+      io.pinMode(10,INPUT);     //   .
+      io.digitalWrite(10,LOW);  // Activating PULL DOWN resistor on pin
+      io.pinMode(11,INPUT);     //   .
+      io.digitalWrite(11,LOW);  // Activating PULL DOWN resistor on pin
+      io.pinMode(12,OUTPUT);    //   .
+      io.pinMode(13,OUTPUT);    //   .
+      io.pinMode(14,OUTPUT);    //   .
+      io.pinMode(15,OUTPUT);    //   .
       
       for (int i=0; i<6; i++){
           sensorArray.serial |= io.digitalRead(i) << i; 
