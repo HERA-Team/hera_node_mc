@@ -20,7 +20,7 @@ serverAddress = '10.1.1.1'
 PORT = 8888
 
 
-class UdpClient():
+class UdpSender():
 
 
     def __init__(self):
@@ -67,26 +67,8 @@ class UdpClient():
 
         # Set delay before receiving more data
         time.sleep(2)
-    
-    def shutdown(self, arduinoAddress):
 
-        # define arduino socket to send requests
-        arduinoSocket = (arduinoAddress, PORT)
-        self.client_socket.sendto('shutdown', arduinoSocket)
-
-        # Set delay before receiving more data
-        time.sleep(2)
-
-    def start(self, arduinoAddress):
-
-        # define arduino socket to send requests
-        arduinoSocket = (arduinoAddress, PORT)
-        self.client_socket.sentto('start', arduinoSocket)
-
-        # Set delay before receiving more data
-        time.sleep(2)
-
-    def snapRelay(self, command, arduinoAddress):
+    def snapRelay(self, arduinoAddress, command):
         
         # define arduino socket to send requests
         arduinoSocket = (arduinoAddress, PORT)
@@ -95,7 +77,7 @@ class UdpClient():
         # Set delay before receiving more data
         time.sleep(2)
 
-    def fem(self, command, arduinoAddress):
+    def fem(self, arduinoAddress, command):
         
         # define arduino socket to send requests
         arduinoSocket = (arduinoAddress, PORT)
@@ -104,7 +86,7 @@ class UdpClient():
         # Set delay before receiving more data
         time.sleep(2)
 
-    def pam(self, command, arduinoAddress):
+    def pam(self, arduinoAddress, command):
         
         # define arduino socket to send requests
         arduinoSocket = (arduinoAddress, PORT)
@@ -113,20 +95,38 @@ class UdpClient():
         # Set delay before receiving more data
         time.sleep(2)
 
-    def snapv2_0_1(self, command, arduinoAddress):
+    def snapv2_0(self, arduinoAddress, command):
 
         # define arduino socket to send requests
         arduinoSocket = (arduinoAddress, PORT)
-        self.client_socket.sendto('snapv2_0_1_%s'%command, arduinoSocket)
+        self.client_socket.sendto('snapv2_0_%s'%command, arduinoSocket)
 
         # Set delay before receiving more data
         time.sleep(2)
 
-    def snapv2_2_3(self, command, arduinoAddress):
+    def snapv2_1(self, arduinoAddress, command):
 
         # define arduino socket to send requests
         arduinoSocket = (arduinoAddress, PORT)
-        self.client_socket.sendto('snapv2_2_3_%s'%command, arduinoSocket)
+        self.client_socket.sendto('snapv2_1_%s'%command, arduinoSocket)
+
+        # Set delay before receiving more data
+        time.sleep(2)
+
+    def snapv2_2(self, arduinoAddress, command):
+
+        # define arduino socket to send requests
+        arduinoSocket = (arduinoAddress, PORT)
+        self.client_socket.sendto('snapv2_2_%s'%command, arduinoSocket)
+
+        # Set delay before receiving more data
+        time.sleep(2)
+
+    def snapv2_3(self, arduinoAddress, command):
+
+        # define arduino socket to send requests
+        arduinoSocket = (arduinoAddress, PORT)
+        self.client_socket.sendto('snapv2_3_%s'%command, arduinoSocket)
 
         # Set delay before receiving more data
         time.sleep(2)
