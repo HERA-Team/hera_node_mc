@@ -48,10 +48,12 @@
 
 // Define Arduino pins 
 #define SNAP_RELAY 2 
-#define FEM 5
-#define PAM 6
-#define SNAPv2_0_1 3
-#define SNAPv2_2_3 7
+#define FEM 8
+#define PAM 9
+#define SNAPv2_0 3
+#define SNAPv2_1 5
+#define SNAPv2_2 6
+#define SNAPv2_3 7
 #define RESET 4
 
 
@@ -110,8 +112,10 @@ struct sensors {
   bool snap_relay = false;
   bool fem = false;
   bool pam = false;
-  bool snapv2_0_1 = false;
-  bool snapv2_2_3 = false;
+  bool snapv2_0 = false;
+  bool snapv2_1 = false;
+  bool snapv2_2 = false;
+  bool snapv2_3 = false;
   byte serial;
   byte mac[7];
 } sensorArray;
@@ -153,16 +157,26 @@ void setup() {
   pinMode(PAM, OUTPUT);
   digitalWrite(PAM, LOW);
   
-  // SNAPv2_0_1: Active LOW so HIGH is off
-  digitalWrite(SNAPv2_0_1, HIGH);
-  pinMode(SNAPv2_0_1, OUTPUT);
-  digitalWrite(SNAPv2_0_1, HIGH);
+  // SNAPv2_0: Active LOW so HIGH is off
+  digitalWrite(SNAPv2_0, HIGH);
+  pinMode(SNAPv2_0, OUTPUT);
+  digitalWrite(SNAPv2_0, HIGH);
 
-  // SNAPv2_2_3: Active LOW so HIGH is off
-  digitalWrite(SNAPv2_2_3, HIGH);
-  pinMode(SNAPv2_2_3, OUTPUT);
-  digitalWrite(SNAPv2_2_3, HIGH);
+  // SNAPv2_1: Active LOW so HIGH is off
+  digitalWrite(SNAPv2_1, HIGH);
+  pinMode(SNAPv2_1, OUTPUT);
+  digitalWrite(SNAPv2_1, HIGH);
   
+  // SNAPv2_2: Active LOW so HIGH is off
+  digitalWrite(SNAPv2_2, HIGH);
+  pinMode(SNAPv2_2, OUTPUT);
+  digitalWrite(SNAPv2_2, HIGH);
+
+  // SNAPv2_3: Active LOW so HIGH is off
+  digitalWrite(SNAPv2_3, HIGH);
+  pinMode(SNAPv2_3, OUTPUT);
+  digitalWrite(SNAPv2_3, HIGH);
+
   // Reset pin, Active LOW
   digitalWrite(RESET, HIGH);
   pinMode(RESET, OUTPUT); 
@@ -369,29 +383,54 @@ void parseUdpPacket(){
         sensorArray.snap_relay = false;
       }
       
-      else if (command == "snapv2_0_1_on"){
-        Serial.println("snapv2_0_1 on");
-        digitalWrite(SNAPv2_0_1, LOW);
-        sensorArray.snapv2_0_1 = true;
+      else if (command == "snapv2_0_on"){
+        Serial.println("snapv2_0 on");
+        digitalWrite(SNAPv2_0, LOW);
+        sensorArray.snapv2_0 = true;
         }
 
-      else if (command == "snapv2_0_1_off"){
-        Serial.println("snapv2_0_1 off");
-        digitalWrite(SNAPv2_0_1, HIGH);
-        sensorArray.snapv2_0_1 = false;
+      else if (command == "snapv2_0_off"){
+        Serial.println("snapv2_0 off");
+        digitalWrite(SNAPv2_0, HIGH);
+        sensorArray.snapv2_0 = false;
         }
 
-      else if (command == "snapv2_2_3_on"){
-        Serial.println("snapv2_2_3 on");
-        digitalWrite(SNAPv2_2_3, LOW);
-        sensorArray.snapv2_2_3 = true;
+      else if (command == "snapv2_1_on"){
+        Serial.println("snapv2_1 on");
+        digitalWrite(SNAPv2_1, LOW);
+        sensorArray.snapv2_1 = true;
         }
 
-      else if (command == "snapv2_2_3_off"){
-        Serial.println("snapv2_2_3 off");
-        digitalWrite(SNAPv2_2_3, HIGH);
-        sensorArray.snapv2_2_3 = false;
+      else if (command == "snapv2_1_off"){
+        Serial.println("snapv2_1 off");
+        digitalWrite(SNAPv2_1, HIGH);
+        sensorArray.snapv2_1 = false;
         }
+
+      else if (command == "snapv2_2_on"){
+        Serial.println("snapv2_2 on");
+        digitalWrite(SNAPv2_2, LOW);
+        sensorArray.snapv2_2 = true;
+        }
+
+      else if (command == "snapv2_2_off"){
+        Serial.println("snapv2_2 off");
+        digitalWrite(SNAPv2_2, HIGH);
+        sensorArray.snapv2_2 = false;
+        }
+
+      else if (command == "snapv2_3_on"){
+        Serial.println("snapv2_3 on");
+        digitalWrite(SNAPv2_3, LOW);
+        sensorArray.snapv2_3 = true;
+        }
+
+      else if (command == "snapv2_3_off"){
+        Serial.println("snapv2_3 off");
+        digitalWrite(SNAPv2_3, HIGH);
+        sensorArray.snapv2_3 = false;
+        }
+
 
       else if (command == "FEM_on") {
         digitalWrite(FEM, HIGH);
