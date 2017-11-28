@@ -16,7 +16,7 @@ PORT = 8889
 sendPort = 8888
 
 
-unpacked_mac = ["" for x in range(7)]
+unpacked_mac = ["" for x in range(6)]
 
 class UdpClient():
     """
@@ -113,11 +113,11 @@ class UdpClient():
             unpacked_snapv2_3 = struct.unpack('=?',data[34])
             unpacked_serialLb = struct.unpack('=s',data[35])
             unpacked_serialHb = struct.unpack('=s',data[36])
-            unpacked_mac[0]=(struct.unpack('=s',data[37])[0])
-            unpacked_mac[1]=(struct.unpack('=s',data[38])[0])
-            unpacked_mac[2]=(struct.unpack('=s',data[39])[0])
-            unpacked_mac[3]=(struct.unpack('=s',data[40])[0])
-            unpacked_mac[4]=(struct.unpack('=s',data[41])[0])
+            unpacked_mac[0]=hex(ord(struct.unpack('=s',data[37])[0]))
+            unpacked_mac[1]=hex(ord(struct.unpack('=s',data[38])[0]))
+            unpacked_mac[2]=hex(ord(struct.unpack('=s',data[39])[0]))
+            unpacked_mac[3]=hex(ord(struct.unpack('=s',data[40])[0]))
+            unpacked_mac[4]=hex(ord(struct.unpack('=s',data[41])[0]))
             unpacked_mac[5]=hex(ord(struct.unpack('=s',data[42])[0]))
 
 
