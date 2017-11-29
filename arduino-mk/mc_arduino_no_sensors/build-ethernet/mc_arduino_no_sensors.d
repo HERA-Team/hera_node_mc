@@ -25,8 +25,4 @@ build-ethernet/mc_arduino_no_sensors.o: mc_arduino_no_sensors.ino \
  /home/zuhraa470/monitor-control/arduino-mk/libraries/Ethernet/src/EthernetUdp.h \
  /home/zuhraa470/arduino-1.8.4/hardware/arduino/avr/cores/arduino/Udp.h \
  /home/zuhraa470/arduino-1.8.4/hardware/arduino/avr/cores/arduino/Stream.h \
- /home/zuhraa470/monitor-control/arduino-mk/libraries/SPI/src/SPI.h \
- /home/zuhraa470/monitor-control/arduino-mk/libraries/Adafruit_MCP9808_Library/Adafruit_MCP9808.h \
- /home/zuhraa470/monitor-control/arduino-mk/libraries/Wire/src/Wire.h \
- /home/zuhraa470/monitor-control/arduino-mk/libraries/Adafruit_HTU21DF_Library/Adafruit_HTU21DF.h \
- /home/zuhraa470/monitor-control/arduino-mk/libraries/SparkFun_SX1509_Arduino_Library/src/SparkFunSX1509.h
+ /home/zuhraa470/monitor-control/arduino-mk/libraries/SPI/src/SPI.h

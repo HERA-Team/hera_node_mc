@@ -38,9 +38,9 @@
 #include <EEPROM.h>
 #include <Ethernet.h>
 #include <SPI.h>
-#include <Adafruit_MCP9808.h>
-#include <Adafruit_HTU21DF.h>
-#include <SparkFunSX1509.h> // Include SX1509 library
+//#include <Adafruit_MCP9808.h>
+//#include <Adafruit_HTU21DF.h>
+//#include <SparkFunSX1509.h> // Include SX1509 library
 
 
 
@@ -88,15 +88,15 @@ unsigned int eeSerialAdrL = 7;
 unsigned int eeSerialAdrH = 8;
 
 // I2C digital i/o serial board
-const byte SX1509_ADDRESS = 0x3E;
-SX1509 io;
+//const byte SX1509_ADDRESS = 0x3E;
+//SX1509 io;
 
 
 // Sensor objects
-Adafruit_MCP9808 mcpTop = Adafruit_MCP9808(); 
-Adafruit_MCP9808 mcpMid = Adafruit_MCP9808(); 
-Adafruit_MCP9808 mcpBot = Adafruit_MCP9808(); 
-Adafruit_HTU21DF htu = Adafruit_HTU21DF();
+//Adafruit_MCP9808 mcpTop = Adafruit_MCP9808(); 
+//Adafruit_MCP9808 mcpMid = Adafruit_MCP9808(); 
+//Adafruit_MCP9808 mcpBot = Adafruit_MCP9808(); 
+//Adafruit_HTU21DF htu = Adafruit_HTU21DF();
 
 
 float cpu_uptime_init;
