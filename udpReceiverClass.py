@@ -128,13 +128,13 @@ class UdpClient():
             # Set hashes in Redis composed of sensor temperature values
 
             self.r.hmset('status:node:%d'%node,
-            {'serialLbyte':hex(ord(unpacked_serialLb[0])),
-            'serialHbyte':hex(ord(unpacked_serialHb[0])),
+            {'serial_Lbyte':hex(ord(unpacked_serialLb[0])),
+            'serial_Hbyte':hex(ord(unpacked_serialHb[0])),
             'mac':unpacked_mac,
-            'tempTop':unpacked_mcptemp_top[0],
-            'tempMid':unpacked_mcptemp_mid[0],
-            'tempBot':unpacked_mcptemp_bot[0],
-            'tempHumid':unpacked_htutemp[0],
+            'temp_top':unpacked_mcptemp_top[0],
+            'temp_mid':unpacked_mcptemp_mid[0],
+            'temp_bot':unpacked_mcptemp_bot[0],
+            'temp_humid':unpacked_htutemp[0],
             'humid':unpacked_htuhumid[0],
             'power_snap_relay': bin(unpacked_snap_relay[0]),
             'power_fem': bin(unpacked_fem[0]),
@@ -143,7 +143,7 @@ class UdpClient():
             'power_snapv2_1': bin(unpacked_snapv2_1[0]),
             'power_snapv2_2': bin(unpacked_snapv2_2[0]),
             'power_snapv2_3': bin(unpacked_snapv2_3[0]),
-            'cpu_uptime': unpacked_cpu_uptime[0],
+            'cpu_uptime_seconds': unpacked_cpu_uptime[0],
             'timestamp':datetime.datetime.now()})
 
 
