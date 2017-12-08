@@ -9,7 +9,7 @@ PORT = 6379
 
 
 class NodeControl():
-    def __init__(self,serverAddress = "10.1.1.1"):
+    def __init__(self,serverAddress = "hera-digi-vm"):
         """ 
         Takes in the string ip address or the host name of the Redis database host server.
         Returns the NodeControlClass object
@@ -24,19 +24,34 @@ class NodeControl():
         """
         Takes in the node argument, which is an integer value from
         0 to eventually 29.
-        Gives back the temperature sensor values inside the node. 
+        Returns the temperature sensor values inside the node. 
         """
             
-        redistime = self.r.hmget("status:node:%d"%node, "timestamp")[0] 
-        timestamp = {'timestamp': redistime}
-        temp_mid = float((self.r.hmget("status:node:%d"%node,"temp_mid"))[0])
-        temp_top = float((self.r.hmget("status:node:%d"%node,"temp_top"))[0])
-        temp_bot = float((self.r.hmget("status:node:%d"%node,"temp_bot"))[0])
-        temp_humid = float((self.r.hmget("status:node:%d"%node,"temp_humid"))[0])
+        timestamp = self.r.hmget("status:node:%d"%node, "timestamp")[0] 
+        temp_mid = float(self.r.hmget("status:node:%d"%node,"temp_mid")[0])
+        temp_top = float(self.r.hmget("status:node:%d"%node,"temp_top")[0])
+        temp_bot = float(self.r.hmget("status:node:%d"%node,"temp_bot")[0])
+        temp_humid = float(self.r.hmget("status:node:%d"%node,"temp_humid")[0])
         sensors = {'timestamp':timestamp,'temp_top':temp_top,'temp_mid':temp_mid,'temp_bot':temp_bot,'temp_humid':temp_humid}
         return sensors
 
-
+    def get_power_status(self,node):
+        """
+        Takes in the node argument, which is an integer value from 
+        0 to eventually 29.
+        Returns the current power status of snaps, pam and fem. 
+        """
+        timestamp = self.r.hmget("status:node:%d"%node, "timestamp")[0] 
+        power_snap_0 = self.r.hmget("status:node%d"%node,"power_snap_0")[0]
+        power_snap_1 = self.r.hmget("status:node%d"%node,"power_snap_1")[0]
+        power_snap_2 = self.r.hmget("status:node%d"%node,"power_snap_2")[0]
+        power_snap_3 = self.r.hmget("status:node%d"%node,"power_snap_3")[0]
+        power_pam = self.r.hmget("status:node%d"%node,"power_pam")[0]
+        power_fem = self.r.hmget("status:node%d"%node,"power_fem")[0]
+        statii = {'timestamp':timestamp,'power_snap_0':power_snap_0,'power_snap_1':power_snap_1,'power_snap_2':power_snap_2,
+        'power_snap_3':power_snap_3,'power_pam':power_pam,'power_fem':power_fem}
+        return statii
+        
 #    def getHumid(self,node):
 #        """
 #        Gives back the humidity value inside the node. 

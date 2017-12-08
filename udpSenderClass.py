@@ -1,7 +1,7 @@
 """
-This class is used for sending UDP commands to Arduino.
+This class is used for sending UDP commands to Arduino directly.
 
-Has ability to turn on/off PSU, FEM, PAM and White Rabbit. Could also reset the Arduino so it restarts the bootloader. 
+Has ability to turn on/off PSU, FEM and PAM. Could also reset the Arduino so it restarts the bootloader. 
 """
 
 
@@ -60,7 +60,9 @@ class UdpSender():
         
 
     def reset(self, arduinoAddress):
-
+        """
+        Takes in the arduino IP address as a string and resets the bootloader.
+        """
         # define arduino socket to send requests
         arduinoSocket = (arduinoAddress, PORT)
         self.client_socket.sendto('reset', arduinoSocket)
@@ -68,8 +70,12 @@ class UdpSender():
         # Set delay before receiving more data
         time.sleep(2)
 
-    def snapRelay(self, arduinoAddress, command):
-        
+    def power_snap_relay(self, arduinoAddress, command):
+        """
+        Takes in the arduino IP address string and a command "on"/"off".
+        Turns the SNAP relay on/off, must be turned on first before gaining 
+        control over individual SNAPs. 
+        """
         # define arduino socket to send requests
         arduinoSocket = (arduinoAddress, PORT)
         self.client_socket.sendto('snapRelay_%s'%command, arduinoSocket)
@@ -77,8 +83,11 @@ class UdpSender():
         # Set delay before receiving more data
         time.sleep(2)
 
-    def fem(self, arduinoAddress, command):
-        
+    def power_fem(self, arduinoAddress, command):
+        """
+        Takes in the arduino IP address string and a command "on"/"off".
+        Controls the power to FEM.
+        """ 
         # define arduino socket to send requests
         arduinoSocket = (arduinoAddress, PORT)
         self.client_socket.sendto('FEM_%s'%command, arduinoSocket)
@@ -86,7 +95,11 @@ class UdpSender():
         # Set delay before receiving more data
         time.sleep(2)
 
-    def pam(self, arduinoAddress, command):
+    def power_pam(self, arduinoAddress, command):
+        """
+        Takes in the arduino IP address string and a command "on"/"off".
+        Controls the power to PAM.
+        """ 
         
         # define arduino socket to send requests
         arduinoSocket = (arduinoAddress, PORT)
@@ -95,7 +108,11 @@ class UdpSender():
         # Set delay before receiving more data
         time.sleep(2)
 
-    def snapv2_0(self, arduinoAddress, command):
+    def power_snap_0(self, arduinoAddress, command):
+        """
+        Takes in the arduino IP address string and a command "on"/"off".
+        Controls the power to SNAP 0.
+        """ 
 
         # define arduino socket to send requests
         arduinoSocket = (arduinoAddress, PORT)
@@ -104,7 +121,11 @@ class UdpSender():
         # Set delay before receiving more data
         time.sleep(2)
 
-    def snapv2_1(self, arduinoAddress, command):
+    def power_snap_1(self, arduinoAddress, command):
+        """
+        Takes in the arduino IP address string and a command "on"/"off".
+        Controls the power to SNAP 1.
+        """ 
 
         # define arduino socket to send requests
         arduinoSocket = (arduinoAddress, PORT)
@@ -113,7 +134,11 @@ class UdpSender():
         # Set delay before receiving more data
         time.sleep(2)
 
-    def snapv2_2(self, arduinoAddress, command):
+    def power_snap_2(self, arduinoAddress, command):
+        """
+        Takes in the arduino IP address string and a command "on"/"off".
+        Controls the power to SNAP 2.
+        """ 
 
         # define arduino socket to send requests
         arduinoSocket = (arduinoAddress, PORT)
@@ -122,7 +147,11 @@ class UdpSender():
         # Set delay before receiving more data
         time.sleep(2)
 
-    def snapv2_3(self, arduinoAddress, command):
+    def power_snap_3(self, arduinoAddress, command):
+        """
+        Takes in the arduino IP address string and a command "on"/"off".
+        Controls the power to SNAP 3. 
+        """ 
 
         # define arduino socket to send requests
         arduinoSocket = (arduinoAddress, PORT)

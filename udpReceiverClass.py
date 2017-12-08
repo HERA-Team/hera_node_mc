@@ -139,66 +139,64 @@ class UdpClient():
             'power_snap_relay': bin(unpacked_snap_relay[0]),
             'power_fem': bin(unpacked_fem[0]),
             'power_pam': bin(unpacked_pam[0]),
-            'power_snapv2_0': bin(unpacked_snapv2_0[0]),
-            'power_snapv2_1': bin(unpacked_snapv2_1[0]),
-            'power_snapv2_2': bin(unpacked_snapv2_2[0]),
-            'power_snapv2_3': bin(unpacked_snapv2_3[0]),
+            'power_snap_0': bin(unpacked_snapv2_0[0]),
+            'power_snap_1': bin(unpacked_snapv2_1[0]),
+            'power_snap_2': bin(unpacked_snapv2_2[0]),
+            'power_snap_3': bin(unpacked_snapv2_3[0]),
             'cpu_uptime_seconds': unpacked_cpu_uptime[0],
             'timestamp':datetime.datetime.now()})
 
 
             # Check if Redis flags were set through the nodeControlClass
 
-            if ((self.r.hmget('status:node:%d'%node, 'power_snap_relay_ctrl')[0]) == 'True'):
+            if ((self.r.hmget('status:node:%d'%node, 'power_snap_relay_ctrl_trig')[0]) == 'True'):
                 if ((self.r.hmget('status:node:%d'%node, 'power_snap_relay_cmd')[0]) == 'on'):
                     self.client_socket.sendto("snapRelay_on",self.arduinoSocket) 
                 else: 
                     self.client_socket.sendto('snapRelay_off',self.arduinoSocket) 
-                self.r.hmset('status:node:%d'%node, {'power_snap_relay_ctrl': False})
+                self.r.hmset('status:node:%d'%node, {'power_snap_relay_ctrl_trig': False})
             
-            if ((self.r.hmget('status:node:%d'%node, 'power_snapv2_0_ctrl')[0]) == 'True'):
-                if (self.r.hmget('status:node:%d'%node, 'power_snapv2_0_cmd')[0] == 'on'):
+            if ((self.r.hmget('status:node:%d'%node, 'power_snap_0_ctrl_trig')[0]) == 'True'):
+                if (self.r.hmget('status:node:%d'%node, 'power_snap_0_cmd')[0] == 'on'):
                     self.client_socket.sendto('snapv2_0_on',self.arduinoSocket) 
                 else:
                     self.client_socket.sendto('snapv2_0_off',self.arduinoSocket) 
-                self.r.hset('status:node:%d'%node, 'power_snapv2_0_ctrl', False)
+                self.r.hset('status:node:%d'%node, 'power_snap_0_ctrl_trig', False)
 
-            if ((self.r.hmget('status:node:%d'%node, 'power_snapv2_1_ctrl')[0]) == 'True'):
-                if (self.r.hmget('status:node:%d'%node, 'power_snapv2_1_cmd')[0] == 'on'):
+            if ((self.r.hmget('status:node:%d'%node, 'power_snap_1_ctrl_trig')[0]) == 'True'):
+                if (self.r.hmget('status:node:%d'%node, 'power_snap_1_cmd')[0] == 'on'):
                     self.client_socket.sendto('snapv2_1_on',self.arduinoSocket)
                 else:
                     self.client_socket.sendto('snapv2_1_off',self.arduinoSocket)
-                self.r.hset('status:node:%d'%node, 'power_snapv2_1_ctrl', False)
+                self.r.hset('status:node:%d'%node, 'power_snap_1_ctrl_trig', False)
 
-            if ((self.r.hmget('status:node:%d'%node, 'power_snapv2_2_ctrl')[0]) == 'True'):
-                if (self.r.hmget('status:node:%d'%node, 'power_snapv2_2_cmd')[0] == 'on'):
+            if ((self.r.hmget('status:node:%d'%node, 'power_snap_2_ctrl_trig')[0]) == 'True'):
+                if (self.r.hmget('status:node:%d'%node, 'power_snap_2_cmd')[0] == 'on'):
                     self.client_socket.sendto('snapv2_2_on',self.arduinoSocket)
                 else:
                     self.client_socket.sendto('snapv2_2_off',self.arduinoSocket)
-                self.r.hset('status:node:%d'%node, 'power_snapv2_2_ctrl', False)
+                self.r.hset('status:node:%d'%node, 'power_snap_2_ctrl_trig', False)
 
-            if ((self.r.hmget('status:node:%d'%node, 'power_snapv2_3_ctrl')[0]) == 'True'):
-                if (self.r.hmget('status:node:%d'%node, 'power_snapv2_3_cmd')[0] == 'on'):
+            if ((self.r.hmget('status:node:%d'%node, 'power_snap_3_ctrl_trig')[0]) == 'True'):
+                if (self.r.hmget('status:node:%d'%node, 'power_snap_3_cmd')[0] == 'on'):
                     self.client_socket.sendto('snapv2_3_on',self.arduinoSocket)
                 else:
                     self.client_socket.sendto('snapv2_3_off',self.arduinoSocket)
-                self.r.hset('status:node:%d'%node, 'power_snapv2_3_ctrl', False)
+                self.r.hset('status:node:%d'%node, 'power_snap_3_ctrl_trig', False)
 
-
-
-            if (self.r.hmget('status:node:%d'%node, 'power_fem_ctrl')[0] == 'True'):
+            if (self.r.hmget('status:node:%d'%node, 'power_fem_ctrl_trig')[0] == 'True'):
                 if (self.r.hmget('status:node:%d'%node, 'power_fem_cmd')[0] == 'on'):
                     self.client_socket.sendto('FEM_on',self.arduinoSocket) 
                 else:
                     self.client_socket.sendto('FEM_off',self.arduinoSocket) 
-                self.r.hset('status:node:%d'%node, 'power_fem_ctrl', False)
+                self.r.hset('status:node:%d'%node, 'power_fem_ctrl_trig', False)
 
-            if (self.r.hmget('status:node:%d'%node, 'power_pam_ctrl')[0] == 'True'):
+            if (self.r.hmget('status:node:%d'%node, 'power_pam_ctrl_trig')[0] == 'True'):
                 if (self.r.hmget('status:node:%d'%node, 'power_pam_cmd')[0] == 'on'):
                     self.client_socket.sendto('PAM_on',self.arduinoSocket) 
                 else:
                     self.client_socket.sendto('PAM_off',self.arduinoSocket) 
-                self.r.hset('status:node:%d'%node, 'power_pam_ctrl', False)
+                self.r.hset('status:node:%d'%node, 'power_pam_ctrl_trig', False)
 
 
 
