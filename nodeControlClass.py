@@ -1,5 +1,9 @@
 '''
-	monitor control database class
+This Class is used to control node power and get status information
+through the Redis database running on the hera-digi-vm server.
+
+
+
 '''
 import redis
 import time
