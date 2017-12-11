@@ -1,4 +1,4 @@
-ARDUINO_DIR = /home/zara/arduino-1.6.5-r5
+ARDUINO_DIR = /home/zara/arduino-1.8.5
 BOARD_TAG = ethernet
 ARDUINO_SKETCHBOOK = ../../arduino-mk
 ARDMK_DIR = ../../arduino-mk
