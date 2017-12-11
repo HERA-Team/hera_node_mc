@@ -1,3 +1,3 @@
 build-ethernet/userlibs/Adafruit_SleepyDog/utility/WatchdogAVR.o: \
- /home/zuhraa470/monitor-control/arduino-mk/libraries/Adafruit_SleepyDog/utility/WatchdogAVR.cpp \
- /home/zuhraa470/monitor-control/arduino-mk/libraries/Adafruit_SleepyDog/utility/WatchdogAVR.h
+ ../../arduino-mk/libraries/Adafruit_SleepyDog/utility/WatchdogAVR.cpp \
+ ../../arduino-mk/libraries/Adafruit_SleepyDog/utility/WatchdogAVR.h

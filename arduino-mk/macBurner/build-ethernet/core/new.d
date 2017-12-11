@@ -1,2 +1,2 @@
 build-ethernet/core/new.o: \
- /home/zuhraa470/arduino-1.8.4/hardware/arduino/avr/cores/arduino/new.cpp
+ /home/zara/arduino-1.6.5-r5/hardware/arduino/avr/cores/arduino/new.cpp

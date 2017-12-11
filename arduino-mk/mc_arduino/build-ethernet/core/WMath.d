@@ -1,2 +1,2 @@
 build-ethernet/core/WMath.o: \
- /home/zuhraa470/arduino-1.8.4/hardware/arduino/avr/cores/arduino/WMath.cpp
+ /home/zara/arduino-1.6.5-r5/hardware/arduino/avr/cores/arduino/WMath.cpp
