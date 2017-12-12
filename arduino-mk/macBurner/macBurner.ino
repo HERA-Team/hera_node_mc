@@ -32,7 +32,7 @@ IPAddress serverIp(10, 1, 1, 1); // Server ip address
 EthernetUDP UdpRcv; // UDP object
 EthernetUDP UdpSer; // UDP object to print serial debug info
 
-byte mac[] = {0x00, 0x08, 0xDC, 0x00, 0x02, 0x4f}; //Assign MAC address of the Arduino here
+byte mac[] = {0x00, 0x08, 0xDC, 0x00, 0x03, 0x4f}; //Assign MAC address of the Arduino here
 unsigned int rcvPort = 8888; // Assign a port to talk over
 unsigned int serPort = 8890;  // Assign port to print debug statements
 
