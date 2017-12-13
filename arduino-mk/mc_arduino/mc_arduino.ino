@@ -379,15 +379,6 @@ void loop() {
     serialUdp("Loops runs for");
     serialUdp(String(endLoop-startLoop));
     delay(2000);
-    Watchdog.reset();
-    delay(2000);
-    Watchdog.reset();
-    delay(2000);
-    Watchdog.reset();
-    delay(2000);
-    Watchdog.reset();
-    delay(2000);
-    Watchdog.reset();
 }
 
 
