@@ -10,5 +10,5 @@ args = parser.parse_args()
 
 
 
-u = udpReceiverClass.UdpClient()
+u = udpReceiverClass.UdpReceiver()
 u.receiveUDP(args.ip_addr)
