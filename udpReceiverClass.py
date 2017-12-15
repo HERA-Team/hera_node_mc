@@ -11,16 +11,15 @@ import smtplib
 # Define IP address of the Redis server host machine
 serverAddress = '10.1.1.1'
 
-# Define PORT for socket creation
-PORT = 8889
-sendPort = 8888
+# Define rcvPort for socket creation
+rcvPort = 8889
 
 
 unpacked_mac = ["" for x in range(6)]
 
 class UdpReceiver():
         """
-        This class received UDP packets from Arduino containing sensor data and misc node metadata.
+        This class receives UDP packets from Arduino containing sensor data and misc node metadata.
         Class goes into an infinite loop when receiveUDP method is called.
 
         """
@@ -28,7 +27,7 @@ class UdpReceiver():
         def __init__(self):
 
                 # define socket address for binding; necessary for receiving data from Arduino 
-                self.localSocket = (serverAddress, PORT)
+                self.localSocket = (serverAddress, rcvPort)
 
 
                 # Instantiate redis object connected to redis server running on serverAddress
@@ -60,16 +59,6 @@ class UdpReceiver():
                 #server.starttls()
 
 
-        def __poke(self):
-
-                print('Poking..')
-                self.client_socket.sendto('poke',self.arduinoSocket) 
-                t = threading.Timer(3,self.__poke)
-                print("Timer Set.")
-                t.daemon = True
-                t.start()
-
-
 
 
 
@@ -79,12 +68,8 @@ class UdpReceiver():
                 Sends poke signal to Arduino every 3 seconds.
                 Checks for control flags in Redis database set by the nodeControlClass.
                 """
-
-                # define socket necessary for sending poke command to Arduino
-                self.arduinoSocket = (arduinoAddress, sendPort)
                 
                 # Start the timer to send poke command to the Arduino
-                self.__poke()
 
                 # Loop to grap UDP packets from Arduino and push to Redis
                 while True:
@@ -147,57 +132,6 @@ class UdpReceiver():
                         'cpu_uptime_seconds': unpacked_cpu_uptime[0],
                         'timestamp':datetime.datetime.now()})
 
-
-                        # Check if Redis flags were set through the nodeControlClass
-
-                        if ((self.r.hmget('status:node:%d'%node, 'power_snap_relay_ctrl_trig')[0]) == 'True'):
-                                if ((self.r.hmget('status:node:%d'%node, 'power_snap_relay_cmd')[0]) == 'on'):
-                                        self.client_socket.sendto("snapRelay_on",self.arduinoSocket) 
-                                else: 
-                                        self.client_socket.sendto('snapRelay_off',self.arduinoSocket) 
-                                self.r.hmset('status:node:%d'%node, {'power_snap_relay_ctrl_trig': False})
-                        
-                        if ((self.r.hmget('status:node:%d'%node, 'power_snap_0_ctrl_trig')[0]) == 'True'):
-                                if (self.r.hmget('status:node:%d'%node, 'power_snap_0_cmd')[0] == 'on'):
-                                        self.client_socket.sendto('snapv2_0_on',self.arduinoSocket) 
-                                else:
-                                        self.client_socket.sendto('snapv2_0_off',self.arduinoSocket) 
-                                self.r.hset('status:node:%d'%node, 'power_snap_0_ctrl_trig', False)
-
-                        if ((self.r.hmget('status:node:%d'%node, 'power_snap_1_ctrl_trig')[0]) == 'True'):
-                                if (self.r.hmget('status:node:%d'%node, 'power_snap_1_cmd')[0] == 'on'):
-                                        self.client_socket.sendto('snapv2_1_on',self.arduinoSocket)
-                                else:
-                                        self.client_socket.sendto('snapv2_1_off',self.arduinoSocket)
-                                self.r.hset('status:node:%d'%node, 'power_snap_1_ctrl_trig', False)
-
-                        if ((self.r.hmget('status:node:%d'%node, 'power_snap_2_ctrl_trig')[0]) == 'True'):
-                                if (self.r.hmget('status:node:%d'%node, 'power_snap_2_cmd')[0] == 'on'):
-                                        self.client_socket.sendto('snapv2_2_on',self.arduinoSocket)
-                                else:
-                                        self.client_socket.sendto('snapv2_2_off',self.arduinoSocket)
-                                self.r.hset('status:node:%d'%node, 'power_snap_2_ctrl_trig', False)
-
-                        if ((self.r.hmget('status:node:%d'%node, 'power_snap_3_ctrl_trig')[0]) == 'True'):
-                                if (self.r.hmget('status:node:%d'%node, 'power_snap_3_cmd')[0] == 'on'):
-                                        self.client_socket.sendto('snapv2_3_on',self.arduinoSocket)
-                                else:
-                                        self.client_socket.sendto('snapv2_3_off',self.arduinoSocket)
-                                self.r.hset('status:node:%d'%node, 'power_snap_3_ctrl_trig', False)
-
-                        if (self.r.hmget('status:node:%d'%node, 'power_fem_ctrl_trig')[0] == 'True'):
-                                if (self.r.hmget('status:node:%d'%node, 'power_fem_cmd')[0] == 'on'):
-                                        self.client_socket.sendto('FEM_on',self.arduinoSocket) 
-                                else:
-                                        self.client_socket.sendto('FEM_off',self.arduinoSocket) 
-                                self.r.hset('status:node:%d'%node, 'power_fem_ctrl_trig', False)
-
-                        if (self.r.hmget('status:node:%d'%node, 'power_pam_ctrl_trig')[0] == 'True'):
-                                if (self.r.hmget('status:node:%d'%node, 'power_pam_cmd')[0] == 'on'):
-                                        self.client_socket.sendto('PAM_on',self.arduinoSocket) 
-                                else:
-                                        self.client_socket.sendto('PAM_off',self.arduinoSocket) 
-                                self.r.hset('status:node:%d'%node, 'power_pam_ctrl_trig', False)
 
 
 
