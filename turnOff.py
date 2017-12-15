@@ -31,56 +31,56 @@ s = udpSenderClass.UdpSender()
 
 if args.snaps:
         print("Turning SNAP 0 off")
-        s.power_snap_0(ip_addr,'off')
+        s.power_snap_0(args.ip_addr,'off')
         time.sleep(1)
         print("Turning SNAP 1 off")
-        s.power_snap_1(ip_addr,'off')
+        s.power_snap_1(args.ip_addr,'off')
         time.sleep(1)
         print("Turning SNAP 2 off")
-        s.power_snap_2(ip_addr,'off')
+        s.power_snap_2(args.ip_addr,'off')
         time.sleep(1)
         print("Turning SNAP 3 off")
-        s.power_snap_3(ip_addr,'off')
+        s.power_snap_3(args.ip_addr,'off')
         time.sleep(1)
         print("Turning SNAP relay off")
-        s.power_snap_relay(ip_addr,'off')
+        s.power_snap_relay(args.ip_addr,'off')
         time.sleep(.1)
 
 if args.snapRelay:
         print("Turning SNAP relay off")
-        s.power_snap_relay(ip_addr,'off')
+        s.power_snap_relay(args.ip_addr,'off')
         time.sleep(.1)
 
 if args.snap0:
         print("Turning SNAP 0 off")
-        s.power_snap_0(ip_addr,'off')
+        s.power_snap_0(args.ip_addr,'off')
         time.sleep(1)
 
 if args.snap1:
         print("Turning SNAP 1 off")
-        s.power_snap_1(ip_addr,'off')
+        s.power_snap_1(args.ip_addr,'off')
         time.sleep(1)
 
 if args.snap2:
         print("Turning SNAP 2 off")
-        s.power_snap_2(ip_addr,'off')
+        s.power_snap_2(args.ip_addr,'off')
         time.sleep(1)
 
 if args.snap3:
         print("Turning SNAP 3 off")
-        s.power_snap_3(ip_addr,'off')
+        s.power_snap_3(args.ip_addr,'off')
         time.sleep(1)
 
 if args.pam:
         print("Turning PAM off")
-        s.power_pam(ip_addr,'off')
+        s.power_pam(args.ip_addr,'off')
         time.sleep(1)
 
 if args.fem:
         print("Turning FEM off")
-        s.power_fem(ip_addr,'off')
+        s.power_fem(args.ip_addr,'off')
         time.sleep(1)
 
 if args.reset:
         print("Resetting Arduino/Turning everything off at once")
-        s.reset(ip_addr)
+        s.reset(args.ip_addr)
