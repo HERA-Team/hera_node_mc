@@ -64,6 +64,9 @@
 #define TEMP_BOT 0x18
 
 
+#define VERBOSE 0
+
+
 IPAddress serverIp(10, 1, 1, 1); // Server ip address
 EthernetUDP UdpRcv; // UDP object to receive packets
 EthernetUDP UdpSnd; // UDP object to send packets
@@ -210,6 +213,7 @@ void setup() {
   UdpSer.begin(serPort);
   delay(1500); // delay to give time for initialization
 
+  
   // Now that UDP is initialized, serialUdp can be used
   serialUdp("Running Setup..."); 
   serialUdp("Contents of the sensorArray.mac:");
@@ -306,7 +310,9 @@ void loop() {
     }
     else {
       Serial.println("MCP9808 TOP not found");
+#ifdef VERBOSE
       serialUdp("MCP9808 TOP not found");
+#endif
       sensorArray.mcpTempTop = -99; 
     }
  
@@ -317,7 +323,9 @@ void loop() {
     }
     else {
       Serial.println("MCP9808 MID not found");
+#ifdef VERBOSE
       serialUdp("MCP9808 MID not found"); 
+#endif
       sensorArray.mcpTempMid = -99; 
     }
 
@@ -328,7 +336,9 @@ void loop() {
     }
     else {
       Serial.println("MCP9808 BOT not found");
+#ifdef VERBOSE
       serialUdp("MCP9808 BOT not found");
+#endif
       sensorArray.mcpTempBot = -99; 
     }
 
@@ -340,7 +350,9 @@ void loop() {
     }
     else {
       Serial.println("HTU21DF not found!");
+#ifdef VERBOSE
       serialUdp("HTU21DF not found!");
+#endif
       sensorArray.htuTemp = -99;
       sensorArray.htuHumid = -99;
     }
@@ -354,11 +366,11 @@ void loop() {
     UdpSnd.endPacket(); // End the packet
     
     Serial.println("UDP packet sent...");
+#ifdef VERBOSE
     serialUdp("UDP packet sent...");
+#endif
    
     
-    // Clear UDP packet buffer before sending another packet
-    memset(packetBuffer, 0, UDP_TX_PACKET_MAX_SIZE);
   
    
     // Check if request was sent to Arduino
@@ -369,15 +381,17 @@ void loop() {
     } 
 
     //clear out the packetBuffer array
-    memset(packetBuffer, 0, UDP_TX_PACKET_MAX_SIZE); 
+    //memset(packetBuffer, 0, UDP_TX_PACKET_MAX_SIZE); 
     
     // Renew DHCP lease - times out eventually if this is removed
     Ethernet.maintain();
      
 
     unsigned int endLoop = millis();
+#ifdef VERBOSE
     serialUdp("Loops runs for");
     serialUdp(String(endLoop-startLoop));
+#endif
     delay(2000);
 }
 
@@ -478,8 +492,13 @@ void parseUdpPacket(){
               
       else if (command == "reset") {
         bootReset();
-        }
-     
+      }
+      else {
+        serialUdp("Unknown command received..");
+      }
+      // Clear UDP packet buffer before sending another packet
+      memset(packetBuffer, 0, UDP_TX_PACKET_MAX_SIZE);
+       
     
 }
 
@@ -496,7 +515,6 @@ void serialUdp(String message){
   UdpSer.beginPacket(serverIp, serPort);
   UdpSer.print(message);
   UdpSer.endPacket();
-  memset(packetBuffer, 0, UDP_TX_PACKET_MAX_SIZE);
   }
 
 
