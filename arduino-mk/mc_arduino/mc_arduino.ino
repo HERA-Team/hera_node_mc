@@ -302,7 +302,7 @@ void setup() {
 void loop() {
      
     unsigned int startLoop = millis();
-    
+#if 0   
     
     // Find top temp sensor and read its value
     if (mcpTop.begin(TEMP_TOP)) {
@@ -356,7 +356,7 @@ void loop() {
       sensorArray.htuTemp = -99;
       sensorArray.htuHumid = -99;
     }
-    
+#endif    
     // Calculate the cpu uptime since the last Setup in seconds.
     sensorArray.cpu_uptime = (millis() - cpu_uptime_init)/1000;
     
