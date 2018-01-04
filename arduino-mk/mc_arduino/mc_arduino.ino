@@ -358,13 +358,13 @@ void loop() {
     }
     
     // Calculate the cpu uptime since the last Setup in seconds.
-    //sensorArray.cpu_uptime = (millis() - cpu_uptime_init)/1000;
+    sensorArray.cpu_uptime = (millis() - cpu_uptime_init)/1000;
     
+    //UdpSnd.beginPacket(serverIp, sndPort); // Initialize the packet send
+    //UdpSnd.write((byte *)&sensorArray, sizeof sensorArray); // Send the struct as UDP packet
+    //UdpSnd.endPacket(); // End the packet
     // Send UDP packet to the server ip address serverIp that's listening on port sndPort
-    UdpSnd.beginPacket(serverIp, sndPort); // Initialize the packet send
-    UdpSnd.write((byte *)&sensorArray, sizeof sensorArray); // Send the struct as UDP packet
-    UdpSnd.endPacket(); // End the packet
-    
+    serialUdp("01234567890123456789012345678901234567890123456789012345678901234567890123456789");   
     Serial.println("UDP packet sent...");
 #ifdef VERBOSE
     serialUdp("UDP packet sent...");
