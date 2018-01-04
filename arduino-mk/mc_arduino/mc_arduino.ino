@@ -355,10 +355,6 @@ void loop() {
     }
     // Calculate the cpu uptime since the last Setup in seconds.
     sensorArray.cpu_uptime = (millis())/1000;
-    serialUdp("CPU Uptime measured at start of SETUP loop:");
-    serialUdp(String(sensorArray.cpu_uptime));
-    serialUdp("CPU Uptime as measured by the millis function:");
-    serialUdp(String(millis()));
  
     // Send UDP packet to the server ip address serverIp that's listening on port sndPort
     UdpSnd.beginPacket(serverIp, sndPort); // Initialize the packet send
