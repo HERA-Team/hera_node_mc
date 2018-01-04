@@ -64,7 +64,7 @@
 #define TEMP_BOT 0x18
 
 
-#define VERBOSE 0
+//#define VERBOSE 0
 
 
 IPAddress serverIp(10, 1, 1, 1); // Server ip address
