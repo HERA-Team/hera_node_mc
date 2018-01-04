@@ -357,7 +357,11 @@ void loop() {
     }
     // Calculate the cpu uptime since the last Setup in seconds.
     sensorArray.cpu_uptime = (millis() - cpu_uptime_init)/1000;
-    
+    serialUdp("CPU Uptime measured at start of SETUP loop:");
+    serialUdp(String(sensorArray.cpu_uptime));
+    serialUdp("CPU Uptime as measured by the millis function:");
+    serialUdp(String(millis()));
+ 
     // Send UDP packet to the server ip address serverIp that's listening on port sndPort
     UdpSnd.beginPacket(serverIp, sndPort); // Initialize the packet send
     UdpSnd.write((byte *)&sensorArray, sizeof sensorArray); // Send the struct as UDP packet
@@ -367,9 +371,6 @@ void loop() {
     serialUdp("UDP packet sent...");
 #endif
    
-    
-  
-   
     // Check if request was sent to Arduino
     packetSize = UdpRcv.parsePacket(); // Reads the packet size
     
@@ -377,12 +378,8 @@ void loop() {
     parseUdpPacket();    
     } 
 
-    //clear out the packetBuffer array
-    //memset(packetBuffer, 0, UDP_TX_PACKET_MAX_SIZE); 
-    
     // Renew DHCP lease - times out eventually if this is removed
     Ethernet.maintain();
-     
 
     unsigned int endLoop = millis();
 #ifdef VERBOSE
