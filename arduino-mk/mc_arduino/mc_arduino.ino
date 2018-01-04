@@ -64,7 +64,7 @@
 #define TEMP_BOT 0x18
 
 
-#define VERBOSE
+//#define VERBOSE
 
 
 IPAddress serverIp(10, 1, 1, 1); // Server ip address
@@ -394,7 +394,9 @@ void parseUdpPacket(){
       
       if (command == "poke") {
           Serial.println("I've been poked!");
+#ifdef VERBOSE
           serialUdp("I've been poked!");
+#endif
           Watchdog.reset();
       }
       
