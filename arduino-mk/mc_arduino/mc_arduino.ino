@@ -364,7 +364,7 @@ void loop() {
     //UdpSnd.write((byte *)&sensorArray, sizeof sensorArray); // Send the struct as UDP packet
     //UdpSnd.endPacket(); // End the packet
     // Send UDP packet to the server ip address serverIp that's listening on port sndPort
-    serialUdp("01234567");   
+    serialUdp("0");   
     Serial.println("UDP packet sent...");
 #ifdef VERBOSE
     serialUdp("UDP packet sent...");
