@@ -358,7 +358,7 @@ void loop() {
     }
     
     // Calculate the cpu uptime since the last Setup in seconds.
-    sensorArray.cpu_uptime = (millis() - cpu_uptime_init)/1000;
+    //sensorArray.cpu_uptime = (millis() - cpu_uptime_init)/1000;
     
     // Send UDP packet to the server ip address serverIp that's listening on port sndPort
     UdpSnd.beginPacket(serverIp, sndPort); // Initialize the packet send
@@ -389,7 +389,7 @@ void loop() {
 
     unsigned int endLoop = millis();
 #ifdef VERBOSE
-    serialUdp("Loops runs for");
+    serialUdp("Loop runtime:");
     serialUdp(String(endLoop-startLoop));
 #endif
     delay(2000);
