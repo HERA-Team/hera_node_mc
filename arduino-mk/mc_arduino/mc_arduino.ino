@@ -342,6 +342,7 @@ void loop() {
       sensorArray.mcpTempBot = -99; 
     }
 
+#endif    
 
     // Read humidity and temperature from HTU21DF sensor
     if (htu.begin()) {
@@ -356,7 +357,6 @@ void loop() {
       sensorArray.htuTemp = -99;
       sensorArray.htuHumid = -99;
     }
-#endif    
     // Calculate the cpu uptime since the last Setup in seconds.
     sensorArray.cpu_uptime = (millis() - cpu_uptime_init)/1000;
     
