@@ -102,7 +102,6 @@ Adafruit_MCP9808 mcpBot = Adafruit_MCP9808();
 Adafruit_HTU21DF htu = Adafruit_HTU21DF();
 
 
-float cpu_uptime_init;
 
 // struct for a UDP packet
 struct sensors {
@@ -132,7 +131,6 @@ void parseUdpPacket();
 void setup() {
   Watchdog.enable(8000);
   unsigned int startSetup = millis();
-  cpu_uptime_init = millis();
   
   
   // Initialize Serial port
@@ -356,7 +354,7 @@ void loop() {
       sensorArray.htuHumid = -99;
     }
     // Calculate the cpu uptime since the last Setup in seconds.
-    sensorArray.cpu_uptime = (millis() - cpu_uptime_init)/1000;
+    sensorArray.cpu_uptime = (millis())/1000;
     serialUdp("CPU Uptime measured at start of SETUP loop:");
     serialUdp(String(sensorArray.cpu_uptime));
     serialUdp("CPU Uptime as measured by the millis function:");
