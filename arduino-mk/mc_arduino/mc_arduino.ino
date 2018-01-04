@@ -64,7 +64,7 @@
 #define TEMP_BOT 0x18
 
 
-//#define VERBOSE 0
+#define VERBOSE
 
 
 IPAddress serverIp(10, 1, 1, 1); // Server ip address
@@ -302,7 +302,6 @@ void setup() {
 void loop() {
      
     unsigned int startLoop = millis();
-#if 0   
     
     // Find top temp sensor and read its value
     if (mcpTop.begin(TEMP_TOP)) {
@@ -342,7 +341,6 @@ void loop() {
       sensorArray.mcpTempBot = -99; 
     }
 
-#endif    
 
     // Read humidity and temperature from HTU21DF sensor
     if (htu.begin()) {
@@ -360,11 +358,10 @@ void loop() {
     // Calculate the cpu uptime since the last Setup in seconds.
     sensorArray.cpu_uptime = (millis() - cpu_uptime_init)/1000;
     
-    //UdpSnd.beginPacket(serverIp, sndPort); // Initialize the packet send
-    //UdpSnd.write((byte *)&sensorArray, sizeof sensorArray); // Send the struct as UDP packet
-    //UdpSnd.endPacket(); // End the packet
     // Send UDP packet to the server ip address serverIp that's listening on port sndPort
-    serialUdp("0");   
+    UdpSnd.beginPacket(serverIp, sndPort); // Initialize the packet send
+    UdpSnd.write((byte *)&sensorArray, sizeof sensorArray); // Send the struct as UDP packet
+    UdpSnd.endPacket(); // End the packet
     Serial.println("UDP packet sent...");
 #ifdef VERBOSE
     serialUdp("UDP packet sent...");
