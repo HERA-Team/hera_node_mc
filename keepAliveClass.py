@@ -17,7 +17,7 @@ sendPort = 8888
 
 unpacked_mac = ["" for x in range(6)]
 
-class Heartbeat():
+class KeepAlive():
         """
         This class pokes Arduino every 3 seconds to ensure Arduino's connectivity to the server.
         It also checks the Redis Database flags set from the nodeControlClass and for commands and
