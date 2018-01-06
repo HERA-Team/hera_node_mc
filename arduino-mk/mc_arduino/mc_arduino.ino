@@ -374,7 +374,7 @@ void loop() {
     } 
 
     // Renew DHCP lease - times out eventually if this is removed
-    Ethernet.maintain();
+    //Ethernet.maintain();
 
     unsigned int endLoop = millis();
 #ifdef VERBOSE
