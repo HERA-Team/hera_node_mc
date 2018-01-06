@@ -357,10 +357,9 @@ void loop() {
     sensorArray.cpu_uptime = (millis())/1000;
  
     // Send UDP packet to the server ip address serverIp that's listening on port sndPort
-//    UdpSnd.beginPacket(serverIp, sndPort); // Initialize the packet send
-//    UdpSnd.write((byte *)&sensorArray, sizeof sensorArray); // Send the struct as UDP packet
-//    UdpSnd.endPacket(); // End the packet
-    serialUdp("01234567890123456789012345678901234567890123456789012345678901234567890123456789");
+    UdpSnd.beginPacket(serverIp, sndPort); // Initialize the packet send
+    UdpSnd.write((byte *)&sensorArray, sizeof sensorArray); // Send the struct as UDP packet
+    UdpSnd.endPacket(); // End the packet
     Serial.println("UDP packet sent...");
 #ifdef VERBOSE
     serialUdp("UDP packet sent...");
@@ -374,7 +373,7 @@ void loop() {
     } 
 
     // Renew DHCP lease - times out eventually if this is removed
-    //Ethernet.maintain();
+    Ethernet.maintain();
 
     unsigned int endLoop = millis();
 #ifdef VERBOSE
