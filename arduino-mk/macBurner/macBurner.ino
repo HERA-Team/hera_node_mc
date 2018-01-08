@@ -42,7 +42,7 @@ char packetBuffer[UDP_TX_PACKET_MAX_SIZE];
 String command; // String for data
 
 
-unsigned int nodeID = 0;
+unsigned int nodeID = 3;
 unsigned int eeadr = 0; 
 unsigned int eeNodeAdr = 6; // EEPROM addres that will store node ID number
 
