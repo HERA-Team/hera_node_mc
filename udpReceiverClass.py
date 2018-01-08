@@ -64,7 +64,7 @@ class UdpReceiver():
 
                 print('Poking..')
                 self.client_socket.sendto('poke',self.arduinoSocket) 
-                t = threading.Timer(3,self.__poke)
+                t = threading.Timer(4,self.__poke)
                 print("Timer Set.")
                 t.daemon = True
                 t.start()
@@ -131,6 +131,7 @@ class UdpReceiver():
                         self.r.hmset('status:node:%d'%node,
                         {'serial_Lbyte':hex(ord(unpacked_serialLb[0])),
                         'serial_Hbyte':hex(ord(unpacked_serialHb[0])),
+                        'node_id':node,
                         'mac':unpacked_mac,
                         'temp_top':unpacked_mcptemp_top[0],
                         'temp_mid':unpacked_mcptemp_mid[0],
