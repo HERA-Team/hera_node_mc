@@ -196,7 +196,7 @@ void setup() {
   for (int i = 0; i < 6; i++){
     sensorArray.mac[i] = mac[i]; 
   }
- 
+  Watchdog.reset(); 
   // Start Ethernet connection, automatically tries to get IP using DHCP
   if (Ethernet.begin(mac) == 0) {
     Serial.println("Failed to configure Ethernet using DHCP, restarting sketch...");
@@ -211,7 +211,7 @@ void setup() {
   UdpSer.begin(serPort);
   delay(1500); // delay to give time for initialization
 
-  
+  Watchdog.reset();
   // Now that UDP is initialized, serialUdp can be used
   serialUdp("Running Setup..."); 
   serialUdp("Contents of the sensorArray.mac:");
