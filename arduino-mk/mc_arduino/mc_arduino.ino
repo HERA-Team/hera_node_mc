@@ -202,15 +202,17 @@ void setup() {
     Serial.println("Failed to configure Ethernet using DHCP, restarting sketch...");
     delay(10000);
   }
+  Watchdog.reset();
+  Serial.println("After ethernet begin and watchdog reset");
   Serial.println("Configured IP:");
   Serial.println(Ethernet.localIP());
-
+  
   // Start UDP - HAS TO BE AFTER ETHERNET.BEGIN!!!!!!
   UdpRcv.begin(rcvPort);
   UdpSnd.begin(sndPort);
   UdpSer.begin(serPort);
   delay(1500); // delay to give time for initialization
-
+  Serial.println("after UDP begins");
   Watchdog.reset();
   // Now that UDP is initialized, serialUdp can be used
   serialUdp("Running Setup..."); 
