@@ -216,6 +216,7 @@ void setup() {
   Watchdog.reset();
   // Now that UDP is initialized, serialUdp can be used
   serialUdp("Running Setup..."); 
+  Serial.println("After first serialUdp");
   serialUdp("Contents of the sensorArray.mac:");
   serialUdp(String(mac[6]));
   serialUdp("Individual values:");
@@ -496,17 +497,18 @@ void parseUdpPacket(){
 
 
 void bootReset(){
-   Serial.println("Resetting Bootloader..");
-   serialUdp("Resetting Bootloader..");
-   delay(500);
-   digitalWrite(RESET, LOW);  
+    Serial.println("Resetting Bootloader..");
+    serialUdp("Resetting Bootloader..");
+    delay(500);
+    digitalWrite(RESET, LOW);  
 }
 
 
 void serialUdp(String message){
-  UdpSer.beginPacket(serverIp, serPort);
-  UdpSer.print(message);
-  UdpSer.endPacket();
+    String debugMessage = message + sensorArray.nodeID;
+    UdpSer.beginPacket(serverIp, serPort);
+    UdpSer.print(debugMessage);
+    UdpSer.endPacket();
   }
 
 
