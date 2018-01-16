@@ -25,11 +25,12 @@ class KeepAlive():
 
         """
 
-        def __init__(self):
+        def __init__(self,arduinoAddress, node):
 
                 # define socket address for binding; necessary for receiving data from Arduino 
                 self.localSocket = (serverAddress, sendPort)
-
+                self.arduinoAddress = arduinoAddress
+                self.node = node
 
                 # Instantiate redis object connected to redis server running on serverAddress
                 self.r = redis.StrictRedis(serverAddress)
@@ -63,6 +64,7 @@ class KeepAlive():
         def __poke(self):
                 
                 print('Poking..')
+                print(self.arduinoSocket)
                 self.client_socket.sendto('poke',self.arduinoSocket) 
                 t = threading.Timer(3,self.__poke)
                 print("Timer Set.")
@@ -70,7 +72,7 @@ class KeepAlive():
                 t.start()
 
 
-        def keepAlive(self, arduinoAddress):
+        def keepAlive(self):
 
                 """
                 Captures UDP packets sent by Arduino an pushes to Redis. 
@@ -79,8 +81,8 @@ class KeepAlive():
                 """
 
                 # define socket necessary for sending poke command to Arduino
-                self.arduinoSocket = (arduinoAddress, sendPort)
-                
+                self.arduinoSocket = (self.arduinoAddress, sendPort)
+                node = self.node
                 # Start the timer to send poke command to the Arduino
                 self.__poke()
 
@@ -141,7 +143,6 @@ class KeepAlive():
 
 
 
-                        print(self.r.hgetall('status:node:%d'%node))
 
 
 
