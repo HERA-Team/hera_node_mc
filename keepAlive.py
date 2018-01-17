@@ -1,4 +1,4 @@
-import heartbeatClass
+import keepAliveClass 
 import argparse 
 
 parser = argparse.ArgumentParser(description = 'This script instantiates the heartbeatClass with the IP address of the Arduino.',
@@ -9,6 +9,6 @@ args = parser.parse_args()
 
 
 
-h = heartbeatClass.Heartbeat()
-h.keepAlive(args.ip_addr, int(args.node)) 
+h = keepAliveClass.KeepAlive(args.ip_addr, int(args.node))
+h.keepAlive() 
 
