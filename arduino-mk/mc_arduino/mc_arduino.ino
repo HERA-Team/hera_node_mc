@@ -505,7 +505,7 @@ void bootReset(){
 
 
 void serialUdp(String message){
-    String debugMessage =int( sensorArray.nodeID)+ ': ' + message;
+    String debugMessage = String(int(sensorArray.nodeID)+ ': ' + message);
     UdpSer.beginPacket(serverIp, serPort);
     UdpSer.print(debugMessage);
     UdpSer.endPacket();
