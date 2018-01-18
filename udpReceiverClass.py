@@ -30,8 +30,8 @@ class UdpReceiver():
                 self.localSocket = (serverAddress, rcvPort)
 
 
-                # Instantiate redis object connected to redis server running on serverAddress
-                self.r = redis.StrictRedis(serverAddress)
+                # Instantiate redis object connected to redis server running on localhost
+                self.r = redis.StrictRedis()
 
                 # Create a UDP socket
                 try:
@@ -62,7 +62,7 @@ class UdpReceiver():
 
 
 
-        def receiveUDP(self, arduinoAddress):
+        def receiveUDP(self):
                 """
                 Captures UDP packets sent by Arduino an pushes to Redis. 
                 Sends poke signal to Arduino every 3 seconds.
@@ -77,7 +77,6 @@ class UdpReceiver():
                     
                         # Receive data continuously from the server (Arduino in this case)
                         data, addr =  self.client_socket.recvfrom(1024)
-
                         # Arduino sends a Struct via UDP so unpacking is needed 
                         # struct.unpack returns a tuple with one element
                         # Each struct element is 4 Bytes (c floats are packed as 4 byte strings)
@@ -108,15 +107,13 @@ class UdpReceiver():
 
                         node = int(unpacked_nodeID[0])
                          
-                        # if (unpacked_mcptemp_top > 27 && unpacked_mcptemp_mid > 27 && unpacked_htutemp > 27):
-                        # server.send('heranodemc@gmail.com','recipientemail@gmail.com','The temperature values are
-                        # approaching critical levels, shutdown sequence initiated') 
-                        # Set hashes in Redis composed of sensor temperature values
 
                         self.r.hmset('status:node:%d'%node,
                         {'serial_Lbyte':hex(ord(unpacked_serialLb[0])),
                         'serial_Hbyte':hex(ord(unpacked_serialHb[0])),
                         'mac':unpacked_mac,
+                        'ip':addr[0],
+                        'node_ID':node,
                         'temp_top':unpacked_mcptemp_top[0],
                         'temp_mid':unpacked_mcptemp_mid[0],
                         'temp_bot':unpacked_mcptemp_bot[0],
