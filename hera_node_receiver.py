@@ -6,9 +6,10 @@ parser = argparse.ArgumentParser(description = 'This scripts instantiates the ud
 parser.add_argument('ip_addr', action = 'store', help = 'Specify the Arduino IP address')
 
 args = parser.parse_args()
- 
+
 
 
 
 u = udpReceiverClass.UdpReceiver()
-u.receiveUDP(args.ip_addr)
+u.receiveUDP()
+
