@@ -20,9 +20,9 @@
 //      3              ---- ----       MAC byte 3
 //      4              ---- ----       MAC byte 4
 //      5              ---- ----       MAC byte 5
-//      6              ---- ----        Node ID 
-//      7              ---- ----       Serial Number
-//      8              ---- ----       unassigned
+//      6              ---- ----       Node ID 
+//      7              ---- ----       Serial Low byte
+//      8              ---- ----       Serial High byte
 //      9              ---- ----       unassigned
 //      10             ---- ----       unassigned
 //      .              ---- ----       unassigned
@@ -96,23 +96,23 @@ Adafruit_MCP9808 mcpMid = Adafruit_MCP9808();
 Adafruit_HTU21DF htu = Adafruit_HTU21DF();
 
 
-float cpu_uptime_init;
 
 // struct for a UDP packet
 struct sensors {
   float nodeID;
+  float cpu_uptime = 0;
   float mcpTempTop = -99;
   float mcpTempMid = -99;
   float htuTemp = -99;
   float htuHumid = -99;
-  byte serial;
   bool snap_relay = false;
   bool fem = false;
   bool pam = false;
   bool snapv2_0_1 = false;
   bool snapv2_2_3 = false;
-  float cpu_uptime = 0;
-  byte mac[7];
+  byte serialLb;
+  byte serialHb;
+  byte mac[6];
 } sensorArray;
 
 void bootReset();
@@ -122,7 +122,6 @@ void parseUdpPacket();
 void setup() {
   Watchdog.enable(8000);
   unsigned int startSetup = millis();
-  cpu_uptime_init = millis();
   
   
   // Initialize Serial port
@@ -224,35 +223,52 @@ void setup() {
     serialUdp(String(EEPROM.read(i)));
     
   }
+
   // Find Digital IO card and initialize its pin modes 
   if (io.begin(SX1509_ADDRESS)) {
       Serial.println("Digital IO card found!");
-     serialUdp("Digital IO card found!");
-      io.pinMode(0,INPUT);   // Serial
-      io.pinMode(1,INPUT);   //   .
-      io.pinMode(2,INPUT);   //   .
-      io.pinMode(3,INPUT);   //   .
-      io.pinMode(4,INPUT);   //   .
-      io.pinMode(5,INPUT);   //   .
-      io.pinMode(6,INPUT);   // Rev Number
-      io.pinMode(7,INPUT);   //   .
-      io.pinMode(8,INPUT);   // 1=production, 0=prototype
-      io.pinMode(9,INPUT);   //  TBD
-      io.pinMode(10,INPUT);  //   .
-      io.pinMode(11,INPUT);  //   .
-      io.pinMode(12,OUTPUT); //   .
-      io.pinMode(13,OUTPUT); //   .
-      io.pinMode(14,OUTPUT); //   .
-      io.pinMode(15,OUTPUT); //   .
-      
-      for (int i=0; i<6; i++){
-          sensorArray.serial |= io.digitalRead(i) << i; 
+      serialUdp("Digital IO card found!");
+      io.pinMode(0,INPUT);      // Serial
+      io.digitalWrite(0,LOW);   // Activating PULL DOWN resistor on pin
+      io.pinMode(1,INPUT);      //   .
+      io.digitalWrite(1,LOW);   // Activating PULL DOWN resistor on pin
+      io.pinMode(2,INPUT);      //   .
+      io.digitalWrite(2,LOW);   // Activating PULL DOWN resistor on pin
+      io.pinMode(3,INPUT);      //   .
+      io.digitalWrite(3,LOW);   // Activating PULL DOWN resistor on pin
+      io.pinMode(4,INPUT);      //   .
+      io.digitalWrite(4,LOW);   // Activating PULL DOWN resistor on pin
+      io.pinMode(5,INPUT);      //   .
+      io.digitalWrite(5,LOW);   // Activating PULL DOWN resistor on pin
+      io.pinMode(6,INPUT);      // Rev Number
+      io.digitalWrite(6,LOW);   // Activating PULL DOWN resistor on pin
+      io.pinMode(7,INPUT);      //   .
+      io.digitalWrite(7,LOW);   // Activating PULL DOWN resistor on pin
+      io.pinMode(8,INPUT);      // 1=production, 0=prototype
+      io.digitalWrite(8,LOW);   // Activating PULL DOWN resistor on pin
+      io.pinMode(9,INPUT);      //  TBD
+      io.digitalWrite(9,LOW);   // Activating PULL DOWN resistor on pin
+      io.pinMode(10,INPUT);     //   .
+      io.digitalWrite(10,LOW);  // Activating PULL DOWN resistor on pin
+      io.pinMode(11,INPUT);     //   .
+      io.digitalWrite(11,LOW);  // Activating PULL DOWN resistor on pin
+      io.pinMode(12,OUTPUT);    //   .
+      io.pinMode(13,OUTPUT);    //   .
+      io.pinMode(14,OUTPUT);    //   .
+      io.pinMode(15,OUTPUT);    //   .
+
+      for (int i=0; i<8; i++){
+          sensorArray.serialLb |= io.digitalRead(i) << i;
       }
-      EEPROM.write(eeSerialAdr, sensorArray.serial);
+      for (int i=8; i<15; i++){
+          sensorArray.serialHb |= io.digitalRead(i) << i;
+      }
+      EEPROM.write(eeSerialAdrL, sensorArray.serialLb);
+      EEPROM.write(eeSerialAdrH, sensorArray.serialHb);
   }
   else {
-    Serial.println("Digital io card not found"); 
-    serialUdp("Digital io card not found"); 
+    Serial.println("Digital io card not found");
+    serialUdp("Digital io card not found");
   }
 
   unsigned int endSetup = millis();
@@ -276,6 +292,7 @@ void loop() {
 #ifdef VERBOSE
       serialUdp("MCP9808 TOP not found");
 #endif
+      sensorArray.mcpTempTop = -99;
     }
  
     
@@ -288,6 +305,7 @@ void loop() {
 #ifdef VERBOSE
       serialUdp("MCP9808 MID not found"); 
 #endif
+      sensorArray.mcpTempMid = -99;
     }
 
     
@@ -301,16 +319,18 @@ void loop() {
 #ifdef VERBOSE
       serialUdp("HTU21DF not found!");
 #endif
+      sensorArray.htuTemp = -99;
+      sensorArray.htuHumid = -99;
+
     }
     
     // Calculate the cpu uptime since the last Setup in seconds.
-    sensorArray.cpu_uptime = (millis() - cpu_uptime_init)/1000;
+    sensorArray.cpu_uptime = (millis())/1000;
     
     // Send UDP packet to the server ip address serverIp that's listening on port sndPort
     UdpSnd.beginPacket(serverIp, sndPort); // Initialize the packet send
     UdpSnd.write((byte *)&sensorArray, sizeof sensorArray); // Send the struct as UDP packet
     UdpSnd.endPacket(); // End the packet
-    
     Serial.println("UDP packet sent...");
 #ifdef VERBOSE
     serialUdp("UDP packet sent...");
@@ -429,11 +449,11 @@ void bootReset(){
 
 
 void serialUdp(String message){
-  UdpSer.beginPacket(serverIp, serPort);
-  UdpSer.print(message);
-  UdpSer.endPacket();
-  memset(packetBuffer, 0, UDP_TX_PACKET_MAX_SIZE);
-  }
+    String debugMessage = String("NODE " + String(int(sensorArray.nodeID)) + ": " + message);
+    UdpSer.beginPacket(serverIp, serPort);
+    UdpSer.print(debugMessage);
+    UdpSer.endPacket();
+}
 
 
 
