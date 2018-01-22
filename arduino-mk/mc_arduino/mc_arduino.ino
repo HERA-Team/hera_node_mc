@@ -20,7 +20,7 @@
 //      3              ---- ----       MAC byte 3
 //      4              ---- ----       MAC byte 4
 //      5              ---- ----       MAC byte 5
-//      6              ---- ----        Node ID 
+//      6              ---- ----       Node ID 
 //      7              ---- ----       Serial Low byte
 //      8              ---- ----       Serial High byte
 //      9              ---- ----       unassigned
@@ -121,7 +121,7 @@ struct sensors {
   bool snapv2_3 = false;
   byte serialLb;
   byte serialHb;
-  byte mac[7];
+  byte mac[6];
 } sensorArray;
 
 void bootReset();
@@ -502,10 +502,11 @@ void bootReset(){
 
 
 void serialUdp(String message){
-  UdpSer.beginPacket(serverIp, serPort);
-  UdpSer.print(message);
-  UdpSer.endPacket();
-  }
+    String debugMessage = String("NODE " + String(int(sensorArray.nodeID)) + ": " + message);
+    UdpSer.beginPacket(serverIp, serPort);
+    UdpSer.print(debugMessage);
+    UdpSer.endPacket();
+} 
 
 
 
