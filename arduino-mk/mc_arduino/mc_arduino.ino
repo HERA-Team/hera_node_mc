@@ -84,6 +84,8 @@ unsigned int EEPROM_SIZE = 1024;
 unsigned int eeadr = 0; // MACburner.bin writes MAC addres to the first 6 addresses of EEPROM
 unsigned int eeNodeAdr = 6; // EEPROM node ID address
 unsigned int eeSerialAdr = 7;
+unsigned int eeSerialAdrL = 7;
+unsigned int eeSerialAdrH = 8;
 
 // I2C digital i/o serial board
 const byte SX1509_ADDRESS = 0x3E;
