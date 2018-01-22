@@ -33,8 +33,9 @@ is string with value 'on' or 'off'.
 ***You must have the Arduino IDE and avr-gcc toolchain installed on the computer you're compiling mc_arduino.ino***  
 Tested with Arduino 1.6.5 and Arduino 1.8.5: https://www.arduino.cc/en/Main/Software   
 Once you download the Arduino IDE, you're going to have to update its path in the Makefile inside the sketch directory
-you're working on. 
-to create binary file out of c script (.ino) using arduino-mk:  
+you're working on. Change the line with ARDUINO_DIR to point to your Arduino IDE source files. 
+
+Once you have done that, you're ready to create a binary file out of the .ino file using arduino-mk:  
 
 * go into mc_arduino folder
 * run make clean to get rid of old versions
