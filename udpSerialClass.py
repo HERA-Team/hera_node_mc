@@ -65,4 +65,4 @@ class UdpClient():
             # Receive data continuously from the server (Arduino in this case)
             data, addr =  self.client_socket.recvfrom(2048)
             print(data)
-            #print(datetime.datetime.now())
+            print(datetime.datetime.now())
