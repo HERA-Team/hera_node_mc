@@ -80,29 +80,26 @@ class UdpReceiver():
                         # Arduino sends a Struct via UDP so unpacking is needed 
                         # struct.unpack returns a tuple with one element
                         # Each struct element is 4 Bytes (c floats are packed as 4 byte strings)
-
+                        
                         unpacked_nodeID = struct.unpack('=f',data[0:4])
                         unpacked_cpu_uptime = struct.unpack('=f',data[4:8])
                         unpacked_mcptemp_top = struct.unpack('=f',data[8:12])
                         unpacked_mcptemp_mid = struct.unpack('=f',data[12:16])
-                        unpacked_mcptemp_bot = struct.unpack('=f',data[16:20])
-                        unpacked_htutemp = struct.unpack('=f', data[20:24])
-                        unpacked_htuhumid = struct.unpack('=f', data[24:28])
-                        unpacked_snap_relay = struct.unpack('=?',data[28])
-                        unpacked_fem = struct.unpack('=?',data[29])
-                        unpacked_pam = struct.unpack('=?',data[30])
-                        unpacked_snapv2_0 = struct.unpack('=?',data[31])
-                        unpacked_snapv2_1 = struct.unpack('=?',data[32])
-                        unpacked_snapv2_2 = struct.unpack('=?',data[33])
-                        unpacked_snapv2_3 = struct.unpack('=?',data[34])
-                        unpacked_serialLb = struct.unpack('=s',data[35])
-                        unpacked_serialHb = struct.unpack('=s',data[36])
-                        unpacked_mac[0]=hex(ord(struct.unpack('=s',data[37])[0]))
-                        unpacked_mac[1]=hex(ord(struct.unpack('=s',data[38])[0]))
-                        unpacked_mac[2]=hex(ord(struct.unpack('=s',data[39])[0]))
-                        unpacked_mac[3]=hex(ord(struct.unpack('=s',data[40])[0]))
-                        unpacked_mac[4]=hex(ord(struct.unpack('=s',data[41])[0]))
-                        unpacked_mac[5]=hex(ord(struct.unpack('=s',data[42])[0]))
+                        unpacked_htutemp = struct.unpack('=f', data[16:20])
+                        unpacked_htuhumid = struct.unpack('=f', data[20:24])
+                        unpacked_snap_relay = struct.unpack('=?',data[24])
+                        unpacked_fem = struct.unpack('=?',data[25])
+                        unpacked_pam = struct.unpack('=?',data[26])
+                        unpacked_snapv2_0_1 = struct.unpack('=?',data[27])
+                        unpacked_snapv2_2_3 = struct.unpack('=?',data[28])
+                        unpacked_serialLb = struct.unpack('=s',data[29])
+                        unpacked_serialHb = struct.unpack('=s',data[30])
+                        unpacked_mac[0]=hex(ord(struct.unpack('=s',data[31])[0]))
+                        unpacked_mac[1]=hex(ord(struct.unpack('=s',data[32])[0]))
+                        unpacked_mac[2]=hex(ord(struct.unpack('=s',data[33])[0]))
+                        unpacked_mac[3]=hex(ord(struct.unpack('=s',data[34])[0]))
+                        unpacked_mac[4]=hex(ord(struct.unpack('=s',data[35])[0]))
+                        unpacked_mac[5]=hex(ord(struct.unpack('=s',data[36])[0]))
 
 
                         node = int(unpacked_nodeID[0])
@@ -116,16 +113,13 @@ class UdpReceiver():
                         'node_ID':node,
                         'temp_top':unpacked_mcptemp_top[0],
                         'temp_mid':unpacked_mcptemp_mid[0],
-                        'temp_bot':unpacked_mcptemp_bot[0],
                         'temp_humid':unpacked_htutemp[0],
                         'humid':unpacked_htuhumid[0],
                         'power_snap_relay': bin(unpacked_snap_relay[0]),
                         'power_fem': bin(unpacked_fem[0]),
                         'power_pam': bin(unpacked_pam[0]),
-                        'power_snap_0': bin(unpacked_snapv2_0[0]),
-                        'power_snap_1': bin(unpacked_snapv2_1[0]),
-                        'power_snap_2': bin(unpacked_snapv2_2[0]),
-                        'power_snap_3': bin(unpacked_snapv2_3[0]),
+                        'power_snap_0_1': bin(unpacked_snapv2_0_1[0]),
+                        'power_snap_2_3': bin(unpacked_snapv2_2_3[0]),
                         'cpu_uptime_seconds': unpacked_cpu_uptime[0],
                         'timestamp':datetime.datetime.now()})
 
