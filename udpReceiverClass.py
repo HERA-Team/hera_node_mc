@@ -115,11 +115,11 @@ class UdpReceiver():
                         'temp_mid':unpacked_mcptemp_mid[0],
                         'temp_humid':unpacked_htutemp[0],
                         'humid':unpacked_htuhumid[0],
-                        'power_snap_relay': bin(unpacked_snap_relay[0]),
-                        'power_fem': bin(unpacked_fem[0]),
-                        'power_pam': bin(unpacked_pam[0]),
-                        'power_snap_0_1': bin(unpacked_snapv2_0_1[0]),
-                        'power_snap_2_3': bin(unpacked_snapv2_2_3[0]),
+                        'power_snap_relay': int(unpacked_snap_relay[0]),
+                        'power_fem': int(unpacked_fem[0]),
+                        'power_pam': int(unpacked_pam[0]),
+                        'power_snap_0_1': int(unpacked_snapv2_0_1[0]),
+                        'power_snap_2_3': int(unpacked_snapv2_2_3[0]),
                         'cpu_uptime_seconds': unpacked_cpu_uptime[0],
                         'timestamp':datetime.datetime.now()})
 
