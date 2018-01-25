@@ -89,6 +89,7 @@ class KeepAlive():
                         # Check if Redis flags were set through the nodeControlClass
 
                         if ((self.r.hmget('status:node:%d'%self.node, 'power_snap_relay_ctrl_trig')[0]) == 'True'):
+                                print('Detected TRUE in power_snap_relay_ctrl_trig')
                                 if ((self.r.hmget('status:node:%d'%self.node, 'power_snap_relay_cmd')[0]) == 'on'):
                                         self.client_socket.sendto("snapRelay_on",self.arduinoSocket) 
                                 else: 
