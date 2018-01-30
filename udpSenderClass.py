@@ -23,7 +23,9 @@ sendPort = 8888
 class UdpSender():
 
 
-        def __init__(self):
+        def __init__(self,arduinoAddress):
+                
+                self.arduinoAddress = arduinoAddress
 
                 # define socket address for binding; necessary for receiving data from Arduino 
                 self.localSocket = (serverAddress, sendPort)
@@ -56,103 +58,77 @@ class UdpSender():
                 #server.starttls()
         
 
-        def reset(self, arduinoAddress):
+        def reset(self):
                 """
-                Takes in the arduino IP address as a string and resets the bootloader.
+                Resets Arduino bootloader. 
                 """
                 # define arduino socket to send requests
-                arduinoSocket = (arduinoAddress, sendPort)
+                arduinoSocket = (self.arduinoAddress, sendPort)
                 self.client_socket.sendto('reset', arduinoSocket)
 
                 # Set delay before receiving more data
                 time.sleep(2)
 
-        def power_snap_relay(self, arduinoAddress, command):
+        def power_snap_relay(self, command):
                 """
-                Takes in the arduino IP address string and a command "on"/"off".
+                Takes in a string value of 'on' or 'off'.
                 Turns the SNAP relay on/off, must be turned on first before gaining 
                 control over individual SNAPs. 
                 """
                 # define arduino socket to send requests
-                arduinoSocket = (arduinoAddress, sendPort)
+                arduinoSocket = (self.arduinoAddress, sendPort)
                 self.client_socket.sendto('snapRelay_%s'%command, arduinoSocket)
 
                 # Set delay before receiving more data
                 time.sleep(2)
 
-        def power_fem(self, arduinoAddress, command):
+        def power_fem(self, command):
                 """
-                Takes in the arduino IP address string and a command "on"/"off".
+                Takes in a string value of 'on' or 'off'.
                 Controls the power to FEM.
                 """ 
                 # define arduino socket to send requests
-                arduinoSocket = (arduinoAddress, sendPort)
+                arduinoSocket = (self.arduinoAddress, sendPort)
                 self.client_socket.sendto('FEM_%s'%command, arduinoSocket)
 
                 # Set delay before receiving more data
                 time.sleep(2)
 
-        def power_pam(self, arduinoAddress, command):
+        def power_pam(self, command):
                 """
-                Takes in the arduino IP address string and a command "on"/"off".
+                Takes in a string value of 'on' or 'off'.
                 Controls the power to PAM.
                 """ 
                 
                 # define arduino socket to send requests
-                arduinoSocket = (arduinoAddress, sendPort)
+                arduinoSocket = (self.arduinoAddress, sendPort)
                 self.client_socket.sendto('PAM_%s'%command, arduinoSocket)
 
                 # Set delay before receiving more data
                 time.sleep(2)
 
-        def power_snap_0(self, arduinoAddress, command):
+        def power_snap_0_1(self, command):
                 """
-                Takes in the arduino IP address string and a command "on"/"off".
-                Controls the power to SNAP 0.
+                Takes in a string value of 'on' or 'off'.
+                Controls the power to SNAP 0 and 1.
                 """ 
 
                 # define arduino socket to send requests
-                arduinoSocket = (arduinoAddress, sendPort)
-                self.client_socket.sendto('snapv2_0_%s'%command, arduinoSocket)
+                arduinoSocket = (self.arduinoAddress, sendPort)
+                self.client_socket.sendto('snapv2_0_1_%s'%command, arduinoSocket)
 
                 # Set delay before receiving more data
                 time.sleep(2)
 
-        def power_snap_1(self, arduinoAddress, command):
+        def power_snap_2_3(self, command):
                 """
-                Takes in the arduino IP address string and a command "on"/"off".
-                Controls the power to SNAP 1.
+                Takes in a string value of 'on' or 'off'.
+                Controls the power to SNAP 2 and 3.
                 """ 
 
                 # define arduino socket to send requests
-                arduinoSocket = (arduinoAddress, sendPort)
-                self.client_socket.sendto('snapv2_1_%s'%command, arduinoSocket)
-
-                # Set delay before receiving more data
-                time.sleep(2)
-
-        def power_snap_2(self, arduinoAddress, command):
-                """
-                Takes in the arduino IP address string and a command "on"/"off".
-                Controls the power to SNAP 2.
-                """ 
-
-                # define arduino socket to send requests
-                arduinoSocket = (arduinoAddress, sendPort)
-                self.client_socket.sendto('snapv2_2_%s'%command, arduinoSocket)
-
-                # Set delay before receiving more data
-                time.sleep(2)
-
-        def power_snap_3(self, arduinoAddress, command):
-                """
-                Takes in the arduino IP address string and a command "on"/"off".
-                Controls the power to SNAP 3. 
-                """ 
-
-                # define arduino socket to send requests
-                arduinoSocket = (arduinoAddress, sendPort)
-                self.client_socket.sendto('snapv2_3_%s'%command, arduinoSocket)
+                arduinoSocket = (self.arduinoAddress, sendPort)
+                self.client_socket.sendto('snapv2_2_3_%s'%command, arduinoSocket)
 
                 # Set delay before receiving more data
                 time.sleep(2)
