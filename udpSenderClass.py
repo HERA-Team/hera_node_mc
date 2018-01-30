@@ -24,6 +24,11 @@ class UdpSender():
 
 
         def __init__(self,arduinoAddress):
+                """
+                Takes in the arduino IP address and sends commands directly, using udp.
+                You have to be on the hera-digi-vm server to use it, otherwise use
+                the nodeControl class to send commands via Redis.
+                """
                 
                 self.arduinoAddress = arduinoAddress
 
