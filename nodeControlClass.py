@@ -58,7 +58,7 @@ class NodeControl():
 
                 self.r.hset("status:node:%d"%self.node,"power_snap_relay_ctrl_trig",True)
                 self.r.hset("status:node:%d"%self.node,"power_snap_relay_cmd",command)
-                print("Snap relay power is %s"%command)
+                print("SNAP relay power is %s"%command)
 
 
         def power_snap_0_1(self, command):
@@ -69,7 +69,7 @@ class NodeControl():
 
                 self.r.hset("status:node:%d"%self.node,"power_snap_0_1_ctrl_trig",True)
                 self.r.hset("status:node:%d"%self.node,"power_snap_0_1_cmd",command)
-                print("SNAP_0_1 power is %s"%command)
+                print("SNAP 0 and 1 power is %s"%command)
 
 
         def power_snap_2_3(self, command):
@@ -80,7 +80,7 @@ class NodeControl():
 
                 self.r.hset("status:node:%d"%self.node,"power_snap_2_3_ctrl_trig",True)
                 self.r.hset("status:node:%d"%self.node,"power_snap_2_3_cmd",command)
-                print("SNAP_2_3 power is %s"%command)
+                print("SNAP 2 and 3 power is %s"%command)
 
 
 
