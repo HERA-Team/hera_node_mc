@@ -5,7 +5,7 @@ To clone the sensor libraries together with code use 'git clone --recursive http
 ### Usage 
 * import the nodeControlClass into ipython  
 * instantiate a nodeControl class object: 
-* n = nodeControlClass.NodeControl() 
+* n = nodeControlClass.NodeControl(nodeID, redisServerAddress)   
 * Check out the available functions via n.[tab] 
 
 you'll see something like this:
@@ -13,16 +13,11 @@ you'll see something like this:
 n.get_sensors  
 n.get_power_status                 
 n.power_snap_relay      
-n.power_snap_0     
-n.power_snap_1   
-n.power_snap_2   
-n.power_snap_3   
+n.power_snap_0_1       
+n.power_snap_2_3       
 n.power_fem   
 n.power_pam    
 n.reset  
-
-
-          
 
 The power methods provide the ability to send power commands to Arduino, through the Redis database.
 All power methods take the node number and command as arguments. Node number is a digit from 0-29 and command
@@ -89,12 +84,4 @@ screen -S udpReceiver // takes you to a screen session
 python udpReceiver.py new_arduino_ip_address > /dev/null 2>&1 & // this starts a script that grabs data packets from the Arduino and updates Redis with the new sensor and status values.  
 
 Make sure to edit /etc/hosts and /etc/ethers so the new Arduino is recognized by the server and is given a proper IP address. 
-
-
-
-
-
-
-
-
 
