@@ -30,38 +30,39 @@ args = parser.parse_args()
 n = nodeControlClass.NodeControl(int(args.node))
 r = redis.StrictRedis(host='hera-digi-vm')
 if args.snaps:
-		print("Turning SNAP relay on")
 		n.power_snap_relay('on')
 		time.sleep(.1)
-		print("Turning SNAP 0 and 1 on")
 		n.power_snap_0_1('on')
 		time.sleep(1)
-		print("Turning SNAP 2 and 3 on")
 		n.power_snap_2_3('on')
 		time.sleep(1)
 
 if args.snapRelay:
-		print("Turning SNAP relay on")
+                #print("Turning SNAP relay on")
 		n.power_snap_relay('on')
 		time.sleep(.1)
 
 if args.snap01:
-                print("Turning SNAP 0 and 1 on")
-                n.power_snap_0_1('on')
                 time.sleep(1)
+		if int(r.hget("status:node:%d"%int(args.node),"power_snap_relay")):
+                    n.power_snap_0_1('on')
+                    time.sleep(1)
+                else:
+                    print("SNAP relay is not turned on!")
 
 if args.snap23:
-		print("Turning SNAP 2 and 3 on")
-		n.power_snap_2_3('on')
-		time.sleep(1)
+                time.sleep(1)
+		if int(r.hget("status:node:%d"%int(args.node),"power_snap_relay")):
+                    n.power_snap_2_3('on')
+                    time.sleep(1)
+                else:
+                    print("SNAP relay is not turned on!")
 
 if args.pam:
-		print("Turning PAM on")
 		n.power_pam('on')
 		time.sleep(1)
 
 if args.fem:
-		print("Turning FEM on")
 		n.power_fem('on')
 		time.sleep(1)
 
