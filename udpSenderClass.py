@@ -1,10 +1,3 @@
-"""
-This class is used for sending UDP commands to Arduino directly.
-
-Has ability to turn on/off PSU, FEM and PAM. Could also reset the Arduino so it restarts the bootloader. 
-"""
-
-
 import time
 import datetime
 import struct
@@ -21,7 +14,10 @@ sendPort = 8888
 
 
 class UdpSender():
-
+        """
+        This class is used for sending UDP commands to Arduino directly.
+        Has ability to turn on/off PSU, FEM and PAM. Could also reset the Arduino so it restarts the bootloader. 
+        """
 
         def __init__(self,arduinoAddress):
                 """
@@ -61,18 +57,6 @@ class UdpSender():
                 #server.login('heranodemc@gmail.com','monitorcontrol')
                 #server.ehlo()
                 #server.starttls()
-        
-
-        def reset(self):
-                """
-                Resets Arduino bootloader. 
-                """
-                # define arduino socket to send requests
-                arduinoSocket = (self.arduinoAddress, sendPort)
-                self.client_socket.sendto('reset', arduinoSocket)
-
-                # Set delay before receiving more data
-                time.sleep(2)
 
         def power_snap_relay(self, command):
                 """
@@ -134,6 +118,17 @@ class UdpSender():
                 # define arduino socket to send requests
                 arduinoSocket = (self.arduinoAddress, sendPort)
                 self.client_socket.sendto('snapv2_2_3_%s'%command, arduinoSocket)
+
+                # Set delay before receiving more data
+                time.sleep(2)
+
+        def reset(self):
+                """
+                Resets Arduino bootloader. 
+                """
+                # define arduino socket to send requests
+                arduinoSocket = (self.arduinoAddress, sendPort)
+                self.client_socket.sendto('reset', arduinoSocket)
 
                 # Set delay before receiving more data
                 time.sleep(2)

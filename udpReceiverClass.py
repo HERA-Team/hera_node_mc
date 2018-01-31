@@ -19,9 +19,8 @@ unpacked_mac = ["" for x in range(6)]
 
 class UdpReceiver():
         """
-        This class receives UDP packets from Arduino containing sensor data and misc node metadata.
+        This class receives UDP packets from all active Arduinos containing sensor data and misc node metadata.
         Class goes into an infinite loop when receiveUDP method is called.
-
         """
 
         def __init__(self):

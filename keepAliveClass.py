@@ -26,10 +26,10 @@ class KeepAlive():
         """
 
         def __init__(self, arduinoAddress, node):
-
                 """
                 Takes in the IP address of the Arduino to poke as a string and the corresponding node ID as an int. 
                 """
+
                 self.arduinoAddress = arduinoAddress
                 self.node = node
 
@@ -72,12 +72,12 @@ class KeepAlive():
 
 
         def keepAlive(self):
-
                 """
                 Captures UDP packets sent by Arduino an pushes to Redis. 
                 Sends poke signal to Arduino every 3 seconds.
                 Checks for control flags in Redis database set by the nodeControlClass.
                 """
+
                 # define socket necessary for sending poke command to Arduino
                 self.arduinoSocket = (self.arduinoAddress, sendPort)
                 # Start the timer to send poke command to the Arduino

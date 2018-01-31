@@ -1,14 +1,11 @@
-'''
-
-This Class is used to control power to PAM, FEM, SNAPs 0 & 1 and 2 & 3 and get status information
-through the Redis database running on the hera-digi-vm server.
-
-'''
-
 import redis
 import time
         
 class NodeControl():
+        """
+        This Class is used to control power to PAM, FEM, SNAPs 0 & 1 and 2 & 3 and get status information
+        through the Redis database running on the hera-digi-vm server.
+        """
 
         def __init__(self, node, serverAddress = "hera-digi-vm"):
                 """ 
@@ -51,10 +48,7 @@ class NodeControl():
                 'power_pam':power_pam,'power_fem':power_fem}
                 return statii
 
-
-
         # Power Control Methods 
-
         def power_snap_relay(self, command):
                 """
                 Takes in a string value of 'on' or 'off'.
