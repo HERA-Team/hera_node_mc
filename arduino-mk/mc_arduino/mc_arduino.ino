@@ -98,7 +98,7 @@ Adafruit_HTU21DF htu = Adafruit_HTU21DF();
 // struct for a UDP packet
 struct sensors {
   int   nodeID = -99;
-  int   cpu_uptime_ms = 0;
+  unsigned long cpu_uptime_ms = -99;
   float mcpTempTop = -99;
   float mcpTempMid = -99;
   float htuTemp = -99;
@@ -251,8 +251,10 @@ void setup() {
       io.pinMode(14,OUTPUT);    //   .
       io.pinMode(15,OUTPUT);    //   .
 
+      int nodeIDByte;
       for (int i=0; i<15; i++){
-          sensorArray.nodeID |= io.digitalRead(i) << i;
+          nodeIDByte |= io.digitalRead(i) << i;
+          sensorArray.nodeID = nodeIDByte;
       }
   }
   else {
