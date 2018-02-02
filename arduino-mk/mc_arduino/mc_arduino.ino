@@ -20,9 +20,9 @@
 //      3              ---- ----       MAC byte 3
 //      4              ---- ----       MAC byte 4
 //      5              ---- ----       MAC byte 5
-//      6              ---- ----       Node ID 
-//      7              ---- ----       Serial Low byte
-//      8              ---- ----       Serial High byte
+//      6              ---- ----       unassigned 
+//      7              ---- ----       unassigned
+//      8              ---- ----       unassigned
 //      9              ---- ----       unassigned
 //      10             ---- ----       unassigned
 //      .              ---- ----       unassigned
@@ -82,10 +82,6 @@ String command; // String for data
 
 unsigned int EEPROM_SIZE = 1024;
 unsigned int eeadr = 0; // MACburner.bin writes MAC addres to the first 6 addresses of EEPROM
-unsigned int eeNodeAdr = 6; // EEPROM node ID address
-unsigned int eeSerialAdr = 7;
-unsigned int eeSerialAdrL = 7;
-unsigned int eeSerialAdrH = 8;
 
 // I2C digital i/o serial board
 const byte SX1509_ADDRESS = 0x3E;
@@ -101,20 +97,18 @@ Adafruit_HTU21DF htu = Adafruit_HTU21DF();
 
 // struct for a UDP packet
 struct sensors {
-  float nodeID;
-  float cpu_uptime = 0;
+  int   nodeID;
+  int   cpu_uptime_ms = 0;
   float mcpTempTop = -99;
   float mcpTempMid = -99;
   float htuTemp = -99;
   float htuHumid = -99;
-  bool snap_relay = false;
-  bool fem = false;
-  bool pam = false;
-  bool snapv2_0_1 = false;
-  bool snapv2_2_3 = false;
-  byte serialLb;
-  byte serialHb;
-  byte mac[6];
+  bool  snap_relay = false;
+  bool  fem = false;
+  bool  pam = false;
+  bool  snapv2_0_1 = false;
+  bool  snapv2_2_3 = false;
+  byte  mac[6];
 } sensorArray;
 
 void bootReset();
@@ -208,8 +202,6 @@ void setup() {
 
  
 
-  // Read node ID from EEPROM (burned with MACburner.bin sketch) and assign it to struct nodeID member
-  sensorArray.nodeID = EEPROM.read(eeNodeAdr);
   Serial.print("EEPROM contents:");
   serialUdp("EEPROM contents:");
   for (int i = 0; i < 8; i++) {
@@ -259,14 +251,9 @@ void setup() {
       io.pinMode(14,OUTPUT);    //   .
       io.pinMode(15,OUTPUT);    //   .
 
-      for (int i=0; i<8; i++){
-          sensorArray.serialLb |= io.digitalRead(i) << i;
+      for (int i=0; i<15; i++){
+          sensorArray.nodeID |= io.digitalRead(i) << i;
       }
-      for (int i=8; i<15; i++){
-          sensorArray.serialHb |= io.digitalRead(i) << i;
-      }
-      EEPROM.write(eeSerialAdrL, sensorArray.serialLb);
-      EEPROM.write(eeSerialAdrH, sensorArray.serialHb);
   }
   else {
     Serial.println("Digital io card not found");
@@ -327,7 +314,7 @@ void loop() {
     }
     
     // Calculate the cpu uptime since the last Setup in seconds.
-    sensorArray.cpu_uptime = (millis())/1000;
+    sensorArray.cpu_uptime_ms = millis();
     
     // Send UDP packet to the server ip address serverIp that's listening on port sndPort
     UdpSnd.beginPacket(serverIp, sndPort); // Initialize the packet send

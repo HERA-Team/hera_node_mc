@@ -1,5 +1,5 @@
 # Change the ARDUINO_DIR path to point to your arduino IDE source files.
-ARDUINO_DIR = /home/zara/arduino-1.8.5
+ARDUINO_DIR = /home/zuhraa470/arduino-1.8.4
 BOARD_TAG = ethernet
 ARDUINO_SKETCHBOOK = ../../arduino-mk
 ARDMK_DIR = ../../arduino-mk

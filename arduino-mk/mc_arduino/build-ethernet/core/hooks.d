@@ -1,2 +1,2 @@
 build-ethernet/core/hooks.o: \
- /home/zara/arduino-1.8.5/hardware/arduino/avr/cores/arduino/hooks.c
+ /home/zuhraa470/arduino-1.8.4/hardware/arduino/avr/cores/arduino/hooks.c
