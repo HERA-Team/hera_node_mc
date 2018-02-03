@@ -80,8 +80,8 @@ class UdpReceiver():
                         # struct.unpack returns a tuple with one element
                         # Each struct element is 4 Bytes (c floats are packed as 4 byte strings)
                         
-                        unpacked_nodeID = struct.unpack('=f',data[0:4])
-                        unpacked_cpu_uptime = struct.unpack('=f',data[4:8])
+                        unpacked_nodeID = struct.unpack('=i',data[0:4])
+                        unpacked_cpu_uptime = struct.unpack('=i',data[4:8])
                         unpacked_mcptemp_top = struct.unpack('=f',data[8:12])
                         unpacked_mcptemp_mid = struct.unpack('=f',data[12:16])
                         unpacked_htutemp = struct.unpack('=f', data[16:20])
