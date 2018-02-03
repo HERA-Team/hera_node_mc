@@ -107,7 +107,7 @@ struct status {
   bool  pam = false;
   bool  snapv2_0_1 = false;
   bool  snapv2_2_3 = false;
-  long long  mac;
+  long long int  mac;
   int   nodeID = -99;
 } statusStruct;
 
@@ -168,6 +168,7 @@ void setup() {
     statusStruct.mac |= mac[i] << i;
     ++eeadr;
   }
+  
 
  
   // Start Ethernet connection, automatically tries to get IP using DHCP
