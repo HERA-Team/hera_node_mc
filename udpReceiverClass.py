@@ -79,9 +79,7 @@ class UdpReceiver():
                         # Arduino sends a Struct via UDP so unpacking is needed 
                         # struct.unpack returns a tuple with one element
                         # Each struct element is 4 Bytes (c floats are packed as 4 byte strings)
-                        print(data) 
                         unpacked_cpu_uptime = struct.unpack('=i',data[0:4])
-                        print(unpacked_cpu_uptime)
                         unpacked_mcptemp_top = struct.unpack('=f',data[4:8])
                         unpacked_mcptemp_mid = struct.unpack('=f',data[8:12])
                         unpacked_htutemp = struct.unpack('=f', data[12:16])
@@ -91,24 +89,28 @@ class UdpReceiver():
                         unpacked_pam = struct.unpack('=?',data[22])
                         unpacked_snapv2_0_1 = struct.unpack('=?',data[23])
                         unpacked_snapv2_2_3 = struct.unpack('=?',data[24])
-                        print(unpacked_mcptemp_top)
-                        print(unpacked_mcptemp_mid)
-                        print(unpacked_htutemp)
-                        print(unpacked_htuhumid)
-                        print(unpacked_snap_relay)
-                        print(unpacked_fem)
-                        print(unpacked_pam)
-                        print(unpacked_snapv2_0_1)
-                        print(unpacked_snapv2_2_3)
                         unpacked_mac[0]=hex(ord(struct.unpack('=s',data[25])[0]))
                         unpacked_mac[1]=hex(ord(struct.unpack('=s',data[26])[0]))
-                        print(unpacked_mac[0])
-                        print(unpacked_mac[1])
                         unpacked_mac[2]=hex(ord(struct.unpack('=s',data[27])[0]))
                         unpacked_mac[3]=hex(ord(struct.unpack('=s',data[28])[0]))
                         unpacked_mac[4]=hex(ord(struct.unpack('=s',data[29])[0]))
                         unpacked_mac[5]=hex(ord(struct.unpack('=s',data[30])[0]))
-                        unpacked_nodeID = struct.unpack('=i',data[31:35])
+                        unpacked_nodeID = struct.unpack('=h',data[31:33])
+                        #print(unpacked_mcptemp_top)
+                        #print(unpacked_mcptemp_mid)
+                        #print(unpacked_htutemp)
+                        #print(unpacked_htuhumid)
+                        #print(unpacked_snap_relay)
+                        #print(unpacked_fem)
+                        #print(unpacked_pam)
+                        #print(unpacked_snapv2_0_1)
+                        #print(unpacked_snapv2_2_3)
+                        #print(unpacked_mac[0])
+                        #print(unpacked_mac[1])
+                        #print(unpacked_mac[2])
+                        #print(unpacked_mac[3])
+                        #print(unpacked_mac[4])
+                        #print(unpacked_mac[5])
 
                         node = int(unpacked_nodeID[0])
                          
@@ -117,7 +119,7 @@ class UdpReceiver():
                         {
                         'mac':unpacked_mac,
                         'ip':addr[0],
-                        'node_ID':unpacked_nodeID,
+                        'node_ID':node,
                         'temp_top':unpacked_mcptemp_top[0],
                         'temp_mid':unpacked_mcptemp_mid[0],
                         'temp_humid':unpacked_htutemp[0],
