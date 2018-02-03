@@ -79,37 +79,47 @@ class UdpReceiver():
                         # Arduino sends a Struct via UDP so unpacking is needed 
                         # struct.unpack returns a tuple with one element
                         # Each struct element is 4 Bytes (c floats are packed as 4 byte strings)
-                        
-                        unpacked_nodeID = struct.unpack('=f',data[0:4])
-                        unpacked_cpu_uptime = struct.unpack('=f',data[4:8])
-                        unpacked_mcptemp_top = struct.unpack('=f',data[8:12])
-                        unpacked_mcptemp_mid = struct.unpack('=f',data[12:16])
-                        unpacked_htutemp = struct.unpack('=f', data[16:20])
-                        unpacked_htuhumid = struct.unpack('=f', data[20:24])
-                        unpacked_snap_relay = struct.unpack('=?',data[24])
-                        unpacked_fem = struct.unpack('=?',data[25])
-                        unpacked_pam = struct.unpack('=?',data[26])
-                        unpacked_snapv2_0_1 = struct.unpack('=?',data[27])
-                        unpacked_snapv2_2_3 = struct.unpack('=?',data[28])
-                        unpacked_serialLb = struct.unpack('=s',data[29])
-                        unpacked_serialHb = struct.unpack('=s',data[30])
-                        unpacked_mac[0]=hex(ord(struct.unpack('=s',data[31])[0]))
-                        unpacked_mac[1]=hex(ord(struct.unpack('=s',data[32])[0]))
-                        unpacked_mac[2]=hex(ord(struct.unpack('=s',data[33])[0]))
-                        unpacked_mac[3]=hex(ord(struct.unpack('=s',data[34])[0]))
-                        unpacked_mac[4]=hex(ord(struct.unpack('=s',data[35])[0]))
-                        unpacked_mac[5]=hex(ord(struct.unpack('=s',data[36])[0]))
+                        print(data) 
+                        unpacked_nodeID = struct.unpack('<i',data[0:4])
+                        unpacked_cpu_uptime = struct.unpack('=L',data[4:8])
+                        print(unpacked_nodeID)
+                        print(unpacked_cpu_uptime)
+                        unpacked_mcptemp_top = struct.unpack('f',data[8:12])
+                        unpacked_mcptemp_mid = struct.unpack('f',data[12:16])
+                        unpacked_htutemp = struct.unpack('f', data[16:20])
+                        unpacked_htuhumid = struct.unpack('f', data[20:24])
+                        unpacked_snap_relay = struct.unpack('?',data[24])
+                        unpacked_fem = struct.unpack('?',data[25])
+                        unpacked_pam = struct.unpack('?',data[26])
+                        unpacked_snapv2_0_1 = struct.unpack('?',data[27])
+                        unpacked_snapv2_2_3 = struct.unpack('?',data[28])
+                        print(unpacked_mcptemp_top)
+                        print(unpacked_mcptemp_mid)
+                        print(unpacked_htutemp)
+                        print(unpacked_htuhumid)
+                        print(unpacked_snap_relay)
+                        print(unpacked_fem)
+                        print(unpacked_pam)
+                        print(unpacked_snapv2_0_1)
+                        print(unpacked_snapv2_2_3)
+                        unpacked_mac[0]=hex(ord(struct.unpack('=s',data[29])[0]))
+                        unpacked_mac[1]=hex(ord(struct.unpack('=s',data[30])[0]))
+                        print(unpacked_mac[0])
+                        print(unpacked_mac[1])
+                        unpacked_mac[2]=hex(ord(struct.unpack('=s',data[31])[0]))
+                        unpacked_mac[3]=hex(ord(struct.unpack('=s',data[32])[0]))
+                        unpacked_mac[4]=hex(ord(struct.unpack('=s',data[33])[0]))
+                        unpacked_mac[5]=hex(ord(struct.unpack('=s',data[34])[0]))
 
 
                         node = int(unpacked_nodeID[0])
                          
 
                         self.r.hmset('status:node:%d'%node,
-                        {'serial_Lbyte':hex(ord(unpacked_serialLb[0])),
-                        'serial_Hbyte':hex(ord(unpacked_serialHb[0])),
+                        {
                         'mac':unpacked_mac,
                         'ip':addr[0],
-                        'node_ID':node,
+                        'node_ID':unpacked_nodeID,
                         'temp_top':unpacked_mcptemp_top[0],
                         'temp_mid':unpacked_mcptemp_mid[0],
                         'temp_humid':unpacked_htutemp[0],
