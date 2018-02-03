@@ -107,7 +107,7 @@ struct status {
   bool  pam = false;
   bool  snapv2_0_1 = false;
   bool  snapv2_2_3 = false;
-  int  mac;
+  long long  mac;
   int   nodeID = -99;
 } statusStruct;
 
