@@ -97,7 +97,6 @@ Adafruit_HTU21DF htu = Adafruit_HTU21DF();
 
 // struct for a UDP packet
 struct sensors {
-  int   nodeID = -99;
   unsigned long cpu_uptime_ms = -99;
   float mcpTempTop = -99;
   float mcpTempMid = -99;
@@ -109,6 +108,7 @@ struct sensors {
   bool  snapv2_0_1 = false;
   bool  snapv2_2_3 = false;
   byte  mac[6];
+  int   nodeID = -99;
 } sensorArray;
 
 void bootReset();
