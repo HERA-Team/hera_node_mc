@@ -47,18 +47,18 @@
 
 
 // Define Arduino pins 
-#define SNAP_RELAY 2 
-#define FEM 5
-#define PAM 6
-#define SNAPv2_0_1 3
-#define SNAPv2_2_3 7
-#define RESET 4
+#define SNAP_RELAY_PIN 2 
+#define FEM_PIN 5
+#define PAM_PIN 6
+#define SNAPv2_0_1_PIN 3
+#define SNAPv2_2_3_PIN 7
+#define RESET_PIN 4
 
 
 
 // I2C addresses for the two MCP9808 temperature sensors
-#define TEMP_TOP 0x1B
-#define TEMP_MID 0x1A
+#define TEMP_TOP_ADDR 0x1B
+#define TEMP_MID_ADDR 0x1A
 
 
 #define VERBOSE
@@ -96,7 +96,7 @@ Adafruit_HTU21DF htu = Adafruit_HTU21DF();
 
 
 // struct for a UDP packet
-struct sensors {
+struct status {
   unsigned long cpu_uptime_ms = -99;
   float mcpTempTop = -99;
   float mcpTempMid = -99;
@@ -107,9 +107,9 @@ struct sensors {
   bool  pam = false;
   bool  snapv2_0_1 = false;
   bool  snapv2_2_3 = false;
-  byte  mac[6];
+  int  mac;
   int   nodeID = -99;
-} sensorArray;
+} statusStruct;
 
 void bootReset();
 void serialUdp(String);
@@ -133,46 +133,42 @@ void setup() {
 
   // Initialize and deactivate pins to avoid glitches
   // 8 way SNAP relay
-  digitalWrite(SNAP_RELAY, LOW);
-  pinMode(SNAP_RELAY, OUTPUT);
-  digitalWrite(SNAP_RELAY, LOW);
+  digitalWrite(SNAP_RELAY_PIN, LOW);
+  pinMode(SNAP_RELAY_PIN, OUTPUT);
+  digitalWrite(SNAP_RELAY_PIN, LOW);
    
   // FEM VAC pin: Active HIGH
-  digitalWrite(FEM, LOW);
-  pinMode(FEM, OUTPUT);
-  digitalWrite(FEM, LOW);
+  digitalWrite(FEM_PIN, LOW);
+  pinMode(FEM_PIN, OUTPUT);
+  digitalWrite(FEM_PIN, LOW);
   
   // PAM VAC pin: Active HIGH
-  digitalWrite(PAM, LOW);
-  pinMode(PAM, OUTPUT);
-  digitalWrite(PAM, LOW);
+  digitalWrite(PAM_PIN, LOW);
+  pinMode(PAM_PIN, OUTPUT);
+  digitalWrite(PAM_PIN, LOW);
   
-  // SNAPv2_0_1: Active LOW so HIGH is off
-  digitalWrite(SNAPv2_0_1, HIGH);
-  pinMode(SNAPv2_0_1, OUTPUT);
-  digitalWrite(SNAPv2_0_1, HIGH);
+  // SNAPv2_0_1_PIN: Active LOW so HIGH is off
+  digitalWrite(SNAPv2_0_1_PIN, HIGH);
+  pinMode(SNAPv2_0_1_PIN, OUTPUT);
+  digitalWrite(SNAPv2_0_1_PIN, HIGH);
 
-  // SNAPv2_2_3: Active LOW so HIGH is off
-  digitalWrite(SNAPv2_2_3, HIGH);
-  pinMode(SNAPv2_2_3, OUTPUT);
-  digitalWrite(SNAPv2_2_3, HIGH);
+  // SNAPv2_2_3_PIN: Active LOW so HIGH is off
+  digitalWrite(SNAPv2_2_3_PIN, HIGH);
+  pinMode(SNAPv2_2_3_PIN, OUTPUT);
+  digitalWrite(SNAPv2_2_3_PIN, HIGH);
   
   // Reset pin, Active LOW
-  digitalWrite(RESET, HIGH);
-  pinMode(RESET, OUTPUT); 
-  digitalWrite(RESET, HIGH);
+  digitalWrite(RESET_PIN, HIGH);
+  pinMode(RESET_PIN, OUTPUT); 
+  digitalWrite(RESET_PIN, HIGH);
  
-    
   // Read MAC address from EEPROM (burned previously with macBurner.bin sketch)
   for (int i = 0; i < 6; i++){
     mac[i] = EEPROM.read(eeadr);
+    statusStruct.mac |= mac[i] << i;
     ++eeadr;
   }
 
-  // Fill up the sensorArray struct's mac variable with the burned MAC address
-  for (int i = 0; i < 6; i++){
-    sensorArray.mac[i] = mac[i]; 
-  }
  
   // Start Ethernet connection, automatically tries to get IP using DHCP
   if (Ethernet.begin(mac) == 0) {
@@ -190,7 +186,7 @@ void setup() {
 
   // Now that UDP is initialized, serialUdp can be used
   serialUdp("Running Setup..."); 
-  serialUdp("Contents of the sensorArray.mac:");
+  serialUdp("Contents of the statusStruct.mac:");
   serialUdp(String(mac[6]));
   serialUdp("Individual values:");
   serialUdp(String(mac[0]));
@@ -254,7 +250,7 @@ void setup() {
       int nodeIDByte;
       for (int i=0; i<15; i++){
           nodeIDByte |= io.digitalRead(i) << i;
-          sensorArray.nodeID = nodeIDByte;
+          statusStruct.nodeID = nodeIDByte;
       }
   }
   else {
@@ -275,52 +271,52 @@ void loop() {
     
     
     // Find top temp sensor and read its value
-    if (mcpTop.begin(TEMP_TOP)) {
-      sensorArray.mcpTempTop = mcpTop.readTempC();    
+    if (mcpTop.begin(TEMP_TOP_ADDR)) {
+      statusStruct.mcpTempTop = mcpTop.readTempC();    
     }
     else {
       Serial.println("MCP9808 TOP not found");
 #ifdef VERBOSE
       serialUdp("MCP9808 TOP not found");
 #endif
-      sensorArray.mcpTempTop = -99;
+      statusStruct.mcpTempTop = -99;
     }
  
     
     // Find middle temp sensor and take read value
-    if (mcpMid.begin(TEMP_MID)) {
-      sensorArray.mcpTempMid = mcpMid.readTempC();
+    if (mcpMid.begin(TEMP_MID_ADDR)) {
+      statusStruct.mcpTempMid = mcpMid.readTempC();
     }
     else {
       Serial.println("MCP9808 MID not found");
 #ifdef VERBOSE
       serialUdp("MCP9808 MID not found"); 
 #endif
-      sensorArray.mcpTempMid = -99;
+      statusStruct.mcpTempMid = -99;
     }
 
     
     // Read humidity and temperature from HTU21DF sensor
     if (htu.begin()) {
-      sensorArray.htuTemp = htu.readTemperature();
-      sensorArray.htuHumid = htu.readHumidity();
+      statusStruct.htuTemp = htu.readTemperature();
+      statusStruct.htuHumid = htu.readHumidity();
     }
     else {
       Serial.println("HTU21DF not found!");
 #ifdef VERBOSE
       serialUdp("HTU21DF not found!");
 #endif
-      sensorArray.htuTemp = -99;
-      sensorArray.htuHumid = -99;
+      statusStruct.htuTemp = -99;
+      statusStruct.htuHumid = -99;
 
     }
     
     // Calculate the cpu uptime since the last Setup in seconds.
-    sensorArray.cpu_uptime_ms = millis();
+    statusStruct.cpu_uptime_ms = millis();
     
     // Send UDP packet to the server ip address serverIp that's listening on port sndPort
     UdpSnd.beginPacket(serverIp, sndPort); // Initialize the packet send
-    UdpSnd.write((byte *)&sensorArray, sizeof sensorArray); // Send the struct as UDP packet
+    UdpSnd.write((byte *)&statusStruct, sizeof statusStruct); // Send the struct as UDP packet
     UdpSnd.endPacket(); // End the packet
     Serial.println("UDP packet sent...");
 #ifdef VERBOSE
@@ -365,58 +361,58 @@ void parseUdpPacket(){
       }
       
       else if (command == "snapRelay_on") {
-        digitalWrite(SNAP_RELAY, HIGH);
-        sensorArray.snap_relay = true;
+        digitalWrite(SNAP_RELAY_PIN, HIGH);
+        statusStruct.snap_relay = true;
       }     
       
       else if (command == "snapRelay_off") {
-        digitalWrite(SNAP_RELAY, LOW);
-        sensorArray.snap_relay = false;
+        digitalWrite(SNAP_RELAY_PIN, LOW);
+        statusStruct.snap_relay = false;
       }
       
       else if (command == "snapv2_0_1_on"){
         Serial.println("snapv2_0_1 on");
-        digitalWrite(SNAPv2_0_1, LOW);
-        sensorArray.snapv2_0_1 = true;
+        digitalWrite(SNAPv2_0_1_PIN, LOW);
+        statusStruct.snapv2_0_1 = true;
         }
 
       else if (command == "snapv2_0_1_off"){
         Serial.println("snapv2_0_1 off");
-        digitalWrite(SNAPv2_0_1, HIGH);
-        sensorArray.snapv2_0_1 = false;
+        digitalWrite(SNAPv2_0_1_PIN, HIGH);
+        statusStruct.snapv2_0_1 = false;
         }
 
       else if (command == "snapv2_2_3_on"){
         Serial.println("snapv2_2_3 on");
-        digitalWrite(SNAPv2_2_3, LOW);
-        sensorArray.snapv2_2_3 = true;
+        digitalWrite(SNAPv2_2_3_PIN, LOW);
+        statusStruct.snapv2_2_3 = true;
         }
 
       else if (command == "snapv2_2_3_off"){
         Serial.println("snapv2_2_3 off");
-        digitalWrite(SNAPv2_2_3, HIGH);
-        sensorArray.snapv2_2_3 = false;
+        digitalWrite(SNAPv2_2_3_PIN, HIGH);
+        statusStruct.snapv2_2_3 = false;
         }
 
       else if (command == "FEM_on") {
-        digitalWrite(FEM, HIGH);
-        sensorArray.fem = true;
+        digitalWrite(FEM_PIN, HIGH);
+        statusStruct.fem = true;
       }
       
       else if (command == "FEM_off") {
-        digitalWrite(FEM, LOW);
-        sensorArray.fem = false;
+        digitalWrite(FEM_PIN, LOW);
+        statusStruct.fem = false;
       }
       
       else if (command == "PAM_on") {
         Serial.println("PAM on");
-        digitalWrite(PAM, HIGH);
-        sensorArray.pam = true;
+        digitalWrite(PAM_PIN, HIGH);
+        statusStruct.pam = true;
       }
       
       else if (command == "PAM_off") {
-        digitalWrite(PAM, LOW);
-        sensorArray.pam = false;
+        digitalWrite(PAM_PIN, LOW);
+        statusStruct.pam = false;
       }
               
       else if (command == "reset") {
@@ -435,12 +431,12 @@ void bootReset(){
    Serial.println("Resetting Bootloader..");
    serialUdp("Resetting Bootloader..");
    delay(500);
-   digitalWrite(RESET, LOW);  
+   digitalWrite(RESET_PIN, LOW);  
 }
 
 
 void serialUdp(String message){
-    String debugMessage = String("NODE " + String(int(sensorArray.nodeID)) + ": " + message);
+    String debugMessage = String("NODE " + String(int(statusStruct.nodeID)) + ": " + message);
     UdpSer.beginPacket(serverIp, serPort);
     UdpSer.print(debugMessage);
     UdpSer.endPacket();
