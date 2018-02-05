@@ -107,8 +107,8 @@ struct status {
   bool  pam = false;
   bool  snapv2_0_1 = false;
   bool  snapv2_2_3 = false;
-  long long int  mac;
   int   nodeID = -99;
+  long long int  mac;
 } statusStruct;
 
 void bootReset();
