@@ -108,7 +108,7 @@ struct status {
   bool  snapv2_0_1 = false;
   bool  snapv2_2_3 = false;
   int   nodeID = -99;
-  long long int  mac;
+  byte mac[6];
 } statusStruct;
 
 void bootReset();
@@ -165,7 +165,7 @@ void setup() {
   // Read MAC address from EEPROM (burned previously with macBurner.bin sketch)
   for (int i = 0; i < 6; i++){
     mac[i] = EEPROM.read(eeadr);
-    statusStruct.mac |= mac[i] << i;
+    statusStruct.mac[i] = mac[i];
     ++eeadr;
   }
   
@@ -196,7 +196,6 @@ void setup() {
   serialUdp(String(mac[3]));
   serialUdp(String(mac[4]));
   serialUdp(String(mac[5]));
-
  
 
   Serial.print("EEPROM contents:");
