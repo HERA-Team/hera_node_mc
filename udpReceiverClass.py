@@ -89,13 +89,13 @@ class UdpReceiver():
                         unpacked_pam = struct.unpack('=?',data[22])
                         unpacked_snapv2_0_1 = struct.unpack('=?',data[23])
                         unpacked_snapv2_2_3 = struct.unpack('=?',data[24])
-                        unpacked_mac[0]=hex(ord(struct.unpack('=s',data[25])[0]))
-                        unpacked_mac[1]=hex(ord(struct.unpack('=s',data[26])[0]))
-                        unpacked_mac[2]=hex(ord(struct.unpack('=s',data[27])[0]))
-                        unpacked_mac[3]=hex(ord(struct.unpack('=s',data[28])[0]))
-                        unpacked_mac[4]=hex(ord(struct.unpack('=s',data[29])[0]))
-                        unpacked_mac[5]=hex(ord(struct.unpack('=s',data[30])[0]))
-                        unpacked_nodeID = struct.unpack('=h',data[31:33])
+                        unpacked_nodeID = struct.unpack('=h',data[25:27])
+                        unpacked_mac[0]=hex(ord(struct.unpack('=s',data[27])[0]))
+                        unpacked_mac[1]=hex(ord(struct.unpack('=s',data[28])[0]))
+                        unpacked_mac[2]=hex(ord(struct.unpack('=s',data[29])[0]))
+                        unpacked_mac[3]=hex(ord(struct.unpack('=s',data[30])[0]))
+                        unpacked_mac[4]=hex(ord(struct.unpack('=s',data[31])[0]))
+                        unpacked_mac[5]=hex(ord(struct.unpack('=s',data[32])[0]))
                         #print(unpacked_mcptemp_top)
                         #print(unpacked_mcptemp_mid)
                         #print(unpacked_htutemp)
@@ -111,13 +111,13 @@ class UdpReceiver():
                         #print(unpacked_mac[3])
                         #print(unpacked_mac[4])
                         #print(unpacked_mac[5])
-
+                        print(type(unpacked_mac[0]))
                         node = int(unpacked_nodeID[0])
-                         
-
+                        mac_str = ':'.join(unpacked_mac[i][2:] for i in range(len(unpacked_mac))) 
+                        print(mac_str)
                         self.r.hmset('status:node:%d'%node,
                         {
-                        'mac':unpacked_mac,
+                        'mac':mac_str,
                         'ip':addr[0],
                         'node_ID':node,
                         'temp_top':unpacked_mcptemp_top[0],
