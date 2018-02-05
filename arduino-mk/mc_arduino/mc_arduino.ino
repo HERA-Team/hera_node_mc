@@ -97,18 +97,18 @@ Adafruit_HTU21DF htu = Adafruit_HTU21DF();
 
 // struct for a UDP packet
 struct status {
-  unsigned long cpu_uptime_ms = -99;
-  float mcpTempTop = -99;
-  float mcpTempMid = -99;
-  float htuTemp = -99;
-  float htuHumid = -99;
-  bool  snap_relay = false;
-  bool  fem = false;
-  bool  pam = false;
-  bool  snapv2_0_1 = false;
-  bool  snapv2_2_3 = false;
-  int   nodeID = -99;
-  byte mac[6];
+  unsigned long cpu_uptime_ms = -99;  // Arduino uptime since last reset
+  float mcpTempTop = -99;             // Top temperature sensor value
+  float mcpTempMid = -99;             // Mid temperature sensor value
+  float htuTemp = -99;                // HTU21D sensor temperature value
+  float htuHumid = -99;               // HTU21D sensor humidity value
+  bool  snap_relay = false;           // Power status of SNAP relay
+  bool  fem = false;                  // Power status of FEM 
+  bool  pam = false;                  // Power status of PAM
+  bool  snapv2_0_1 = false;           // Power status of SNAP 0 and 1
+  bool  snapv2_2_3 = false;           // Power status of SNAP 2 and 3
+  int   nodeID = -99;                 // Node ID as give by the digi I/O card hanging from PCB
+  byte mac[6];                        // Arduino MAC address as assigned by arduino-netboot
 } statusStruct;
 
 void bootReset();
@@ -353,66 +353,76 @@ void parseUdpPacket(){
       String command(packetBuffer); //Convert char array packetBuffer into a string called command
       
       if (command == "poke") {
-          Serial.println("I've been poked!");
+        Serial.println("I've been poked!");
 #ifdef VERBOSE
-          serialUdp("I've been poked!");
+        serialUdp("I've been poked!");
 #endif
-          Watchdog.reset();
+        Watchdog.reset();
       }
       
       else if (command == "snapRelay_on") {
-        digitalWrite(SNAP_RELAY_PIN, HIGH);
-        statusStruct.snap_relay = true;
+	digitalWrite(SNAP_RELAY_PIN, HIGH);
+	statusStruct.snap_relay = true;
+	Watchdog.reset();
       }     
       
       else if (command == "snapRelay_off") {
         digitalWrite(SNAP_RELAY_PIN, LOW);
         statusStruct.snap_relay = false;
+	Watchdog.reset();
       }
       
       else if (command == "snapv2_0_1_on"){
         Serial.println("snapv2_0_1 on");
         digitalWrite(SNAPv2_0_1_PIN, LOW);
         statusStruct.snapv2_0_1 = true;
+	Watchdog.reset();
         }
 
       else if (command == "snapv2_0_1_off"){
         Serial.println("snapv2_0_1 off");
         digitalWrite(SNAPv2_0_1_PIN, HIGH);
         statusStruct.snapv2_0_1 = false;
+	Watchdog.reset();
         }
 
       else if (command == "snapv2_2_3_on"){
         Serial.println("snapv2_2_3 on");
         digitalWrite(SNAPv2_2_3_PIN, LOW);
         statusStruct.snapv2_2_3 = true;
+	Watchdog.reset();
         }
 
       else if (command == "snapv2_2_3_off"){
         Serial.println("snapv2_2_3 off");
         digitalWrite(SNAPv2_2_3_PIN, HIGH);
         statusStruct.snapv2_2_3 = false;
+	Watchdog.reset();
         }
 
       else if (command == "FEM_on") {
         digitalWrite(FEM_PIN, HIGH);
         statusStruct.fem = true;
+	Watchdog.reset();
       }
       
       else if (command == "FEM_off") {
         digitalWrite(FEM_PIN, LOW);
         statusStruct.fem = false;
+	Watchdog.reset();
       }
       
       else if (command == "PAM_on") {
         Serial.println("PAM on");
         digitalWrite(PAM_PIN, HIGH);
         statusStruct.pam = true;
+	Watchdog.reset();
       }
       
       else if (command == "PAM_off") {
         digitalWrite(PAM_PIN, LOW);
         statusStruct.pam = false;
+	Watchdog.reset();
       }
               
       else if (command == "reset") {
@@ -436,7 +446,7 @@ void bootReset(){
 
 
 void serialUdp(String message){
-    String debugMessage = String("NODE " + String(int(statusStruct.nodeID)) + ": " + message);
+    String debugMessage = String("NODE " + String(int(statusStruct.nodeID)) + ":" + String(millis()) + ": " + message);
     UdpSer.beginPacket(serverIp, serPort);
     UdpSer.print(debugMessage);
     UdpSer.endPacket();
