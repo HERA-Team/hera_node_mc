@@ -352,7 +352,7 @@ void loop() {
     serialUdp("Loops runs for");
     serialUdp(String(endLoop-startLoop));
 #endif
-    delay(2000);
+    delay(1000);
 }
 
 
