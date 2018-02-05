@@ -54,7 +54,19 @@
 #define SNAPv2_2_3_PIN 7
 #define RESET_PIN 4
 
-
+// Redefine HIGH and LOW 
+#define SNAP_RELAY_ON HIGH
+#define SNAP_RELAY_OFF LOW
+#define FEM_ON HIGH
+#define FEM_OFF LOW
+#define PAM_ON HIGH
+#define PAM_OFF LOW
+#define SNAPv2_0_1_ON LOW
+#define SNAPv2_0_1_OFF HIGH
+#define SNAPv2_2_3_ON LOW
+#define SNAPv2_2_3_OFF HIGH 
+#define RESET_OFF HIGH
+#define RESET_ON LOW
 
 // I2C addresses for the two MCP9808 temperature sensors
 #define TEMP_TOP_ADDR 0x1B
@@ -133,34 +145,34 @@ void setup() {
 
   // Initialize and deactivate pins to avoid glitches
   // 8 way SNAP relay
-  digitalWrite(SNAP_RELAY_PIN, LOW);
+  digitalWrite(SNAP_RELAY_PIN, SNAP_RELAY_OFF);
   pinMode(SNAP_RELAY_PIN, OUTPUT);
-  digitalWrite(SNAP_RELAY_PIN, LOW);
+  digitalWrite(SNAP_RELAY_PIN, SNAP_RELAY_OFF);
    
   // FEM VAC pin: Active HIGH
-  digitalWrite(FEM_PIN, LOW);
+  digitalWrite(FEM_PIN, FEM_OFF);
   pinMode(FEM_PIN, OUTPUT);
-  digitalWrite(FEM_PIN, LOW);
+  digitalWrite(FEM_PIN, FEM_OFF);
   
   // PAM VAC pin: Active HIGH
-  digitalWrite(PAM_PIN, LOW);
+  digitalWrite(PAM_PIN, PAM_OFF);
   pinMode(PAM_PIN, OUTPUT);
-  digitalWrite(PAM_PIN, LOW);
+  digitalWrite(PAM_PIN, PAM_OFF);
   
   // SNAPv2_0_1_PIN: Active LOW so HIGH is off
-  digitalWrite(SNAPv2_0_1_PIN, HIGH);
+  digitalWrite(SNAPv2_0_1_PIN, SNAPv2_0_1_OFF);
   pinMode(SNAPv2_0_1_PIN, OUTPUT);
-  digitalWrite(SNAPv2_0_1_PIN, HIGH);
+  digitalWrite(SNAPv2_0_1_PIN, SNAPv2_0_1_OFF);
 
   // SNAPv2_2_3_PIN: Active LOW so HIGH is off
-  digitalWrite(SNAPv2_2_3_PIN, HIGH);
+  digitalWrite(SNAPv2_2_3_PIN, SNAPv2_2_3_OFF);
   pinMode(SNAPv2_2_3_PIN, OUTPUT);
-  digitalWrite(SNAPv2_2_3_PIN, HIGH);
+  digitalWrite(SNAPv2_2_3_PIN, SNAPv2_2_3_OFF);
   
   // Reset pin, Active LOW
-  digitalWrite(RESET_PIN, HIGH);
+  digitalWrite(RESET_PIN, RESET_OFF);
   pinMode(RESET_PIN, OUTPUT); 
-  digitalWrite(RESET_PIN, HIGH);
+  digitalWrite(RESET_PIN, RESET_OFF);
  
   // Read MAC address from EEPROM (burned previously with macBurner.bin sketch)
   for (int i = 0; i < 6; i++){
@@ -361,66 +373,66 @@ void parseUdpPacket(){
       }
       
       else if (command == "snapRelay_on") {
-	digitalWrite(SNAP_RELAY_PIN, HIGH);
+	digitalWrite(SNAP_RELAY_PIN, SNAP_RELAY_ON);
 	statusStruct.snap_relay = true;
 	Watchdog.reset();
       }     
       
       else if (command == "snapRelay_off") {
-        digitalWrite(SNAP_RELAY_PIN, LOW);
+        digitalWrite(SNAP_RELAY_PIN, SNAP_RELAY_OFF);
         statusStruct.snap_relay = false;
 	Watchdog.reset();
       }
       
       else if (command == "snapv2_0_1_on"){
         Serial.println("snapv2_0_1 on");
-        digitalWrite(SNAPv2_0_1_PIN, LOW);
+        digitalWrite(SNAPv2_0_1_PIN, SNAPv2_0_1_ON);
         statusStruct.snapv2_0_1 = true;
 	Watchdog.reset();
         }
 
       else if (command == "snapv2_0_1_off"){
         Serial.println("snapv2_0_1 off");
-        digitalWrite(SNAPv2_0_1_PIN, HIGH);
+        digitalWrite(SNAPv2_0_1_PIN, SNAPv2_0_1_OFF);
         statusStruct.snapv2_0_1 = false;
 	Watchdog.reset();
         }
 
       else if (command == "snapv2_2_3_on"){
         Serial.println("snapv2_2_3 on");
-        digitalWrite(SNAPv2_2_3_PIN, LOW);
+        digitalWrite(SNAPv2_2_3_PIN, SNAPv2_2_3_ON);
         statusStruct.snapv2_2_3 = true;
 	Watchdog.reset();
         }
 
       else if (command == "snapv2_2_3_off"){
         Serial.println("snapv2_2_3 off");
-        digitalWrite(SNAPv2_2_3_PIN, HIGH);
+        digitalWrite(SNAPv2_2_3_PIN, SNAPv2_2_3_OFF);
         statusStruct.snapv2_2_3 = false;
 	Watchdog.reset();
         }
 
       else if (command == "FEM_on") {
-        digitalWrite(FEM_PIN, HIGH);
+        digitalWrite(FEM_PIN, FEM_ON);
         statusStruct.fem = true;
 	Watchdog.reset();
       }
       
       else if (command == "FEM_off") {
-        digitalWrite(FEM_PIN, LOW);
+        digitalWrite(FEM_PIN, FEM_OFF);
         statusStruct.fem = false;
 	Watchdog.reset();
       }
       
       else if (command == "PAM_on") {
         Serial.println("PAM on");
-        digitalWrite(PAM_PIN, HIGH);
+        digitalWrite(PAM_PIN, PAM_ON);
         statusStruct.pam = true;
 	Watchdog.reset();
       }
       
       else if (command == "PAM_off") {
-        digitalWrite(PAM_PIN, LOW);
+        digitalWrite(PAM_PIN, PAM_OFF);
         statusStruct.pam = false;
 	Watchdog.reset();
       }
@@ -441,7 +453,7 @@ void bootReset(){
    Serial.println("Resetting Bootloader..");
    serialUdp("Resetting Bootloader..");
    delay(500);
-   digitalWrite(RESET_PIN, LOW);  
+   digitalWrite(RESET_PIN, RESET_ON);  
 }
 
 
