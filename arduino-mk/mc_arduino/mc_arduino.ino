@@ -443,6 +443,11 @@ void parseUdpPacket(){
         statusStruct.pam = false;
 	Watchdog.reset();
       }
+      else if (command == "ping"){
+        serialUdp("PONG");
+        Watchdog.reset();
+
+      }
               
       else if (command == "reset") {
         bootReset();
