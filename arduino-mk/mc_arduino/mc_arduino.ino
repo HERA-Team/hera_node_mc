@@ -101,7 +101,7 @@ Adafruit_HTU21DF htu = Adafruit_HTU21DF();
 // Status struct will be sent in a UDP packet 
 struct status {
 	unsigned long cpu_uptime_ms = -99;  // Arduino uptime since last reset
-	int   nodeID = -99;                 // Node ID as give by the digi I/O card hanging from PCB
+	int16_t   nodeID = -99;                 // Node ID as give by the digi I/O card hanging from PCB
 	float mcpTempTop = -99;             // Top temperature sensor value
 	float mcpTempMid = -99;             // Mid temperature sensor value
 	float htuTemp = -99;                // HTU21D sensor temperature value
