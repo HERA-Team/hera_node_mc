@@ -99,6 +99,7 @@ unsigned int eeadr = 0; // MACburner.bin writes MAC addres to the first 6 addres
 const byte SX1509_ADDRESS = 0x3E;
 SX1509 io;
 
+unsigned int old_millis = millis();
 
 // Sensor objects
 Adafruit_MCP9808 mcpTop = Adafruit_MCP9808(); 
@@ -273,6 +274,7 @@ void setup() {
   unsigned int endSetup = millis();
   serialUdp("Time to run the Setup");
   serialUdp(String(endSetup-startSetup));
+  // Set up a variable to determine when to send a UDP packet
 
 }
 
@@ -322,24 +324,29 @@ void loop() {
       statusStruct.htuHumid = -99;
 
     }
-    
-    // Calculate the cpu uptime since the last Setup in seconds.
-    statusStruct.cpu_uptime_ms = millis();
-    
-    // Send UDP packet to the server ip address serverIp that's listening on port sndPort
-    UdpSnd.beginPacket(serverIp, sndPort); // Initialize the packet send
-    UdpSnd.write((byte *)&statusStruct, sizeof statusStruct); // Send the struct as UDP packet
-    UdpSnd.endPacket(); // End the packet
-    Serial.println("UDP packet sent...");
-#ifdef VERBOSE
-    serialUdp("UDP packet sent...");
-#endif
-   
+    unsigned int new_millis = millis();
+
+    if ((new_millis - old_millis) > 2000) {
+      serialUdp(String(new_millis - old_millis));
+
+      // Calculate the cpu uptime since the last Setup in seconds.
+      statusStruct.cpu_uptime_ms = millis();
+      
+      // Send UDP packet to the server ip address serverIp that's listening on port sndPort
+      UdpSnd.beginPacket(serverIp, sndPort); // Initialize the packet send
+      UdpSnd.write((byte *)&statusStruct, sizeof statusStruct); // Send the struct as UDP packet
+      UdpSnd.endPacket(); // End the packet
+      Serial.println("UDP packet sent...");
+      #ifdef VERBOSE
+        serialUdp("UDP packet sent...");
+      #endif
+      old_millis = new_millis;   
+   }
     // Check if request was sent to Arduino
     packetSize = UdpRcv.parsePacket(); // Reads the packet size
     
     if(packetSize>0) { //if packetSize is >0, that means someone has sent a request
-    parseUdpPacket();    
+      parseUdpPacket();    
     } 
 
     
