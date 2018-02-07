@@ -58,6 +58,10 @@ class UdpSender():
                 #server.ehlo()
                 #server.starttls()
 
+        def poke(self):
+                arduinoSocket = (self.arduinoAddress, sendPort)
+                self.client_socket.sendto('poke', arduinoSocket)
+
         def power_snap_relay(self, command):
                 """
                 Takes in a string value of 'on' or 'off'.
