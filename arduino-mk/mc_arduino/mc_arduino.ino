@@ -101,7 +101,7 @@ Adafruit_HTU21DF htu = Adafruit_HTU21DF();
 // Status struct will be sent in a UDP packet 
 struct status {
 	unsigned long cpu_uptime_ms = -99;  // Arduino uptime since last reset
-	uint16_t   nodeID = 99;                 // Node ID as give by the digi I/O card hanging from PCB
+	uint16_t  nodeID = 99;                  // Node ID as give by the digi I/O card hanging from PCB
 	float mcpTempTop = -99;             // Top temperature sensor value
 	float mcpTempMid = -99;             // Mid temperature sensor value
 	float htuTemp = -99;                // HTU21D sensor temperature value
@@ -224,6 +224,7 @@ void setup() {
 		io.pinMode(13,OUTPUT);    //   .
 		io.pinMode(14,OUTPUT);    //   .
 		io.pinMode(15,OUTPUT);    //   .
+		}
 		// Read the digital IO card value and assign it to node ID
 		byte nodeIDByte;
 		for (int i=0; i<6; i++){
@@ -232,7 +233,12 @@ void setup() {
 			serialUdp(String(nodeIDByte));
 			statusStruct.nodeID = nodeIDByte;
 	        }
-	}
+ 		//for (int i=0; i<8; i++){
+                //sensorArray.serialLb |= io.digitalRead(i) << i; 
+      		//}
+      		//for (int i=8; i<15; i++){
+		//sensorArray.serialHb |= io.digitalRead(i) << i;
+		//}
 	else {
 		Serial.println("Digital io card not found");
 		serialUdp("Digital io card not found");
