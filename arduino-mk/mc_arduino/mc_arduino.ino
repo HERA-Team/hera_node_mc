@@ -101,7 +101,8 @@ Adafruit_HTU21DF htu = Adafruit_HTU21DF();
 // Status struct will be sent in a UDP packet 
 struct status {
 	unsigned long cpu_uptime_ms = -99;  // Arduino uptime since last reset
-	uint16_t  nodeID = 99;                  // Node ID as give by the digi I/O card hanging from PCB
+	byte  nodeID = 0xff;
+	byte  nodeID_meta = 0xff;                  // Node ID as give by the digi I/O card hanging from PCB
 	float mcpTempTop = -99;             // Top temperature sensor value
 	float mcpTempMid = -99;             // Mid temperature sensor value
 	float htuTemp = -99;                // HTU21D sensor temperature value
@@ -225,24 +226,26 @@ void setup() {
 		io.pinMode(14,OUTPUT);    //   .
 		io.pinMode(15,OUTPUT);    //   .
 		}
-		// Read the digital IO card value and assign it to node ID
-		byte nodeIDByte;
-		for (int i=0; i<6; i++){
-			nodeIDByte |= io.digitalRead(i) << i;
-			serialUdp("digiIO ping values 0 to 5");
-			serialUdp(String(nodeIDByte));
-			statusStruct.nodeID = nodeIDByte;
-	        }
- 		//for (int i=0; i<8; i++){
-                //sensorArray.serialLb |= io.digitalRead(i) << i; 
-      		//}
-      		//for (int i=8; i<15; i++){
-		//sensorArray.serialHb |= io.digitalRead(i) << i;
-		//}
 	else {
 		Serial.println("Digital io card not found");
 		serialUdp("Digital io card not found");
 	}
+		// Read the digital IO card value and assign it to node ID
+		//byte nodeIDByte;
+		//for (int i=0; i<6; i++){
+		//	nodeIDByte |= io.digitalRead(i) << i;
+		//	serialUdp("digiIO ping values 0 to 5");
+		//	serialUdp(String(nodeIDByte));
+		//	statusStruct.nodeID = nodeIDByte;
+	        //}
+ 		for (int i=0; i<8; i++){
+                	statusStruct.nodeID |= io.digitalRead(i) << i; 
+			serialUdp("digiIO pin values 0 to 8");
+			serialUdp(String(statusStruct.nodeID));
+      		}
+      		for (int i=8; i<15; i++){
+			statusStruct.nodeID_meta |= io.digitalRead(i) << i;
+		}
 	unsigned long endSetup = millis();
 	serialUdp("Time to run the Setup:");
 	serialUdp(String(endSetup-startSetup));
