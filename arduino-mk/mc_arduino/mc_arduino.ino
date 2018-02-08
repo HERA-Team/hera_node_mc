@@ -225,7 +225,7 @@ void setup() {
 		io.pinMode(14,OUTPUT);    //   .
 		io.pinMode(15,OUTPUT);    //   .
 		// Read the digital IO card value and assign it to node ID
-		int nodeIDByte;
+		int16_t nodeIDByte;
 		for (int i=0; i<6; i++){
 			nodeIDByte |= io.digitalRead(i) << i;
 			serialUdp("digiIO ping values 0 to 5");
