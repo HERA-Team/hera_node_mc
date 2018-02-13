@@ -39,11 +39,11 @@ class NodeControl():
 
                 timestamp = self.r.hget("status:node:%d"%self.node, "timestamp") 
                 print(self.r.hget("status:node%d"%self.node,"power_snap_0_1"))
-                power_snap_relay = self.r.hget("status:node:%d"%self.node,"power_snap_relay")
-                power_snap_0_1 = self.r.hget("status:node:%d"%self.node,"power_snap_0_1")
-                power_snap_2_3 = self.r.hget("status:node:%d"%self.node,"power_snap_2_3")
-                power_pam = self.r.hget("status:node:%d"%self.node,"power_pam")
-                power_fem = self.r.hget("status:node:%d"%self.node,"power_fem")
+                power_snap_relay = self.r.hget("commands:node:%d"%self.node,"power_snap_relay")
+                power_snap_0_1 = self.r.hget("commands:node:%d"%self.node,"power_snap_0_1")
+                power_snap_2_3 = self.r.hget("commands:node:%d"%self.node,"power_snap_2_3")
+                power_pam = self.r.hget("commands:node:%d"%self.node,"power_pam")
+                power_fem = self.r.hget("commands:node:%d"%self.node,"power_fem")
                 statii = {'timestamp':timestamp,'power_snap_relay':power_snap_relay,'power_snap_0_1':power_snap_0_1,'power_snap_2_3':power_snap_2_3,
                 'power_pam':power_pam,'power_fem':power_fem}
                 return statii
@@ -56,8 +56,8 @@ class NodeControl():
                 has to be turn on before sending commands to individual SNAPs.
                 """
 
-                self.r.hset("status:node:%d"%self.node,"power_snap_relay_ctrl_trig",True)
-                self.r.hset("status:node:%d"%self.node,"power_snap_relay_cmd",command)
+                self.r.hset("commands:node:%d"%self.node,"power_snap_relay_ctrl_trig",True)
+                self.r.hset("commands:node:%d"%self.node,"power_snap_relay_cmd",command)
                 print("SNAP relay power is %s"%command)
 
 
@@ -67,8 +67,8 @@ class NodeControl():
                 Sends the on/off command to SNAP 0 and 1.
                 """
 
-                self.r.hset("status:node:%d"%self.node,"power_snap_0_1_ctrl_trig",True)
-                self.r.hset("status:node:%d"%self.node,"power_snap_0_1_cmd",command)
+                self.r.hset("commands:node:%d"%self.node,"power_snap_0_1_ctrl_trig",True)
+                self.r.hset("commands:node:%d"%self.node,"power_snap_0_1_cmd",command)
                 print("SNAP 0 and 1 power is %s"%command)
 
 
@@ -78,11 +78,9 @@ class NodeControl():
                 Sends the on/off command to SNAP 2 and 3.
                 """
 
-                self.r.hset("status:node:%d"%self.node,"power_snap_2_3_ctrl_trig",True)
-                self.r.hset("status:node:%d"%self.node,"power_snap_2_3_cmd",command)
+                self.r.hset("commands:node:%d"%self.node,"power_snap_2_3_ctrl_trig",True)
+                self.r.hset("commands:node:%d"%self.node,"power_snap_2_3_cmd",command)
                 print("SNAP 2 and 3 power is %s"%command)
-
-
 
 
         def power_fem(self, command):
@@ -91,8 +89,8 @@ class NodeControl():
                 Sends the on/off command to FEM.
                 """
 
-                self.r.hset("status:node:%d"%self.node,"power_fem_ctrl_trig",True)
-                self.r.hset("status:node:%d"%self.node,"power_fem_cmd",command)
+                self.r.hset("commands:node:%d"%self.node,"power_fem_ctrl_trig",True)
+                self.r.hset("commands:node:%d"%self.node,"power_fem_cmd",command)
                 print("FEM power is %s"%command)
 
 
@@ -102,8 +100,8 @@ class NodeControl():
                 Sends the on/off command to PAM.
                 """
 
-                self.r.hset("status:node:%d"%self.node,"power_pam_ctrl_trig",True)
-                self.r.hset("status:node:%d"%self.node,"power_pam_cmd",command)
+                self.r.hset("commands:node:%d"%self.node,"power_pam_ctrl_trig",True)
+                self.r.hset("commands:node:%d"%self.node,"power_pam_cmd",command)
                 print("PAM power is %s"%command)
 
 
@@ -112,7 +110,7 @@ class NodeControl():
                 Sends the reset command to Arduino which restarts the bootloader, not just the sketch. 
                 """
 
-                self.r.hset("status:node:%d"%self.node,"reset",True)
+                self.r.hset("commands:node:%d"%self.node,"reset",True)
                 print("Arduino is resetting...")
          
 

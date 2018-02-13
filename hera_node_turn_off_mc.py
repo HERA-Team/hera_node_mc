@@ -1,4 +1,3 @@
-import udpSenderClass
 import time
 import argparse
 import redis
@@ -31,31 +30,23 @@ n = nodeControlClass.NodeControl(int(args.node))
 r = redis.StrictRedis(host='hera-digi-vm')
 if args.snaps:
 		n.power_snap_0_1('off')
-		time.sleep(1)
 		n.power_snap_2_3('off')
-		time.sleep(1)
 		n.power_snap_relay('off')
-		time.sleep(.1)
 
 if args.snapRelay:
 		n.power_snap_relay('off')
-		time.sleep(.1)
 
 if args.snap01:
                 n.power_snap_0_1('off')
-                time.sleep(1)
 
 if args.snap23:
 		n.power_snap_2_3('off')
-		time.sleep(1)
 
 if args.pam:
 		n.power_pam('off')
-		time.sleep(1)
 
 if args.fem:
 		n.power_fem('off')
-		time.sleep(1)
 
 if args.reset:
 		n.reset()

@@ -6,11 +6,11 @@ import socket
 import sys
 import smtplib
 
-# Define IP address of the Redis server host machine
-serverAddress = '10.1.1.1'
 
 # Define sendPort for socket creation
 sendPort = 8888
+# Define IP address of the Redis server host machine
+serverAddress = '10.1.1.1'
 
 
 class UdpSender():

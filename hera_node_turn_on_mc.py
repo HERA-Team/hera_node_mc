@@ -1,4 +1,3 @@
-import udpSenderClass
 import time
 import argparse
 import redis
@@ -31,40 +30,30 @@ n = nodeControlClass.NodeControl(int(args.node))
 r = redis.StrictRedis(host='hera-digi-vm')
 if args.snaps:
 		n.power_snap_relay('on')
-		time.sleep(.1)
 		n.power_snap_0_1('on')
-		time.sleep(1)
 		n.power_snap_2_3('on')
-		time.sleep(1)
 
 if args.snapRelay:
                 #print("Turning SNAP relay on")
 		n.power_snap_relay('on')
-		time.sleep(.1)
 
 if args.snap01:
-                time.sleep(1)
 		if int(r.hget("status:node:%d"%int(args.node),"power_snap_relay")):
                     n.power_snap_0_1('on')
-                    time.sleep(1)
                 else:
                     print("SNAP relay is not turned on!")
 
 if args.snap23:
-                time.sleep(1)
 		if int(r.hget("status:node:%d"%int(args.node),"power_snap_relay")):
                     n.power_snap_2_3('on')
-                    time.sleep(1)
                 else:
                     print("SNAP relay is not turned on!")
 
 if args.pam:
 		n.power_pam('on')
-		time.sleep(1)
 
 if args.fem:
 		n.power_fem('on')
-		time.sleep(1)
 
 if args.reset:
 		print("Resetting Arduino/Turning everything off at once")
