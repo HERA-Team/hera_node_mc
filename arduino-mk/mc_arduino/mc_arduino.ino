@@ -101,18 +101,18 @@ Adafruit_HTU21DF htu = Adafruit_HTU21DF();
 // Status struct will be sent in a UDP packet 
 struct status {
 	unsigned long cpu_uptime_ms = -99;  // Arduino uptime since last reset
-	byte  nodeID;                       // Digi I/O bits 0 through 7, first 6 give the node ID
-	byte  nodeID_metadata;	            // Digi I/O bits 8 through 15, bit 8 specifies if node is a prototype or production 	    
 	float mcpTempTop = -99;             // Top temperature sensor value
 	float mcpTempMid = -99;             // Mid temperature sensor value
 	float htuTemp = -99;                // HTU21D sensor temperature value
 	float htuHumid = -99;               // HTU21D sensor humidity value
-	byte  mac[6];                       // Arduino MAC address as assigned by arduino-netboot
 	bool  snap_relay = false;           // Power status of SNAP relay
 	bool  fem = false;                  // Power status of FEM 
 	bool  pam = false;                  // Power status of PAM
 	bool  snapv2_0_1 = false;           // Power status of SNAP 0 and 1
 	bool  snapv2_2_3 = false;           // Power status of SNAP 2 and 3
+	byte  mac[6];                       // Arduino MAC address as assigned by arduino-netboot
+	byte  nodeID;                       // Digi I/O bits 0 through 7, first 6 give the node ID
+	byte  nodeID_metadata;	            // Digi I/O bits 8 through 15, bit 8 specifies if node is a prototype or production 	    
 } statusStruct;
 
 void bootReset();
