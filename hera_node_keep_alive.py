@@ -20,7 +20,7 @@ r = redis.StrictRedis()
 
 # Define a dict of udpSender objects to send commands to Arduinos.
 # If nodes to check and throttle are specified, use those values.
-# If not, use all the nodes that have Redis entries. 
+# If not, poke all the nodes that have Redis status:node:x keys. 
 s = {}
 if args.nodes is None:
     i = 0
