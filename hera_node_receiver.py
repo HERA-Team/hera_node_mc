@@ -1,28 +1,27 @@
-import numpy
-import threading
+"""
+Receives UDP packets from all active Arduinos containing sensor data and status information and 
+pushes it up to Redis with status:node:x hash key. 
+"""
+
 import time
 import datetime
 import struct
 import redis
 import socket
 import sys
-import smtplib
 
-"""
-This script receives UDP packets from all active Arduinos containing sensor data and misc node metadata. Captures UDP packets sent by Arduinos and pushes to Redis based on node ID. 
-"""
 
 # Define rcvPort for socket creation
 rcvPort = 8889
 serverAddress = '10.1.1.1'
-
-unpacked_mac = ["" for x in range(6)]
-
 # define socket for binding; necessary for receiving data from Arduino 
 localSocket = (serverAddress, rcvPort)
 
+unpacked_mac = ["" for x in range(6)]
+
 # Instantiate redis object connected to redis server running on localhost
 r = redis.StrictRedis()
+
 
 # Create a UDP socket
 try:
@@ -34,7 +33,6 @@ except socket.error, msg:
         print('Failed to create socket. Error Code : ' + str(msg[0]) + ' Message ' + str(msg[1]))
         sys.exit()
 
-
 # Bind socket to local host and port
 try:
         client_socket.bind(localSocket)
@@ -43,11 +41,6 @@ except socket.error , msg:
         print('Bind failed. Error Code : ' + str(msg[0]) + ' Message ' + msg[1])
         sys.exit()
 
-# Make a server object to send alerts by email
-#server = smtplib.SMTP('smtp.gmail.com', 587)
-#server.login('heranodemc@gmail.com','monitorcontrol')
-#server.ehlo()
-#server.starttls()
 
 try:
     while True:
@@ -55,26 +48,25 @@ try:
         data, addr =  client_socket.recvfrom(1024)
         # Arduino sends a Struct via UDP so unpacking is needed 
         # struct.unpack returns a tuple with one element
-        # Each struct element is 4 Bytes (c floats are packed as 4 byte strings)
         unpacked_cpu_uptime = struct.unpack('=L',data[0:4])
         print(unpacked_cpu_uptime)
-        unpacked_nodeID = struct.unpack('=B',data[4])
-        unpacked_nodeID_metadata = struct.unpack('=B',data[5])
-        unpacked_mcptemp_top = struct.unpack('=f',data[6:10])
-        unpacked_mcptemp_mid = struct.unpack('=f',data[10:14])
-        unpacked_htutemp = struct.unpack('=f',data[14:18])
-        unpacked_htuhumid = struct.unpack('=f',data[18:22])
-        unpacked_mac[0]=hex(ord(struct.unpack('=s',data[22])[0]))
-        unpacked_mac[1]=hex(ord(struct.unpack('=s',data[23])[0]))
-        unpacked_mac[2]=hex(ord(struct.unpack('=s',data[24])[0]))
-        unpacked_mac[3]=hex(ord(struct.unpack('=s',data[25])[0]))
-        unpacked_mac[4]=hex(ord(struct.unpack('=s',data[26])[0]))
-        unpacked_mac[5]=hex(ord(struct.unpack('=s',data[27])[0]))
-        unpacked_snap_relay = struct.unpack('=?',data[28])
-        unpacked_fem = struct.unpack('=?',data[29])
-        unpacked_pam = struct.unpack('=?',data[30])
-        unpacked_snapv2_0_1 = struct.unpack('=?',data[31])
-        unpacked_snapv2_2_3 = struct.unpack('=?',data[32])
+        unpacked_mcptemp_top = struct.unpack('=f',data[4:8])
+        unpacked_mcptemp_mid = struct.unpack('=f',data[8:12])
+        unpacked_htutemp = struct.unpack('=f',data[12:16])
+        unpacked_htuhumid = struct.unpack('=f',data[16:20])
+        unpacked_snap_relay = struct.unpack('=?',data[20])
+        unpacked_fem = struct.unpack('=?',data[21])
+        unpacked_pam = struct.unpack('=?',data[22])
+        unpacked_snapv2_0_1 = struct.unpack('=?',data[23])
+        unpacked_snapv2_2_3 = struct.unpack('=?',data[24])
+        unpacked_mac[0]=hex(ord(struct.unpack('=s',data[25])[0]))
+        unpacked_mac[1]=hex(ord(struct.unpack('=s',data[26])[0]))
+        unpacked_mac[2]=hex(ord(struct.unpack('=s',data[27])[0]))
+        unpacked_mac[3]=hex(ord(struct.unpack('=s',data[28])[0]))
+        unpacked_mac[4]=hex(ord(struct.unpack('=s',data[29])[0]))
+        unpacked_mac[5]=hex(ord(struct.unpack('=s',data[30])[0]))
+        unpacked_nodeID = struct.unpack('=B',data[31])
+        unpacked_nodeID_metadata = struct.unpack('=B',data[32])
         #print(unpacked_mcptemp_top)
         #print(unpacked_mcptemp_mid)
         #print(unpacked_htutemp)
@@ -91,7 +83,7 @@ try:
         #print(unpacked_mac[4])
         #print(unpacked_mac[5])
         
-        node = (unpacked_nodeID[0])
+        node = unpacked_nodeID[0]
         mac_str = ':'.join(unpacked_mac[i][2:] for i in range(len(unpacked_mac))) 
 
         r.hmset('status:node:%d'%node,
@@ -99,6 +91,7 @@ try:
         'mac':mac_str,
         'ip':addr[0],
         'node_ID':node,
+        'node_ID_metadata':unpacked_nodeID_metadata[0],
         'temp_top':unpacked_mcptemp_top[0],
         'temp_mid':unpacked_mcptemp_mid[0],
         'temp_humid':unpacked_htutemp[0],
