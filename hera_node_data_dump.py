@@ -12,6 +12,6 @@ args = parser.parse_args()
 
 while True:
     os.system("redis-cli hgetall status:node:%d >> %s"%(int(args.node_id),args.file_name))
-    time.sleep(300)
+    time.sleep(float(args.interval))
 
     

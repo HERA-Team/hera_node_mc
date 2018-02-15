@@ -23,7 +23,7 @@ parser.add_argument('--reset', dest = 'reset', action = 'store_true', default = 
 args = parser.parse_args()
 
 # Instantiate a UdpSender class object to send commands to Arduino
-s = udpSenderClass.UdpSender(args.ip_addr)
+s = udpSender.UdpSender(args.ip_addr)
 
 if args.snaps:
 	print("Turning SNAP 0 and 1 off")

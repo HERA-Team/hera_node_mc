@@ -1,7 +1,7 @@
 import time
 import argparse
 import redis
-import nodeControlClass
+import nodeControl
 
 parser = argparse.ArgumentParser(description = 'Turn on SNAP relay, SNAPs, FEM and PAM via flags',
 			formatter_class = argparse.ArgumentDefaultsHelpFormatter)
@@ -26,7 +26,7 @@ parser.add_argument('--reset', dest = 'reset', action = 'store_true', default = 
 args = parser.parse_args()
 
 # Instantiate a udpSenderClass object to send commands to Arduino
-n = nodeControlClass.NodeControl(int(args.node))
+n = nodeControl.NodeControl(int(args.node))
 r = redis.StrictRedis(host='hera-digi-vm')
 if args.snaps:
 		n.power_snap_relay('on')

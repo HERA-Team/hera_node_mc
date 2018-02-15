@@ -10,19 +10,17 @@ class NodeControl():
         def __init__(self, node, serverAddress = "hera-digi-vm"):
                 """ 
                 Takes in the node argument, which is an integer value from
-                0 to eventually 29.
-                Takes in the string ip address or the host name of the Redis database host server.
-                Returns the NodeControlClass object.
+                1 to eventually 30. It's set by the digital I/O card attached to the Power and Control Box.
+                Takes in the string ip address or the host name of the Redis database host server, default
+                is hera-digi-vm. Returns the NodeControlClass object.
                 """ 
 
                 self.node = node    
-                # Class object init makes a connection with our 1U server to grab redis database values
-                # Redis binds to port 6379 by default
                 self.r = redis.StrictRedis(serverAddress)
 
         def get_sensors(self):
                 """
-                Returns the temperature sensor values inside the node. 
+                Returns the sensor values inside the node. 
                 """
                     
                 timestamp = self.r.hget("status:node:%d"%self.node, "timestamp") 
@@ -34,7 +32,7 @@ class NodeControl():
 
         def get_power_status(self):
                 """
-                Returns the current power status of snaps, pam and fem. 
+                Returns the current power status of SNAP relay, SNAPs, PAM and FEM. 
                 """
 
                 timestamp = self.r.hget("status:node:%d"%self.node, "timestamp") 
@@ -52,7 +50,7 @@ class NodeControl():
         def power_snap_relay(self, command):
                 """
                 Takes in a string value of 'on' or 'off'.
-                Sends a command to Arduino to turn the SNAP relay on or off. The SNAP relay
+                Controls the power to SNAP relay. The SNAP relay
                 has to be turn on before sending commands to individual SNAPs.
                 """
 
@@ -64,7 +62,7 @@ class NodeControl():
         def power_snap_0_1(self, command):
                 """
                 Takes in a string value of 'on' or 'off'.
-                Sends the on/off command to SNAP 0 and 1.
+                Controls the power to SNAP 0 and 1.
                 """
 
                 self.r.hset("commands:node:%d"%self.node,"power_snap_0_1_ctrl_trig",True)
@@ -75,7 +73,7 @@ class NodeControl():
         def power_snap_2_3(self, command):
                 """
                 Takes in a string value of 'on' or 'off'.
-                Sends the on/off command to SNAP 2 and 3.
+                Controls the power to SNAP 2 and 3.
                 """
 
                 self.r.hset("commands:node:%d"%self.node,"power_snap_2_3_ctrl_trig",True)
@@ -86,7 +84,7 @@ class NodeControl():
         def power_fem(self, command):
                 """
                 Takes in a string value of 'on' or 'off'.
-                Sends the on/off command to FEM.
+                Controls the power to FEM.
                 """
 
                 self.r.hset("commands:node:%d"%self.node,"power_fem_ctrl_trig",True)
@@ -97,7 +95,7 @@ class NodeControl():
         def power_pam(self, command):
                 """
                 Takes in a string value of 'on' or 'off'.
-                Sends the on/off command to PAM.
+                Controls the power to PAM.
                 """
 
                 self.r.hset("commands:node:%d"%self.node,"power_pam_ctrl_trig",True)
@@ -107,7 +105,7 @@ class NodeControl():
 
         def reset(self):
                 """
-                Sends the reset command to Arduino which restarts the bootloader, not just the sketch. 
+                Sends the reset command to Arduino which restarts the bootloader. 
                 """
 
                 self.r.hset("commands:node:%d"%self.node,"reset",True)

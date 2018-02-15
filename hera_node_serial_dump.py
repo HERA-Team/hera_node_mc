@@ -11,4 +11,4 @@ args = parser.parse_args()
 
 while True:
     os.system("python hera_node_serial.py >> %s"%args.file_name)
-    #time.sleep(args.interval)
+    time.sleep(float(args.interval))
