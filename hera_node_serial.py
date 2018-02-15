@@ -1,6 +1,5 @@
 """
-This class is used for receiving the debu messages from the Arduinos.
-It goes into an infinite while loop so has only the packet receiving functionality. 
+This class is used for receiving debug messages on port 8890 from all the active Arduinos.
 """
 
 import datetime
@@ -16,26 +15,25 @@ localSocket = (serverAddress, serialPort)
 
 # Create a UDP socket
 try:
-        client_socket= socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-        # Set these options so multiple processes can connect to this socket
-        client_socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
-        print('Socket created')
+    client_socket= socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+    # Set these options so multiple processes can connect to this socket
+    client_socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+    print('Socket created')
 except socket.error, msg:
-        print('Failed to create socket. Error Code : ' + str(msg[0]) + ' Message ' + str(msg[1]))
-        sys.exit()
+    print('Failed to create socket. Error Code : ' + str(msg[0]) + ' Message ' + str(msg[1]))
+    sys.exit()
 
 # Bind socket to local host and port
 try:
-        client_socket.bind(localSocket)
-        print('Bound socket')
+    client_socket.bind(localSocket)
+    print('Bound socket')
 except socket.error , msg:
-        print('Bind failed. Error Code : ' + str(msg[0]) + ' Message ' + msg[1])
-        sys.exit()
+    print('Bind failed. Error Code : ' + str(msg[0]) + ' Message ' + msg[1])
+    sys.exit()
 
 try:
-    # Loop to grap UDP packets from Arduino and push to Redis
     while True:
-        # Receive data continuously from the server (Arduino in this case)
+        # Receive data continuously from all active Arduinos
         data, addr =  client_socket.recvfrom(2048)
         print(data)
         print(datetime.datetime.now())
