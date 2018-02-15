@@ -25,22 +25,21 @@ r = redis.StrictRedis()
 
 # Create a UDP socket
 try:
-        client_socket= socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-        # Set these options so multiple processes can connect to this socket
-        client_socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
-        print("Socket created")
+    client_socket= socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+    # Set these options so multiple processes can connect to this socket
+    client_socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+    print("Socket created")
 except socket.error, msg:
-        print('Failed to create socket. Error Code : ' + str(msg[0]) + ' Message ' + str(msg[1]))
-        sys.exit()
+    print('Failed to create socket. Error Code : ' + str(msg[0]) + ' Message ' + str(msg[1]))
+    sys.exit()
 
 # Bind socket to local host and port
 try:
-        client_socket.bind(localSocket)
-        print('Bound socket')
+    client_socket.bind(localSocket)
+    print('Bound socket')
 except socket.error , msg:
-        print('Bind failed. Error Code : ' + str(msg[0]) + ' Message ' + msg[1])
-        sys.exit()
-
+    print('Bind failed. Error Code : ' + str(msg[0]) + ' Message ' + msg[1])
+    sys.exit()
 
 try:
     while True:
@@ -49,7 +48,6 @@ try:
         # Arduino sends a Struct via UDP so unpacking is needed 
         # struct.unpack returns a tuple with one element
         unpacked_cpu_uptime = struct.unpack('=L',data[0:4])
-        print(unpacked_cpu_uptime)
         unpacked_mcptemp_top = struct.unpack('=f',data[4:8])
         unpacked_mcptemp_mid = struct.unpack('=f',data[8:12])
         unpacked_htutemp = struct.unpack('=f',data[12:16])
@@ -67,28 +65,12 @@ try:
         unpacked_mac[5]=hex(ord(struct.unpack('=s',data[30])[0]))
         unpacked_nodeID = struct.unpack('=B',data[31])
         unpacked_nodeID_metadata = struct.unpack('=B',data[32])
-        #print(unpacked_mcptemp_top)
-        #print(unpacked_mcptemp_mid)
-        #print(unpacked_htutemp)
-        #print(unpacked_htuhumid)
-        #print(unpacked_snap_relay)
-        #print(unpacked_fem)
-        #print(unpacked_pam)
-        #print(unpacked_snapv2_0_1)
-        #print(unpacked_snapv2_2_3)
-        #print(unpacked_mac[0])
-        #print(unpacked_mac[1])
-        #print(unpacked_mac[2])
-        #print(unpacked_mac[3])
-        #print(unpacked_mac[4])
-        #print(unpacked_mac[5])
         
         node = unpacked_nodeID[0]
         mac_str = ':'.join(unpacked_mac[i][2:] for i in range(len(unpacked_mac))) 
 
         r.hmset('status:node:%d'%node,
-        {
-        'mac':mac_str,
+        {'mac':mac_str,
         'ip':addr[0],
         'node_ID':node,
         'node_ID_metadata':unpacked_nodeID_metadata[0],
@@ -107,8 +89,8 @@ try:
         print(r.hgetall('status:node:%d'%node))
 
 except KeyboardInterrupt:
-            print('Interrupted')
-            sys.exit(0)
+    print('Interrupted')
+    sys.exit(0)
 
 
 

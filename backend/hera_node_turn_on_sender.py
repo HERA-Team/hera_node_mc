@@ -1,4 +1,4 @@
-import udpSenderClass
+import udpSender
 import time
 import argparse
 
@@ -28,42 +28,44 @@ args = parser.parse_args()
 s = udpSender.UdpSender(args.ip_addr)
 
 if args.snaps:
-		print("Turning SNAP relay on")
-		s.power_snap_relay('on')
-		time.sleep(.1)
-		print("Turning SNAP 0 and 1 on")
-		s.power_snap_0_1('on')
-		time.sleep(1)
-		print("Turning SNAP 2 and 3 on")
-		s.power_snap_2_3('on')
-		time.sleep(1)
+    print("Turning SNAP relay on")
+    s.power_snap_relay('on')
+    time.sleep(.1)
+    print("Turning SNAP 0 and 1 on")
+    s.power_snap_0_1('on')
+    time.sleep(1)
+    print("Turning SNAP 2 and 3 on")
+    s.power_snap_2_3('on')
+    time.sleep(1)
 
 if args.snapRelay:
-		print("Turning SNAP relay on")
-		s.power_snap_relay('on')
-		time.sleep(.1)
+    print("Turning SNAP relay on")
+    s.power_snap_relay('on')
+    time.sleep(.1)
 
 if args.snap01:
-		print("Turning SNAP 0 and 1 on")
-		s.power_snap_0_1('on')
-		time.sleep(1)
+    print("Turning relay and SNAP 0 and 1 on")
+    s.power_snap_relay('on')
+    s.power_snap_0_1('on')
+    time.sleep(1)
 
 if args.snap23:
-		print("Turning SNAP 2 and 3 on")
-		s.power_snap_2_3('on')
-		time.sleep(1)
+    print("Turning relay and SNAP 2 and 3 on")
+    s.power_snap_relay('on')
+    s.power_snap_2_3('on')
+    time.sleep(1)
 
 if args.pam:
-		print("Turning PAM on")
-		s.power_pam('on')
-		time.sleep(1)
+    print("Turning PAM on")
+    s.power_pam('on')
+    time.sleep(1)
 
 if args.fem:
-		print("Turning FEM on")
-		s.power_fem('on')
-		time.sleep(1)
+    print("Turning FEM on")
+    s.power_fem('on')
+    time.sleep(1)
 
 if args.reset:
-		print("Resetting Arduino/Turning everything off at once")
-		s.reset()
+    print("Resetting Arduino/Turning everything off at once")
+    s.reset()
 

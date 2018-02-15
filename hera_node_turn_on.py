@@ -1,6 +1,5 @@
 import time
 import argparse
-import redis
 import nodeControl
 
 parser = argparse.ArgumentParser(description = 'Turn on SNAP relay, SNAPs, FEM and PAM via flags',
@@ -8,7 +7,6 @@ parser = argparse.ArgumentParser(description = 'Turn on SNAP relay, SNAPs, FEM a
 
 parser.add_argument('node', action = 'store', 
 			help = 'Specify the Arduino IP address to send commands to')
-
 parser.add_argument('-r', dest = 'snapRelay', action = 'store_true', default = False,
 			help = 'Use this flag to turn on the snapRelay')
 parser.add_argument('-s', dest = 'snaps', action = 'store_true', default = False,
@@ -27,35 +25,30 @@ args = parser.parse_args()
 
 # Instantiate a udpSenderClass object to send commands to Arduino
 n = nodeControl.NodeControl(int(args.node))
-r = redis.StrictRedis(host='hera-digi-vm')
 if args.snaps:
-		n.power_snap_relay('on')
-		n.power_snap_0_1('on')
-		n.power_snap_2_3('on')
+    n.power_snap_relay('on')
+    n.power_snap_0_1('on')
+    n.power_snap_2_3('on')
 
 if args.snapRelay:
-                #print("Turning SNAP relay on")
-		n.power_snap_relay('on')
+    #print("Turning SNAP relay on")
+    n.power_snap_relay('on')
 
 if args.snap01:
-		if int(r.hget("status:node:%d"%int(args.node),"power_snap_relay")):
-                    n.power_snap_0_1('on')
-                else:
-                    print("SNAP relay is not turned on!")
+    n.power_snap_relay('on')
+    n.power_snap_0_1('on')
 
 if args.snap23:
-		if int(r.hget("status:node:%d"%int(args.node),"power_snap_relay")):
-                    n.power_snap_2_3('on')
-                else:
-                    print("SNAP relay is not turned on!")
+    n.power_snap_relay('on')
+    n.power_snap_2_3('on')
 
 if args.pam:
-		n.power_pam('on')
+    n.power_pam('on')
 
 if args.fem:
-		n.power_fem('on')
+    n.power_fem('on')
 
 if args.reset:
-		print("Resetting Arduino/Turning everything off at once")
-		n.reset()
+    print("Resetting Arduino/Turning everything off at once")
+    n.reset()
 

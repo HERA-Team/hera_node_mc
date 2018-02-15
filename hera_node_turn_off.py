@@ -27,27 +27,28 @@ args = parser.parse_args()
 
 # Instantiate a udpSenderClass object to send commands to Arduino
 n = nodeControl.NodeControl(int(args.node))
-r = redis.StrictRedis(host='hera-digi-vm')
 if args.snaps:
-		n.power_snap_0_1('off')
-		n.power_snap_2_3('off')
-		n.power_snap_relay('off')
+    n.power_snap_0_1('off')
+    n.power_snap_2_3('off')
+    n.power_snap_relay('off')
 
 if args.snapRelay:
-		n.power_snap_relay('off')
+    n.power_snap_0_1('off')
+    n.power_snap_2_3('off')
+    n.power_snap_relay('off')
 
 if args.snap01:
-                n.power_snap_0_1('off')
+    n.power_snap_0_1('off')
 
 if args.snap23:
-		n.power_snap_2_3('off')
+    n.power_snap_2_3('off')
 
 if args.pam:
-		n.power_pam('off')
+    n.power_pam('off')
 
 if args.fem:
-		n.power_fem('off')
+    n.power_fem('off')
 
 if args.reset:
-		n.reset()
+    n.reset()
 

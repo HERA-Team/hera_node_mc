@@ -43,7 +43,7 @@ try:
             # print("Poking node %d"%node)
             s['node%d'%node].poke() 
             r.hset('status:node:%d'%node,'last_poke',time.time())
-            time.sleep(.03)
+            time.sleep(1)
 except KeyboardInterrupt:
     print('Interrupted')
     sys.exit(0)

@@ -1,6 +1,7 @@
 import os 
 import time
 import argparse
+import sys
 
 parser = argparse.ArgumentParser(description = 'This scripts dumps the serial output of all of the Arduinos into a text file every x seconds - default is 300.',
                                     formatter_class = argparse.ArgumentDefaultsHelpFormatter)
@@ -9,6 +10,12 @@ parser.add_argument('-t', action = 'store', dest = 'interval', default = 300, he
 
 args = parser.parse_args()
 
-while True:
-    os.system("python hera_node_serial.py >> %s"%args.file_name)
-    time.sleep(float(args.interval))
+try:
+    while True:
+        os.system("python hera_node_serial.py >> %s"%args.file_name)
+        time.sleep(float(args.interval))
+
+except KeyboardInterrupt:
+    print('Interrupted')
+    sys.exit(0)
+
