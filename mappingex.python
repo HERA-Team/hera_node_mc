@@ -1,3 +1,0 @@
-with open(idtoipmapping.txt) as f:
-    content = f.readlines()
-    print(

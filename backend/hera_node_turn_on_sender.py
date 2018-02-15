@@ -1,12 +1,11 @@
+import udpSenderClass
 import time
 import argparse
-import redis
-import nodeControl
 
 parser = argparse.ArgumentParser(description = 'Turn on SNAP relay, SNAPs, FEM and PAM via flags',
 			formatter_class = argparse.ArgumentDefaultsHelpFormatter)
 
-parser.add_argument('node', action = 'store', 
+parser.add_argument('ip_addr', action = 'store', 
 			help = 'Specify the Arduino IP address to send commands to')
 
 parser.add_argument('-r', dest = 'snapRelay', action = 'store_true', default = False,
@@ -26,36 +25,45 @@ parser.add_argument('--reset', dest = 'reset', action = 'store_true', default = 
 args = parser.parse_args()
 
 # Instantiate a udpSenderClass object to send commands to Arduino
-n = nodeControl.NodeControl(int(args.node))
-r = redis.StrictRedis(host='hera-digi-vm')
+s = udpSender.UdpSender(args.ip_addr)
+
 if args.snaps:
-		n.power_snap_relay('on')
-		n.power_snap_0_1('on')
-		n.power_snap_2_3('on')
+		print("Turning SNAP relay on")
+		s.power_snap_relay('on')
+		time.sleep(.1)
+		print("Turning SNAP 0 and 1 on")
+		s.power_snap_0_1('on')
+		time.sleep(1)
+		print("Turning SNAP 2 and 3 on")
+		s.power_snap_2_3('on')
+		time.sleep(1)
 
 if args.snapRelay:
-                #print("Turning SNAP relay on")
-		n.power_snap_relay('on')
+		print("Turning SNAP relay on")
+		s.power_snap_relay('on')
+		time.sleep(.1)
 
 if args.snap01:
-		if int(r.hget("status:node:%d"%int(args.node),"power_snap_relay")):
-                    n.power_snap_0_1('on')
-                else:
-                    print("SNAP relay is not turned on!")
+		print("Turning SNAP 0 and 1 on")
+		s.power_snap_0_1('on')
+		time.sleep(1)
 
 if args.snap23:
-		if int(r.hget("status:node:%d"%int(args.node),"power_snap_relay")):
-                    n.power_snap_2_3('on')
-                else:
-                    print("SNAP relay is not turned on!")
+		print("Turning SNAP 2 and 3 on")
+		s.power_snap_2_3('on')
+		time.sleep(1)
 
 if args.pam:
-		n.power_pam('on')
+		print("Turning PAM on")
+		s.power_pam('on')
+		time.sleep(1)
 
 if args.fem:
-		n.power_fem('on')
+		print("Turning FEM on")
+		s.power_fem('on')
+		time.sleep(1)
 
 if args.reset:
 		print("Resetting Arduino/Turning everything off at once")
-		n.reset()
+		s.reset()
 
