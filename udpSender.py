@@ -16,7 +16,7 @@ serverAddress = '10.1.1.1'
 class UdpSender():
         """
         This class is used for sending UDP commands to Arduino directly.
-        Has ability to turn on/off PSU, FEM and PAM. Could also reset the Arduino so it restarts the bootloader. 
+        Has ability to turn on/off FEM, PAM, relay and SNAPs. Could also reset the Arduino bootloader. 
         """
 
         def __init__(self,arduinoAddress):
@@ -59,15 +59,21 @@ class UdpSender():
                 #server.starttls()
 
         def poke(self):
+                """
+                Sends poke commands to the Arduino. Used by hera_node_keep_alive script
+                to send keep Arduinos from resetting. 
+                """
+
                 arduinoSocket = (self.arduinoAddress, sendPort)
                 self.client_socket.sendto('poke', arduinoSocket)
 
         def power_snap_relay(self, command):
                 """
                 Takes in a string value of 'on' or 'off'.
-                Turns the SNAP relay on/off, must be turned on first before gaining 
+                Controls the power to SNAP relay, must be turned on first before gaining 
                 control over individual SNAPs. 
                 """
+
                 # define arduino socket to send requests
                 arduinoSocket = (self.arduinoAddress, sendPort)
                 self.client_socket.sendto('snapRelay_%s'%command, arduinoSocket)
@@ -80,6 +86,7 @@ class UdpSender():
                 Takes in a string value of 'on' or 'off'.
                 Controls the power to FEM.
                 """ 
+
                 # define arduino socket to send requests
                 arduinoSocket = (self.arduinoAddress, sendPort)
                 self.client_socket.sendto('FEM_%s'%command, arduinoSocket)
@@ -128,7 +135,7 @@ class UdpSender():
 
         def reset(self):
                 """
-                Resets Arduino bootloader. 
+                Resets the Arduino bootloader. 
                 """
                 # define arduino socket to send requests
                 arduinoSocket = (self.arduinoAddress, sendPort)
