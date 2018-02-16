@@ -18,6 +18,9 @@ args = parser.parse_args()
 
 r = redis.StrictRedis()
 
+# Time to wait between pokes
+poke_time_sec = 1
+
 # Define a dict of udpSender objects to send commands to Arduinos.
 # If nodes to check and throttle are specified, use those values.
 # If not, poke all the nodes that have Redis status:node:x keys. 
@@ -28,22 +31,27 @@ if args.nodes is None:
     for key in r.scan_iter("status:*"):
         nodes.append(int(r.hget(key,'node_ID')))
         s['node%d'%nodes[i]] = udpSender.UdpSender(r.hget(key,'ip'))
+        r.hset('status:node:%d'%nodes[i],'last_poke_sec',time.time())
         i += 1
     print("No node arguments were passed. Using nodes %s:"%nodes)
 else:
     nodes = args.nodes
     for node in nodes:
         s['node%d'%node] = udpSender.UdpSender(r.hget('status:node:%d'%node,'ip'))
+        r.hset('status:node:%d'%node,'last_poke_sec',time.time())
     print("Passed node arguments %s:"%nodes)
 
 # Sends poke signal to Arduinos inside the nodes
 try:
     while True:
+        while ((time.time() - float(r.hget('status:node:%d'%nodes[0],'last_poke_sec'))) < poke_time_sec):
+            print('Too soon to poke. Too young for tragedy.')
+            time.sleep(.1)
         for node in nodes:
-            # print("Poking node %d"%node)
+            print("Poking node %d"%node)
             s['node%d'%node].poke() 
-            r.hset('status:node:%d'%node,'last_poke',time.time())
-            time.sleep(1)
+            r.hset('status:node:%d'%node,'last_poke_sec',time.time())
+
 except KeyboardInterrupt:
     print('Interrupted')
     sys.exit(0)
