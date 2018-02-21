@@ -19,9 +19,10 @@ this installs the monitor-control package to your system, so you can import the 
  import nodeControl   
  n = nodeControlClass.NodeControl(nodeID [, redisServerHostName])    
 ```
-redisServerHostName is either a hostname or ip address of the monitor-control head node that hosts the Redis database.
-Default value is hera-digi-vm but that could change in the future. 
+nodeID is a digit from 1 to 30. redisServerHostName is either a hostname or ip address of the monitor-control head node that hosts the Redis database.  
+Default value is hera-digi-vm but that could change in the future.   
 Running n.[tab key]  returns:  
+
 ```python
 n.get_sensors  
 n.get_power_status                 
@@ -33,8 +34,7 @@ n.power_pam
 n.reset  
 ```
 The power methods provide the ability to send power commands to Arduino, through the Redis database.
-All power methods take the node number and command as arguments. Node number is a digit from 0-29 and command
-is string with value 'on' or 'off'. 
+All power methods take a string command 'on' or 'off' as an argument. 
 
 # arduino-mk usage
 ***You must have the Arduino IDE and avr-gcc toolchain installed on the computer you're compiling mc_arduino.ino***  
