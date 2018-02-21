@@ -39,11 +39,11 @@ class NodeControl():
 
         timestamp = self.r.hget("status:node:%d"%self.node, "timestamp") 
         print(self.r.hget("status:node%d"%self.node,"power_snap_0_1"))
-        power_snap_relay = self.r.hget("commands:node:%d"%self.node,"power_snap_relay")
-        power_snap_0_1 = self.r.hget("commands:node:%d"%self.node,"power_snap_0_1")
-        power_snap_2_3 = self.r.hget("commands:node:%d"%self.node,"power_snap_2_3")
-        power_pam = self.r.hget("commands:node:%d"%self.node,"power_pam")
-        power_fem = self.r.hget("commands:node:%d"%self.node,"power_fem")
+        power_snap_relay = self.r.hget("status:node:%d"%self.node,"power_snap_relay")
+        power_snap_0_1 = self.r.hget("status:node:%d"%self.node,"power_snap_0_1")
+        power_snap_2_3 = self.r.hget("status:node:%d"%self.node,"power_snap_2_3")
+        power_pam = self.r.hget("status:node:%d"%self.node,"power_pam")
+        power_fem = self.r.hget("status:node:%d"%self.node,"power_fem")
         statii = {'timestamp':timestamp,'power_snap_relay':power_snap_relay,'power_snap_0_1':power_snap_0_1,'power_snap_2_3':power_snap_2_3,
         'power_pam':power_pam,'power_fem':power_fem}
         return statii
