@@ -1,15 +1,27 @@
 
-# nodeControlClass usage
-To clone the sensor libraries together with code use 'git clone --recursive https://github.com/reeveress/monitor-control.git'
+# About
+
+# Installation
+
+#### git clone --recursive https://github.com/reeveress/monitor-control.git
+--recursive specifies all the submodules.  
+```shell
+ cd monitor-control
+ sudo python setup.py install 
+```
+this installs the package to your system, so you can run import nodeControl module and scripts from any directory. For example, running 'hera_node_turn_on.py 4 -p' from anywhere in your system will send a turn on command to the PAM inside node 4. 
+
 
 ### Usage 
-* import the nodeControlClass into ipython  
-* instantiate a nodeControl class object: 
-* n = nodeControlClass.NodeControl(nodeID, redisServerAddress)   
-* Check out the available functions via n.[tab] 
-
-you'll see something like this:
-
+#### Make sure you can connect to Redis database running on the monitor-control head node before proceeding
+```python
+ ipython  
+ import nodeControl   
+ n = nodeControlClass.NodeControl(nodeID [, redisServerHostName])   
+ n.[tab] 
+```
+you'll see this for the prototype Node:
+```python
 n.get_sensors  
 n.get_power_status                 
 n.power_snap_relay      
@@ -18,11 +30,10 @@ n.power_snap_2_3
 n.power_fem   
 n.power_pam    
 n.reset  
-
+```
 The power methods provide the ability to send power commands to Arduino, through the Redis database.
 All power methods take the node number and command as arguments. Node number is a digit from 0-29 and command
 is string with value 'on' or 'off'. 
-
 
 # arduino-mk usage
 ***You must have the Arduino IDE and avr-gcc toolchain installed on the computer you're compiling mc_arduino.ino***  
