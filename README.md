@@ -4,23 +4,24 @@
 # Installation
 
 #### git clone --recursive https://github.com/reeveress/monitor-control.git
---recursive makes sure the git clone command gets all the submodules. 
+--recursive makes sure the git clone command downloads all the submodules. 
 ```shell
  cd monitor-control
  sudo python setup.py install 
 ```
-this installs the package to your system, so you can run import nodeControl module and scripts from any directory. For example, running 'hera_node_turn_on.py 4 -p' from anywhere in your system will send a turn on command to the PAM inside node 4. 
+this installs the monitor-control package to your system, so you can import the nodeControl module and scripts from any directory. For example, running 'hera_node_turn_on.py 4 -p' from anywhere in your system will send a turn on command to the PAM inside node 4. 
 
 
-### Usage 
+# Usage 
 #### Make sure you can connect to Redis database running on the monitor-control head node before proceeding
 ```python
  ipython  
  import nodeControl   
- n = nodeControlClass.NodeControl(nodeID [, redisServerHostName])   
- n.[tab] 
+ n = nodeControlClass.NodeControl(nodeID [, redisServerHostName])    
 ```
-you'll see this for the prototype Node:
+redisServerHostName is either a hostname or ip address of the monitor-control head node that hosts the Redis database.
+Default value is hera-digi-vm but that could change in the future. 
+Running n.[tab key]  returns:  
 ```python
 n.get_sensors  
 n.get_power_status                 
