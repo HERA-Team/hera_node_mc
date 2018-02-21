@@ -4,7 +4,7 @@
 # Installation
 
 #### git clone --recursive https://github.com/reeveress/monitor-control.git
---recursive specifies all the submodules.  
+--recursive makes sure the git clone command gets all the submodules. 
 ```shell
  cd monitor-control
  sudo python setup.py install 
