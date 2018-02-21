@@ -1,15 +1,29 @@
 
-# nodeControlClass usage
-To clone the sensor libraries together with code use 'git clone --recursive https://github.com/reeveress/monitor-control.git'
+# About
 
-### Usage 
-* import the nodeControlClass into ipython  
-* instantiate a nodeControl class object: 
-* n = nodeControlClass.NodeControl(nodeID, redisServerAddress)   
-* Check out the available functions via n.[tab] 
+# Installation
 
-you'll see something like this:
+#### git clone --recursive https://github.com/reeveress/monitor-control.git
+--recursive makes sure the git clone command downloads all the submodules. 
+```shell
+ cd monitor-control
+ sudo python setup.py install 
+```
+this installs the monitor-control package to your system, so you can import the nodeControl module and scripts from any directory. For example, running 'hera_node_turn_on.py 4 -p' from anywhere in your system will send a turn on command to the PAM inside node 4. 
 
+
+# Usage 
+#### Make sure you can connect to Redis database running on the monitor-control head node before proceeding
+```python
+ ipython  
+ import nodeControl   
+ n = nodeControlClass.NodeControl(nodeID [, redisServerHostName])    
+```
+nodeID is a digit from 1 to 30. redisServerHostName is either a hostname or ip address of the monitor-control head node that hosts the Redis database.  
+Default value is hera-digi-vm but that could change in the future.   
+Running n.[tab key]  returns:  
+
+```python
 n.get_sensors  
 n.get_power_status                 
 n.power_snap_relay      
@@ -18,11 +32,9 @@ n.power_snap_2_3
 n.power_fem   
 n.power_pam    
 n.reset  
-
+```
 The power methods provide the ability to send power commands to Arduino, through the Redis database.
-All power methods take the node number and command as arguments. Node number is a digit from 0-29 and command
-is string with value 'on' or 'off'. 
-
+All power methods take a string command 'on' or 'off' as an argument. 
 
 # arduino-mk usage
 ***You must have the Arduino IDE and avr-gcc toolchain installed on the computer you're compiling mc_arduino.ino***  
