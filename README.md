@@ -14,6 +14,7 @@ this installs the monitor-control package to your system, so you can import the 
 
 # Usage 
 #### Make sure you can connect to Redis database running on the monitor-control head node before proceeding
+
 ```python
  ipython  
  import nodeControl   
@@ -35,6 +36,27 @@ n.reset
 ```
 The power methods provide the ability to send power commands to Arduino, through the Redis database.
 All power methods take a string command 'on' or 'off' as an argument. 
+### Scripts
+```shell
+hera_node[tab]
+```
+will return these scripts
+```shell
+hera_node_cmd_check.py           hera_node_serial.py
+hera_node_data_dump.py           hera_node_turn_off.py
+hera_node_get_status.py          hera_node_turn_off_sender.py
+hera_node_keep_alive.py          hera_node_turn_on.py
+hera_node_receiver.py            hera_node_turn_on_sender.py
+hera_node_serial_dump.py
+```
+These are the  scripts that are available to HERA Team:
+```shell
+hera_node_turn_on.py     	 hera_node_get_status.py  
+hera_node_turn_off.py   	 hera_node_data_dump.py 
+```
+* hera\_node\_turn\_on.py requires a node ID argument and a command argument in a form of a flag (-p for PAM, -r for relay, etc.)
+* hera\_node\_get\_status.py returns the status:node:x Redis key contents.
+* hera\_node\_data\_dump.py takes in node ID, filename and optional time interval at which to dump the Redis status:node:x contents to the file.
 
 # Backend Instructions
 
