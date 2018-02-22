@@ -56,7 +56,7 @@ dhcp-mac=arduino5,00:08:DC:00:05:4F
  ```
  
 Make sure to edit /etc/hosts and /etc/ethers so the new Arduino is recognized by the server and is given a proper IP address. 
-### arduino-mk usage
+### arduino-mk
 
 ***You must have the Arduino IDE and avr-gcc toolchain installed before compiling mc_arduino.ino***  
 Tested with Arduino 1.6.5 and Arduino 1.8.5: https://www.arduino.cc/en/Main/Software   
@@ -76,11 +76,10 @@ make
 on monitor-control head node. 
 
 
-# Poking, Capture and Command forwarding Scripts
-Order matters:
-hera_node_receiver.py
-hera_node_keep_alive.py
-hera_node_cmd_check.py
+# Poking, Capture and Command Forwarding Scripts
+Order at which these scripts are started matters. You want to run these in a screen session so a broken pipe to the monitor-control head node doesn't kill the terminal session. Start with hera_node_receiver.py so hera_node_keep_alive.py script can successfully get the IP of an Arduino to poke from the status:node:x key. hera_node_cmd_check.py checks for flags set by the front end user and sends commands to the Arduinos - failing to start this will prevent a user from sending commands. 
+
+A screen session would look something like this:
 
 ```shell
 screen -S backend // takes you to a screen session  
@@ -88,4 +87,4 @@ python hera_node_receiver.py > /dev/null 2>&1 &
 python hera_node_keep_alive.py > /dev/null 2>&1 & 
 python hera_node_cmd_check.py > /dev/null 2>&1 & 
 ```
-
+hera_node_keep_alive.py and hera_node_cmd_check both take an optional node array as an argument. If no values are given then it'll will keep alive and check all the nodes that have status:node:x entries in Redis. 
