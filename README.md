@@ -77,7 +77,7 @@ on monitor-control head node.
 
 
 # Poking, Capture and Command Forwarding Scripts
-Order at which these scripts are started matters. You want to run these in a screen session so a broken pipe to the monitor-control head node doesn't kill the terminal session. Start with hera_node_receiver.py so hera_node_keep_alive.py script can successfully get the IP of an Arduino to poke from the status:node:x key. hera_node_cmd_check.py checks for flags set by the front end user and sends commands to the Arduinos - failing to start this will prevent a user from sending commands. 
+Order at which these scripts are started matters. You want to run these in a screen session so a broken pipe to the monitor-control head node doesn't kill the terminal session. Start with hera_node_receiver.py so hera_node_keep_alive.py script can successfully get the IP of an Arduino to poke from the status:node:x key. hera_node_cmd_check.py checks for flags set by the front end user and sends commands to the Arduinos - failing to start this will prevent user from sending commands. 
 
 A screen session would look something like this:
 
