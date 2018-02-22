@@ -13,15 +13,15 @@ this installs the monitor-control package to your system, so you can import the 
 
 
 # Usage 
-#### Make sure you can connect to Redis database running on the monitor-control head node before proceeding
+### iPython
+##### Make sure you can connect to Redis database running on the monitor-control head node before proceeding
 
 ```python
  ipython  
  import nodeControl   
  n = nodeControlClass.NodeControl(nodeID [, redisServerHostName])    
 ```
-nodeID is a digit from 1 to 30. redisServerHostName is either a hostname or ip address of the monitor-control head node that hosts the Redis database.  
-Default value is hera-digi-vm but that could change in the future.   
+nodeID is a digit from 1 to 30. redisServerHostName is either a hostname or ip address of the monitor-control head node that hosts the Redis database. Default value is hera-digi-vm but that could change in the future.   
 Running n.[tab key]  returns:  
 
 ```python
