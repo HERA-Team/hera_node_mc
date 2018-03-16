@@ -13,14 +13,15 @@ this installs the monitor-control package to your system, so you can import the 
 
 
 # Usage 
-#### Make sure you can connect to Redis database running on the monitor-control head node before proceeding
+### iPython
+##### Make sure you can connect to Redis database running on the monitor-control head node before proceeding
+
 ```python
  ipython  
  import nodeControl   
  n = nodeControlClass.NodeControl(nodeID [, redisServerHostName])    
 ```
-nodeID is a digit from 1 to 30. redisServerHostName is either a hostname or ip address of the monitor-control head node that hosts the Redis database.  
-Default value is hera-digi-vm but that could change in the future.   
+nodeID is a digit from 1 to 30. redisServerHostName is either a hostname or ip address of the monitor-control head node that hosts the Redis database. Default value is hera-digi-vm but that could change in the future.   
 Running n.[tab key]  returns:  
 
 ```python
@@ -35,6 +36,27 @@ n.reset
 ```
 The power methods provide the ability to send power commands to Arduino, through the Redis database.
 All power methods take a string command 'on' or 'off' as an argument. 
+### Scripts
+```shell
+hera_node[tab]
+```
+will return these scripts
+```shell
+hera_node_cmd_check.py           hera_node_serial.py
+hera_node_data_dump.py           hera_node_turn_off.py
+hera_node_get_status.py          hera_node_turn_off_sender.py
+hera_node_keep_alive.py          hera_node_turn_on.py
+hera_node_receiver.py            hera_node_turn_on_sender.py
+hera_node_serial_dump.py
+```
+These are the  scripts that are available to HERA Team:
+```shell
+hera_node_turn_on.py     	 hera_node_get_status.py  
+hera_node_turn_off.py   	 hera_node_data_dump.py 
+```
+* hera\_node\_turn\_on.py requires a node ID argument and a command argument in a form of a flag (-p for PAM, -r for relay, etc.)
+* hera\_node\_get\_status.py returns the status:node:x Redis key contents.
+* hera\_node\_data\_dump.py takes in node ID, filename and optional time interval at which to dump the Redis status:node:x contents to the file.
 
 # Backend Instructions
 
@@ -77,7 +99,7 @@ on monitor-control head node.
 
 
 # Poking, Capture and Command Forwarding Scripts
-Order at which these scripts are started matters. You want to run these in a screen session so a broken pipe to the monitor-control head node doesn't kill the terminal session. Start with hera_node_receiver.py so hera_node_keep_alive.py script can successfully get the IP of an Arduino to poke from the status:node:x key. hera_node_cmd_check.py checks for flags set by the front end user and sends commands to the Arduinos - failing to start this will prevent a user from sending commands. 
+Order at which these scripts are started matters. You want to run these in a screen session so a broken pipe to the monitor-control head node doesn't kill the terminal session. Start with hera_node_receiver.py so hera_node_keep_alive.py script can successfully get the IP of an Arduino to poke from the status:node:x key. hera_node_cmd_check.py checks for flags set by the front end user and sends commands to the Arduinos - failing to start this will prevent user from sending commands. 
 
 A screen session would look something like this:
 
