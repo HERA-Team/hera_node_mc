@@ -1,7 +1,4 @@
-build-ethernet/userlibs/Ethernet/src/EthernetServer.o: \
- ../../arduino-mk/libraries/Ethernet/src/EthernetServer.cpp \
- ../../arduino-mk/libraries/Ethernet/src/utility/w5100.h \
- ../../arduino-mk/libraries/SPI/src/SPI.h \
+build-ethernet/mc_arduino_prod.o: mc_arduino_prod.ino \
  /home/zuhraa470/arduino-1.8.4/hardware/arduino/avr/cores/arduino/Arduino.h \
  /home/zuhraa470/arduino-1.8.4/hardware/arduino/avr/cores/arduino/binary.h \
  /home/zuhraa470/arduino-1.8.4/hardware/arduino/avr/cores/arduino/WCharacter.h \
@@ -13,8 +10,9 @@ build-ethernet/userlibs/Ethernet/src/EthernetServer.o: \
  /home/zuhraa470/arduino-1.8.4/hardware/arduino/avr/cores/arduino/USBAPI.h \
  /home/zuhraa470/arduino-1.8.4/hardware/arduino/avr/cores/arduino/Arduino.h \
  /home/zuhraa470/arduino-1.8.4/hardware/arduino/avr/variants/ethernet/pins_arduino.h \
- ../../arduino-mk/libraries/Ethernet/src/utility/socket.h \
- ../../arduino-mk/libraries/Ethernet/src/utility/w5100.h \
+ ../../arduino-mk/libraries/Adafruit_SleepyDog/Adafruit_SleepyDog.h \
+ ../../arduino-mk/libraries/Adafruit_SleepyDog/utility/WatchdogAVR.h \
+ ../../arduino-mk/libraries/EEPROM/src/EEPROM.h \
  ../../arduino-mk/libraries/Ethernet/src/Ethernet.h \
  /home/zuhraa470/arduino-1.8.4/hardware/arduino/avr/cores/arduino/IPAddress.h \
  ../../arduino-mk/libraries/Ethernet/src/EthernetClient.h \
@@ -26,4 +24,9 @@ build-ethernet/userlibs/Ethernet/src/EthernetServer.o: \
  ../../arduino-mk/libraries/Ethernet/src/Dhcp.h \
  ../../arduino-mk/libraries/Ethernet/src/EthernetUdp.h \
  /home/zuhraa470/arduino-1.8.4/hardware/arduino/avr/cores/arduino/Udp.h \
- /home/zuhraa470/arduino-1.8.4/hardware/arduino/avr/cores/arduino/Stream.h
+ /home/zuhraa470/arduino-1.8.4/hardware/arduino/avr/cores/arduino/Stream.h \
+ ../../arduino-mk/libraries/SPI/src/SPI.h \
+ ../../arduino-mk/libraries/Adafruit_MCP9808_Library/Adafruit_MCP9808.h \
+ ../../arduino-mk/libraries/Wire/src/Wire.h \
+ ../../arduino-mk/libraries/Adafruit_HTU21DF_Library/Adafruit_HTU21DF.h \
+ ../../arduino-mk/libraries/SparkFun_SX1509_Arduino_Library/src/SparkFunSX1509.h

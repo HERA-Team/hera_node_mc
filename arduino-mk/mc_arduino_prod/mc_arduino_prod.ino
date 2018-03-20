@@ -39,14 +39,14 @@
 #include <SparkFunSX1509.h> 
 
 // Define Arduino pins 
-#define SNAP_RELAY 2 
-#define FEM 8
-#define PAM 9
-#define SNAPv2_0 3
-#define SNAPv2_1 5
-#define SNAPv2_2 6
-#define SNAPv2_3 7
-#define RESET 4
+#define SNAP_RELAY_PIN 2 
+#define FEM_PIN 8
+#define PAM_PIN 9
+#define SNAPv2_0_PIN 3
+#define SNAPv2_1_PIN 5
+#define SNAPv2_2_PIN 6
+#define SNAPv2_3_PIN 7
+#define RESET_PIN 4
 
 
 // Clarifying which pin states correspond to on/off for different components`  
@@ -104,6 +104,7 @@ unsigned long last_sent = millis();
 // Sensor objects
 Adafruit_MCP9808 mcpTop = Adafruit_MCP9808(); 
 Adafruit_MCP9808 mcpMid = Adafruit_MCP9808(); 
+Adafruit_MCP9808 mcpBot = Adafruit_MCP9808(); 
 Adafruit_HTU21DF htu = Adafruit_HTU21DF();
 
 // Status struct will be sent in a UDP packet 
