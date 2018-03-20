@@ -67,8 +67,7 @@ try:
         unpacked_nodeID_metadata = struct.unpack('=B',data[32])
         
         node = unpacked_nodeID[0]
-        mac_str = ':'.join(unpacked_mac[i][2:] for i in range(len(unpacked_mac))) 
-
+        mac_str = ':'.join((unpacked_mac[i][2:]).zfill(2) for i in range(len(unpacked_mac))) 
         r.hmset('status:node:%d'%node,
         {'mac':mac_str,
         'ip':addr[0],

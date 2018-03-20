@@ -28,7 +28,9 @@ class NodeControl():
         temp_mid = float(self.r.hget("status:node:%d"%self.node,"temp_mid"))
         temp_top = float(self.r.hget("status:node:%d"%self.node,"temp_top"))
         temp_humid = float(self.r.hget("status:node:%d"%self.node,"temp_humid"))
-        sensors = {'timestamp':timestamp,'temp_top':temp_top,'temp_mid':temp_mid,'temp_humid':temp_humid}
+        humid = float(self.r.hget("status:node:%d"%self.node,"humid"))
+        sensors = {'timestamp':timestamp,'temp_top':temp_top,'temp_mid':temp_mid,
+                    'temp_humid':temp_humid,'humid':humid}
         return sensors
 
 
