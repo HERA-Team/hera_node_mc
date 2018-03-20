@@ -80,8 +80,10 @@ try:
         'power_snap_relay': int(unpacked_snap_relay[0]),
         'power_fem': int(unpacked_fem[0]),
         'power_pam': int(unpacked_pam[0]),
-        'power_snap_0_1': int(unpacked_snapv2_0_1[0]),
-        'power_snap_2_3': int(unpacked_snapv2_2_3[0]),
+        'power_snap_0': int(unpacked_snapv2_0[0]),
+        'power_snap_1': int(unpacked_snapv2_1[0]),
+        'power_snap_2': int(unpacked_snapv2_2[0]),
+        'power_snap_3': int(unpacked_snapv2_3[0]),
         'cpu_uptime_ms': unpacked_cpu_uptime[0],
         'timestamp':datetime.datetime.now()})
 

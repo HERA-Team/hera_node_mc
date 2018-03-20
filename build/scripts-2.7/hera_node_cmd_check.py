@@ -61,30 +61,54 @@ try:
                 # reset the last command flag
                 r.hset('throttle:node:%d'%node,'last_command_sec',time.time())
             
-            if ((r.hget('commands:node:%d'%node, 'power_snap_0_1_ctrl_trig')) == 'True'):
+            if ((r.hget('commands:node:%d'%node, 'power_snap_0_ctrl_trig')) == 'True'):
                 while ((time.time() - float(r.hget('throttle:node:%d'%node,'last_command_sec'))) < cmd_time_sec):
                     print('Command sent too soon, waiting 100ms and trying again...')
                     time.sleep(.1)
                 print("Sent!")
-                if (r.hget('commands:node:%d'%node, 'power_snap_0_1_cmd') == 'on'):
-                    s['node%d'%node].power_snap_0_1('on')
+                if (r.hget('commands:node:%d'%node, 'power_snap_0_cmd') == 'on'):
+                    s['node%d'%node].power_snap_0('on')
                 else:
-                    s['node%d'%node].power_snap_0_1('off')
-                r.hset('commands:node:%d'%node, 'power_snap_0_1_ctrl_trig', False)
+                    s['node%d'%node].power_snap_0('off')
+                r.hset('commands:node:%d'%node, 'power_snap_0_ctrl_trig', False)
                 r.hset('throttle:node:%d'%node,'last_command_sec',time.time())
 
-            if ((r.hget('commands:node:%d'%node, 'power_snap_2_3_ctrl_trig')) == 'True'):
+            if ((r.hget('commands:node:%d'%node, 'power_snap_1_ctrl_trig')) == 'True'):
                 while ((time.time() - float(r.hget('throttle:node:%d'%node,'last_command_sec'))) < cmd_time_sec):
                     print('Command sent too soon, waiting 100ms and trying again...')
                     time.sleep(.1)
                 print("Sent!")
-                if (r.hget('commands:node:%d'%node, 'power_snap_2_3_cmd') == 'on'):
-                    s['node%d'%node].power_snap_2_3('on')
+                if (r.hget('commands:node:%d'%node, 'power_snap_1_cmd') == 'on'):
+                    s['node%d'%node].power_snap_1('on')
                 else:
-                    s['node%d'%node].power_snap_2_3('off')
-                r.hset('commands:node:%d'%node, 'power_snap_2_3_ctrl_trig', False)
+                    s['node%d'%node].power_snap_1('off')
+                r.hset('commands:node:%d'%node, 'power_snap_1_ctrl_trig', False)
                 r.hset('throttle:node:%d'%node,'last_command_sec',time.time())
 
+            if ((r.hget('commands:node:%d'%node, 'power_snap_2_ctrl_trig')) == 'True'):
+                while ((time.time() - float(r.hget('throttle:node:%d'%node,'last_command_sec'))) < cmd_time_sec):
+                    print('Command sent too soon, waiting 100ms and trying again...')
+                    time.sleep(.1)
+                print("Sent!")
+                if (r.hget('commands:node:%d'%node, 'power_snap_2_cmd') == 'on'):
+                    s['node%d'%node].power_snap_2('on')
+                else:
+                    s['node%d'%node].power_snap_2('off')
+                r.hset('commands:node:%d'%node, 'power_snap_2_ctrl_trig', False)
+                r.hset('throttle:node:%d'%node,'last_command_sec',time.time())
+
+            if ((r.hget('commands:node:%d'%node, 'power_snap_3_ctrl_trig')) == 'True'):
+                while ((time.time() - float(r.hget('throttle:node:%d'%node,'last_command_sec'))) < cmd_time_sec):
+                    print('Command sent too soon, waiting 100ms and trying again...')
+                    time.sleep(.1)
+                print("Sent!")
+                if (r.hget('commands:node:%d'%node, 'power_snap_3_cmd') == 'on'):
+                    s['node%d'%node].power_snap_3('on')
+                else:
+                    s['node%d'%node].power_snap_3('off')
+                r.hset('commands:node:%d'%node, 'power_snap_3_ctrl_trig', False)
+                r.hset('throttle:node:%d'%node,'last_command_sec',time.time())
+            
             if (r.hget('commands:node:%d'%node, 'power_fem_ctrl_trig') == 'True'):
                 while ((time.time() - float(r.hget('throttle:node:%d'%node,'last_command_sec'))) < cmd_time_sec):
                     print('Command sent too soon, waiting 100ms and trying again...')
