@@ -40,14 +40,13 @@ class NodeControl():
         """
 
         timestamp = self.r.hget("status:node:%d"%self.node, "timestamp") 
+        print(self.r.hget("status:node%d"%self.node,"power_snap_0_1"))
         power_snap_relay = self.r.hget("status:node:%d"%self.node,"power_snap_relay")
-        power_snap_0 = self.r.hget("status:node:%d"%self.node,"power_snap_0")
-        power_snap_1 = self.r.hget("status:node:%d"%self.node,"power_snap_1")
-        power_snap_2 = self.r.hget("status:node:%d"%self.node,"power_snap_2")
-        power_snap_3 = self.r.hget("status:node:%d"%self.node,"power_snap_3")
+        power_snap_0_1 = self.r.hget("status:node:%d"%self.node,"power_snap_0_1")
+        power_snap_2_3 = self.r.hget("status:node:%d"%self.node,"power_snap_2_3")
         power_pam = self.r.hget("status:node:%d"%self.node,"power_pam")
         power_fem = self.r.hget("status:node:%d"%self.node,"power_fem")
-        statii = {'timestamp':timestamp,'power_snap_relay':power_snap_relay,'power_snap_0':power_snap_0,'power_snap_1':power_snap_1,'power_snap_2':power_snap_2,'power_snap_3':power_snap_3,
+        statii = {'timestamp':timestamp,'power_snap_relay':power_snap_relay,'power_snap_0_1':power_snap_0_1,'power_snap_2_3':power_snap_2_3,
         'power_pam':power_pam,'power_fem':power_fem}
         return statii
 
@@ -65,48 +64,26 @@ class NodeControl():
         print("SNAP relay power is %s"%command)
 
 
-    def power_snap_0(self, command):
+    def power_snap_0_1(self, command):
         """
         Takes in a string value of 'on' or 'off'.
-        Controls the power to SNAP 0.
+        Controls the power to SNAP 0 and 1.
         """
 
-        self.r.hset("commands:node:%d"%self.node,"power_snap_0_ctrl_trig",True)
-        self.r.hset("commands:node:%d"%self.node,"power_snap_0_cmd",command)
-        print("SNAP 0 power is %s"%command)
+        self.r.hset("commands:node:%d"%self.node,"power_snap_0_1_ctrl_trig",True)
+        self.r.hset("commands:node:%d"%self.node,"power_snap_0_1_cmd",command)
+        print("SNAP 0 and 1 power is %s"%command)
 
 
-    def power_snap_1(self, command):
-        """
-        Takes in a string value of 'on' or 'off'.
-        Controls the power to SNAP 1.
-        """
-
-        self.r.hset("commands:node:%d"%self.node,"power_snap_1_ctrl_trig",True)
-        self.r.hset("commands:node:%d"%self.node,"power_snap_1_cmd",command)
-        print("SNAP 1 power is %s"%command)
-
-
-    def power_snap_2(self, command):
+    def power_snap_2_3(self, command):
         """
         Takes in a string value of 'on' or 'off'.
-        Controls the power to SNAP 2.
+        Controls the power to SNAP 2 and 3.
         """
 
-        self.r.hset("commands:node:%d"%self.node,"power_snap_2_ctrl_trig",True)
-        self.r.hset("commands:node:%d"%self.node,"power_snap_2_cmd",command)
-        print("SNAP 2 power is %s"%command)
-
-
-    def power_snap_3(self, command):
-        """
-        Takes in a string value of 'on' or 'off'.
-        Controls the power to SNAP 3.
-        """
-
-        self.r.hset("commands:node:%d"%self.node,"power_snap_3_ctrl_trig",True)
-        self.r.hset("commands:node:%d"%self.node,"power_snap_3_cmd",command)
-        print("SNAP 3 power is %s"%command)
+        self.r.hset("commands:node:%d"%self.node,"power_snap_2_3_ctrl_trig",True)
+        self.r.hset("commands:node:%d"%self.node,"power_snap_2_3_cmd",command)
+        print("SNAP 2 and 3 power is %s"%command)
 
 
     def power_fem(self, command):
