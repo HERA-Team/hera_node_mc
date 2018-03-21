@@ -50,21 +50,39 @@ try:
         unpacked_cpu_uptime = struct.unpack('=L',data[0:4])
         unpacked_mcptemp_top = struct.unpack('=f',data[4:8])
         unpacked_mcptemp_mid = struct.unpack('=f',data[8:12])
-        unpacked_htutemp = struct.unpack('=f',data[12:16])
-        unpacked_htuhumid = struct.unpack('=f',data[16:20])
-        unpacked_snap_relay = struct.unpack('=?',data[20])
-        unpacked_fem = struct.unpack('=?',data[21])
-        unpacked_pam = struct.unpack('=?',data[22])
-        unpacked_snapv2_0_1 = struct.unpack('=?',data[23])
-        unpacked_snapv2_2_3 = struct.unpack('=?',data[24])
-        unpacked_mac[0]=hex(ord(struct.unpack('=s',data[25])[0]))
-        unpacked_mac[1]=hex(ord(struct.unpack('=s',data[26])[0]))
-        unpacked_mac[2]=hex(ord(struct.unpack('=s',data[27])[0]))
-        unpacked_mac[3]=hex(ord(struct.unpack('=s',data[28])[0]))
-        unpacked_mac[4]=hex(ord(struct.unpack('=s',data[29])[0]))
-        unpacked_mac[5]=hex(ord(struct.unpack('=s',data[30])[0]))
-        unpacked_nodeID = struct.unpack('=B',data[31])
-        unpacked_nodeID_metadata = struct.unpack('=B',data[32])
+        unpacked_mcptemp_bot = struct.unpack('=f',data[12:16])
+        unpacked_htutemp = struct.unpack('=f',data[16:20])
+        unpacked_htuhumid = struct.unpack('=f',data[20:24])
+        unpacked_snap_relay = struct.unpack('=?',data[24])
+        unpacked_fem = struct.unpack('=?',data[25])
+        unpacked_pam = struct.unpack('=?',data[26])
+        unpacked_snapv2_0 = struct.unpack('=?',data[27])
+        unpacked_snapv2_1 = struct.unpack('=?',data[28])
+        unpacked_snapv2_2 = struct.unpack('=?',data[29])
+        unpacked_snapv2_3 = struct.unpack('=?',data[30])
+        unpacked_mac[0]=hex(ord(struct.unpack('=s',data[31])[0]))
+        unpacked_mac[1]=hex(ord(struct.unpack('=s',data[32])[0]))
+#        print(unpacked_cpu_uptime)
+#        print(unpacked_mcptemp_top)
+#        print(unpacked_mcptemp_mid)
+#        print(unpacked_mcptemp_bot)
+#        print(unpacked_htutemp)
+#        print(unpacked_htuhumid)
+#        print(unpacked_snap_relay)
+#        print(unpacked_fem)
+#        print(unpacked_pam)
+#        print(unpacked_snapv2_0)
+#        print(unpacked_snapv2_1)
+#        print(unpacked_snapv2_2)
+#        print(unpacked_snapv2_3)
+#        print(unpacked_mac[0])
+#        print(unpacked_mac[1])
+        unpacked_mac[2]=hex(ord(struct.unpack('=s',data[33])[0]))
+        unpacked_mac[3]=hex(ord(struct.unpack('=s',data[34])[0]))
+        unpacked_mac[4]=hex(ord(struct.unpack('=s',data[35])[0]))
+        unpacked_mac[5]=hex(ord(struct.unpack('=s',data[36])[0]))
+        unpacked_nodeID = struct.unpack('=B',data[37])
+        unpacked_nodeID_metadata = struct.unpack('=B',data[38])
         
         node = unpacked_nodeID[0]
         mac_str = ':'.join((unpacked_mac[i][2:]).zfill(2) for i in range(len(unpacked_mac))) 
@@ -80,8 +98,10 @@ try:
         'power_snap_relay': int(unpacked_snap_relay[0]),
         'power_fem': int(unpacked_fem[0]),
         'power_pam': int(unpacked_pam[0]),
-        'power_snap_0_1': int(unpacked_snapv2_0_1[0]),
-        'power_snap_2_3': int(unpacked_snapv2_2_3[0]),
+        'power_snap_0': int(unpacked_snapv2_0[0]),
+        'power_snap_1': int(unpacked_snapv2_1[0]),
+        'power_snap_2': int(unpacked_snapv2_2[0]),
+        'power_snap_3': int(unpacked_snapv2_3[0]),
         'cpu_uptime_ms': unpacked_cpu_uptime[0],
         'timestamp':datetime.datetime.now()})
 
