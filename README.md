@@ -20,7 +20,7 @@ this installs the monitor-control package to your system, so you can import the 
 ```python
  ipython  
  import nodeControl   
- n = nodeControlClass.NodeControl(nodeID [, redisServerHostName])    
+ n = nodeControl.NodeControl(nodeID [, redisServerHostName])    
 ```
 nodeID is a digit from 1 to 30. redisServerHostName is either a hostname or ip address of the monitor-control head node that hosts the Redis database. Default value is hera-digi-vm but that could change in the future.   
 Running n.[tab key]  returns:  
