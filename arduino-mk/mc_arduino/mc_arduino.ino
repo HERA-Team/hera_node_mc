@@ -252,7 +252,7 @@ void setup() {
 			serialUdp("digiIO pin values 0 to 6");
 			serialUdp(String(statusStruct.nodeID));
       		}
-      		for (int i=6; i<14; i++){
+      		for (int i=6; i<12; i++){
 			statusStruct.nodeID_metadata |= io.digitalRead(i) << i;
 		}
 	}
