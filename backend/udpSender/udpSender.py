@@ -99,53 +99,53 @@ class UdpSender():
         # Set delay before receiving more data
         time.sleep(2)
 
-    def power_snap_0(self, arduinoAddress, command):
+    def power_snap_0(self, command):
         """
         Takes in the arduino IP address string and a command "on"/"off".
         Controls the power to SNAP 0.
         """ 
 
         # define arduino socket to send requests
-        arduinoSocket = (arduinoAddress, sendPort)
+        arduinoSocket = (self.arduinoAddress, sendPort)
         self.client_socket.sendto('snapv2_0_%s'%command, arduinoSocket)
 
         # Set delay before receiving more data
         time.sleep(2)
 
-    def power_snap_1(self, arduinoAddress, command):
+    def power_snap_1(self, command):
         """
         Takes in the arduino IP address string and a command "on"/"off".
         Controls the power to SNAP 1.
         """ 
 
         # define arduino socket to send requests
-        arduinoSocket = (arduinoAddress, sendPort)
+        arduinoSocket = (self.arduinoAddress, sendPort)
         self.client_socket.sendto('snapv2_1_%s'%command, arduinoSocket)
 
         # Set delay before receiving more data
         time.sleep(2)
 
-    def power_snap_2(self, arduinoAddress, command):
+    def power_snap_2(self, command):
         """
         Takes in the arduino IP address string and a command "on"/"off".
         Controls the power to SNAP 2.
         """ 
 
         # define arduino socket to send requests
-        arduinoSocket = (arduinoAddress, sendPort)
+        arduinoSocket = (self.arduinoAddress, sendPort)
         self.client_socket.sendto('snapv2_2_%s'%command, arduinoSocket)
 
         # Set delay before receiving more data
         time.sleep(2)
 
-    def power_snap_3(self, arduinoAddress, command):
+    def power_snap_3(self, command):
         """
         Takes in the arduino IP address string and a command "on"/"off".
         Controls the power to SNAP 3. 
         """ 
 
         # define arduino socket to send requests
-        arduinoSocket = (arduinoAddress, sendPort)
+        arduinoSocket = (self.arduinoAddress, sendPort)
         self.client_socket.sendto('snapv2_3_%s'%command, arduinoSocket)
 
         # Set delay before receiving more data
