@@ -1,5 +1,6 @@
 
 # About
+The prototype node and the production nodes have different architectures and therefore different software. For example, in prototype node, SNAP power is controlled in pairs (SNAP 0 & 1 or SNAP 2 & 3) and in production nodes, the SNAP power is controlled separately. Make sure you're using the right branch, either **prototype-node** or **production-node**.
 
 # Installation
 
