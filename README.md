@@ -106,8 +106,8 @@ A screen session would look something like this:
 
 ```shell
 screen -S backend // takes you to a screen session  
-python hera_node_receiver.py > /dev/null 2>&1 & 
-python hera_node_keep_alive.py > /dev/null 2>&1 & 
-python hera_node_cmd_check.py > /dev/null 2>&1 & 
+hera_node_receiver.py > /dev/null 2>&1 & 
+hera_node_keep_alive.py > /dev/null 2>&1 & 
+hera_node_cmd_check.py > /dev/null 2>&1 & 
 ```
 hera_node_keep_alive.py and hera_node_cmd_check both take an optional node array as an argument. If no values are given then it'll will keep alive and check all the nodes that have status:node:x entries in Redis. 
