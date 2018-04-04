@@ -1,4 +1,4 @@
-build-ethernet/mc_arduino.o: mc_arduino.ino \
+build-ethernet/mc_arduino_proto.o: mc_arduino_proto.ino \
  /home/zuhraa470/arduino-1.8.4/hardware/arduino/avr/cores/arduino/Arduino.h \
  /home/zuhraa470/arduino-1.8.4/hardware/arduino/avr/cores/arduino/binary.h \
  /home/zuhraa470/arduino-1.8.4/hardware/arduino/avr/cores/arduino/WCharacter.h \
