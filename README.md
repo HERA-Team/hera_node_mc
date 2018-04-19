@@ -72,7 +72,7 @@ So, to get Arduinos to download their sketch files from a TFTP server running on
 in the Node Control Overleaf document: https://www.overleaf.com/read/dbfhdbcjkqvh  
 ```shell
 cd arduino-netboot
-python netboot_upload.py "{0x00,0x08,0xdc,0x00,0x05,0x4f}"
+python bootloader_upload.py "{0x02,0x02,0x0A,0x01,0x01,0x00}"
 ```
 note that the MAC address of your choosing should be specified just as shown above, in quotes and curly braces, for netboot_upload.py to parse it.  
  
