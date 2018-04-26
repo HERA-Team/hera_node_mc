@@ -45,7 +45,7 @@ else:
 try:
     while True:
         while ((time.time() - float(r.hget('throttle:node:%d'%nodes[0],'last_poke_sec'))) < poke_time_sec):
-            print('Too soon to poke. Too young for tragedy.')
+            print('Too soon to poke.')
             time.sleep(.1)
         for node in nodes:
             print("Poking node %d"%node)
