@@ -1,0 +1,151 @@
+127.0.0.1	localhost
+127.0.1.1	ral-Standard-PC-i440FX-PIIX-1996
+
+# Monitor Control Network hera.pvt beaglebone black
+10.1.1.159      monitor
+
+# Arduino
+10.1.1.200	arduino0
+10.1.1.201      arduino1
+10.1.1.202      arduino2
+10.1.1.203      arduino3
+10.1.1.204      arduino4
+10.1.1.205      arduino5
+10.1.1.206      arduino6
+10.1.1.207      arduino7
+10.1.1.208      arduino8
+10.1.1.209	arduino9
+10.1.1.210      arduino10
+10.1.1.211      arduino11
+10.1.1.212      arduino12
+10.1.1.213      arduino13
+10.1.1.214      arduino14
+10.1.1.215      arduino15
+10.1.1.216      arduino16
+10.1.1.217      arduino17
+10.1.1.218      arduino18
+10.1.1.219      arduino19
+10.1.1.220      arduino20
+10.1.1.221      arduino21
+10.1.1.222      arduino22
+10.1.1.223      arduino23
+10.1.1.224      arduino24
+10.1.1.225      arduino25
+10.1.1.226      arduino26
+10.1.1.227      arduino27
+10.1.1.228      arduino28
+10.1.1.229      arduino29
+10.1.1.230      arduino30
+10.1.1.231      arduino31
+10.1.1.232      arduino32
+10.1.1.233      arduino33
+10.1.1.234      arduino34
+10.1.1.235      arduino35
+10.1.1.236      arduino36
+10.1.1.237      arduino37
+10.1.1.238      arduino38
+10.1.1.239      arduino39
+10.1.1.240      arduino40
+10.1.1.241      arduino41  
+10.1.1.242      arduino42  
+10.1.1.243      arduino43  
+10.1.1.244      arduino44  
+10.1.1.245      arduino45  
+10.1.1.246      arduino46  
+10.1.1.247      arduino47  
+10.1.1.248      arduino48  
+10.1.1.249      arduino49  
+10.1.1.250      arduino50  
+10.1.1.251      arduino51  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+# White Rabbit Narduino20etworking and Timing
+10.1.1.120      arduino21wr-switch0
+10.1.1.121	wr-switch1
+
+# J9021A 1Gbe HP Procurve 2810-24G
+10.1.1.130 gbe-switch0
+
+# Arista 7050QX-32 40GbE switch
+10.1.1.140 tge-switch0
+
+
+# The following lines are desirable for IPv6 capable hosts
+::1     ip6-localhost ip6-loopback
+fe00::0 ip6-localnet
+ff00::0 ip6-mcastprefix
+ff02::1 ip6-allnodes
+ff02::2 ip6-allrouters
+
+# Old White Rabbit Nodes, SFP0 followed by SFP1
+10.1.1.150 wr-node0p0
+10.1.1.151 wr-node0p1
+
+10.1.1.152 wr-node1p0
+10.1.1.153 wr-node1p1
+# New White Rabbit Nodes, SFP0 followed by SFP1
+10.1.1.154 wr-node2p0 # Currently inside protonode in Karoo
+10.1.1.155 wr-node2p1 # Currently inside protonode in Karoo
+
+10.1.1.156 wr-node3p0
+10.1.1.157 wr-node3p1
+
+10.1.1.158 wr-node4p0
+10.1.1.159 wr-node4p1
+
+10.1.1.160 wr-node5p0
+10.1.1.161 wr-node5p1
+
+10.1.1.162 wr-node6p0
+10.1.1.163 wr-node6p1
+
+10.1.1.164 wr-node7p0
+10.1.1.165 wr-node7p1
+
+10.1.1.166 wr-node8p0
+10.1.1.167 wr-node8p1
+
+10.1.1.168 wr-node9p0
+10.1.1.169 wr-node9p1
+
+10.1.1.170 wr-node10p0
+10.1.1.171 wr-node10p1
+
+10.1.1.172 wr-node11p0
+10.1.1.173 wr-node11p1
+
+10.1.1.174 wr-node12p0
+10.1.1.175 wr-node12p1
+
+10.1.1.176 wr-node13p0
+10.1.1.177 wr-node13p1
+
+10.1.1.178 wr-node14p0
+10.1.1.179 wr-node14p1
+
+10.1.1.180 wr-node15p0
+10.1.1.181 wr-node15p1
+
+10.1.1.182 wr-node16p0
+10.1.1.183 wr-node16p1
+
+10.1.1.184 wr-node17p0
+10.1.1.185 wr-node17p1
+
+10.1.1.186 wr-node18p0
+10.1.1.187 wr-node18p1
+
+10.1.1.188 wr-node19p0
+10.1.1.189 wr-node19p1
