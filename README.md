@@ -118,4 +118,6 @@ hera_node_keep_alive.py > /dev/null 2>&1 &
 hera_node_cmd_check.py > /dev/null 2>&1 & 
 ctrl-A D // exit screen session
 ```
+**Warning:** Running all 3 scripts in the same screen session sometimes breaks the keep_alive script, so it is best to have 3 separate screen sessions. 
+
 hera_node_keep_alive.py and hera_node_cmd_check both take an optional node array as an argument. If no values are given then it'll will keep alive and check all the nodes that have status:node:x entries in Redis. 
