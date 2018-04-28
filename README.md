@@ -61,6 +61,12 @@ hera_node_turn_off.py   	 hera_node_data_dump.py
 * hera\_node\_data\_dump.py takes in node ID, filename and optional time interval at which to dump the Redis status:node:x contents to the file.
 
 # Backend Instructions
+### redis-server
+To start the redis server, change into monitor-control/backend directory and run
+```
+redis-server redis.conf
+```
+redis.conf allows connections from different computers to be made to Redis server, which is critical.
 
 ### arduino-netboot  
 The arduino-netboot bootloader makes it possible to program Arduinos over ethernet. If you want to learn more about how it works, check out Emil's repo: https://github.com/esmil/arduino-netboot  
