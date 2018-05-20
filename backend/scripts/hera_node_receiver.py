@@ -14,13 +14,15 @@ import sys
 # Define rcvPort for socket creation
 rcvPort = 8889
 serverAddress = '0.0.0.0'
+redisAddress = 'redishost'
+redisPort = 6379
 # define socket for binding; necessary for receiving data from Arduino 
 localSocket = (serverAddress, rcvPort)
 
 unpacked_mac = ["" for x in range(6)]
 
 # Instantiate redis object connected to redis server running on localhost
-r = redis.StrictRedis()
+r = redis.StrictRedis(host=redisAddress, port=redisPort)
 
 
 # Create a UDP socket
