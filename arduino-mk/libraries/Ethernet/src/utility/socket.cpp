@@ -3,6 +3,9 @@
 
 static uint16_t local_port;
 
+void yield() {
+}
+
 /**
  * @brief	This Socket function initialize the channel in perticular mode, and set the port and wait for W5100 done it.
  * @return 	1 for success else 0.
