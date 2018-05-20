@@ -76,7 +76,8 @@
 // Comment this line and recompile to turn off verbose mode
 #define VERBOSE
 
-IPAddress serverIp(10, 1, 1, 1); // TFTP server IP address
+// Surely we can get the TFTP server address via DHCP?
+IPAddress serverIp(10, 80, 2, 1); // TFTP server IP address
 EthernetUDP UdpRcv; // UDP object to receive packets
 EthernetUDP UdpSnd; // UDP object to send packets
 EthernetUDP UdpSer; // UDP object to send debug info
