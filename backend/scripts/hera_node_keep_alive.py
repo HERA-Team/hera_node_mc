@@ -14,9 +14,10 @@ import argparse
 parser = argparse.ArgumentParser(description = 'Takes in an optional argument of node array i.e."python hera_node_keep_alive.py  -n 0 4 \
 will send poke commands to nodes with IDs 0 and 4.', formatter_class = argparse.ArgumentDefaultsHelpFormatter)
 parser.add_argument('-n', dest='nodes', type=int, nargs='+', help = 'List of node IDs to poke.')
+parser.add_argument('-r', dest='redishost', type=str, default='redishost', help = 'IP or hostname string of host running the monitor redis server.')
 args = parser.parse_args()
 
-r = redis.StrictRedis()
+r = redis.StrictRedis(host=args.redishost)
 
 # Time to wait between pokes
 poke_time_sec = 1
