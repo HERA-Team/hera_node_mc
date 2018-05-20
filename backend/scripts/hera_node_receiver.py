@@ -13,7 +13,7 @@ import sys
 
 # Define rcvPort for socket creation
 rcvPort = 8889
-serverAddress = '10.1.1.1'
+serverAddress = '0.0.0.0'
 # define socket for binding; necessary for receiving data from Arduino 
 localSocket = (serverAddress, rcvPort)
 
