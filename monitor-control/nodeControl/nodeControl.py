@@ -7,12 +7,12 @@ class NodeControl():
     through the Redis database running on the hera-digi-vm server.
     """
 
-    def __init__(self, node, serverAddress = "hera-digi-vm"):
+    def __init__(self, node, serverAddress = "redishost"):
         """ 
         Takes in the node argument, which is an integer value from
         1 to eventually 30. It's set by the digital I/O card attached to the Power and Control Box.
         Takes in the string ip address or the host name of the Redis database host server, default
-        is hera-digi-vm. Returns the NodeControlClass object.
+        is `redishost`. Returns the NodeControlClass object.
         """ 
 
         self.node = node    

@@ -18,7 +18,7 @@ parser.add_argument('-n', dest='nodes', type=int, nargs='+', help = 'List of nod
 args = parser.parse_args()
 
 # Instantiate redis object connected to redis server running on serverAddress
-r = redis.StrictRedis()
+r = redis.StrictRedis(host="redishost")
 
 # Time to wait between commands 
 cmd_time_sec = 2
