@@ -4,6 +4,7 @@ It pokes either specified nodes with the -n argument or
 the nodes that have Redis status keys i.e. status:node:x where x is the node ID
 set by the I2C digital I/O cards plugged into PCBs.  
 """
+from __future__ import print_function
 
 import time
 import redis
@@ -34,27 +35,27 @@ if args.nodes is None:
         s['node%d'%nodes[i]] = udpSender.UdpSender(r.hget(key,'ip'))
         r.hset('throttle:node:%d'%nodes[i],'last_poke_sec',time.time())
         i += 1
-    print("No node arguments were passed. Using nodes %s:"%nodes)
+    print("No node arguments were passed. Using nodes %s:"%nodes, file=sys.stderr)
 else:
     nodes = args.nodes
     for node in nodes:
         s['node%d'%node] = udpSender.UdpSender(r.hget('status:node:%d'%node,'ip'))
         r.hset('throttle:node:%d'%node,'last_poke_sec',time.time())
-    print("Passed node arguments %s:"%nodes)
+    print("Passed node arguments %s:"%nodes, file=sys.stderr)
 
 # Sends poke signal to Arduinos inside the nodes
 try:
     while True:
         while ((time.time() - float(r.hget('throttle:node:%d'%nodes[0],'last_poke_sec'))) < poke_time_sec):
-            print('Too soon to poke.')
-            time.sleep(.1)
+            #print('Too soon to poke.')
+            time.sleep(0.1)
         for node in nodes:
-            print("Poking node %d"%node)
+            #print("Poking node %d"%node)
             s['node%d'%node].poke() 
             r.hset('throttle:node:%d'%node,'last_poke_sec',time.time())
 
 except KeyboardInterrupt:
-    print('Interrupted')
+    print('Interrupted', file=sys.stderr)
     sys.exit(0)
 
 

@@ -3,13 +3,13 @@ Receives UDP packets from all active Arduinos containing sensor data and status 
 pushes it up to Redis with status:node:x hash key. 
 """
 
-import time
+from __future__ import print_function
+
 import datetime
 import struct
 import redis
 import socket
 import sys
-
 
 # Define rcvPort for socket creation
 rcvPort = 8889
@@ -30,17 +30,17 @@ try:
     client_socket= socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
     # Set these options so multiple processes can connect to this socket
     client_socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
-    print("Socket created")
+    print("Socket created", file=sys.stderr)
 except socket.error, msg:
-    print('Failed to create socket. Error Code : ' + str(msg[0]) + ' Message ' + str(msg[1]))
+    print('Failed to create socket. Error Code : ' + str(msg[0]) + ' Message ' + str(msg[1]), file=sys.stderr)
     sys.exit()
 
 # Bind socket to local host and port
 try:
     client_socket.bind(localSocket)
-    print('Bound socket')
+    print('Bound socket', file=sys.stderr)
 except socket.error , msg:
-    print('Bind failed. Error Code : ' + str(msg[0]) + ' Message ' + msg[1])
+    print('Bind failed. Error Code : ' + str(msg[0]) + ' Message ' + msg[1], file=sys.stderr)
     sys.exit()
 
 try:
@@ -107,27 +107,8 @@ try:
         'cpu_uptime_ms': unpacked_cpu_uptime[0],
         'timestamp':datetime.datetime.now()})
 
-        print(r.hgetall('status:node:%d'%node))
+        #print(r.hgetall('status:node:%d'%node))
 
 except KeyboardInterrupt:
-    print('Interrupted')
+    print('Interrupted', file=sys.stderr)
     sys.exit(0)
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

@@ -4,6 +4,7 @@ Makes sure commands are spaced out properly to prevent rapid power cycling and
 turning everything on at once. Uses throttle:node:x flag to enforce a 2 second delay
 between commands. Checks for command triggers inside the commands:status:node key.
 """
+from __future__ import print_function
 
 import redis
 import argparse 
@@ -35,13 +36,13 @@ if args.nodes is None:
         s['node%d'%nodes[i]] = udpSender.UdpSender(r.hget(key,'ip'))
         r.hset('throttle:node:%d'%nodes[i],'last_command_sec',time.time())
         i += 1
-    print("No node arguments were passed. Using nodes %s:"%nodes)
+    print("No node arguments were passed. Using nodes %s:"%nodes, file=sys.stderr)
 else:
     nodes = args.nodes
     for node in nodes:
         s['node%d'%node] = udpSender.UdpSender(r.hget('status:node:%d'%node,'ip'))
         r.hset('throttle:node:%d'%node,'last_command_sec',time.time())
-    print("Passed node arguments %s:"%nodes)
+    print("Passed node arguments %s:"%nodes, file=sys.stderr)
 
 # Check command keys for triggers and command sent, throttle those commands to
 # not exceed the cmd_time_sec
@@ -50,9 +51,9 @@ try:
         for node in nodes:
             if ((r.hget('commands:node:%d'%node, 'power_snap_relay_ctrl_trig')) == 'True'):
                 while ((time.time() - float(r.hget('throttle:node:%d'%node,'last_command_sec'))) < cmd_time_sec):
-                    print('Command sent too soon, waiting 100ms and trying again...')
+                    #print('Command sent too soon, waiting 100ms and trying again...')
                     time.sleep(.1)
-                print("Sent!")
+                #print("Sent!")
                 if ((r.hget('commands:node:%d'%node, 'power_snap_relay_cmd')) == 'on'):
                     s['node%d'%node].power_snap_relay('on') 
                 else: 
@@ -63,9 +64,9 @@ try:
             
             if ((r.hget('commands:node:%d'%node, 'power_snap_0_ctrl_trig')) == 'True'):
                 while ((time.time() - float(r.hget('throttle:node:%d'%node,'last_command_sec'))) < cmd_time_sec):
-                    print('Command sent too soon, waiting 100ms and trying again...')
+                    #print('Command sent too soon, waiting 100ms and trying again...')
                     time.sleep(.1)
-                print("Sent!")
+                #print("Sent!")
                 if (r.hget('commands:node:%d'%node, 'power_snap_0_cmd') == 'on'):
                     s['node%d'%node].power_snap_0('on')
                 else:
@@ -75,9 +76,9 @@ try:
 
             if ((r.hget('commands:node:%d'%node, 'power_snap_1_ctrl_trig')) == 'True'):
                 while ((time.time() - float(r.hget('throttle:node:%d'%node,'last_command_sec'))) < cmd_time_sec):
-                    print('Command sent too soon, waiting 100ms and trying again...')
+                    #print('Command sent too soon, waiting 100ms and trying again...')
                     time.sleep(.1)
-                print("Sent!")
+                #print("Sent!")
                 if (r.hget('commands:node:%d'%node, 'power_snap_1_cmd') == 'on'):
                     s['node%d'%node].power_snap_1('on')
                 else:
@@ -87,9 +88,9 @@ try:
 
             if ((r.hget('commands:node:%d'%node, 'power_snap_2_ctrl_trig')) == 'True'):
                 while ((time.time() - float(r.hget('throttle:node:%d'%node,'last_command_sec'))) < cmd_time_sec):
-                    print('Command sent too soon, waiting 100ms and trying again...')
+                    #print('Command sent too soon, waiting 100ms and trying again...')
                     time.sleep(.1)
-                print("Sent!")
+                #print("Sent!")
                 if (r.hget('commands:node:%d'%node, 'power_snap_2_cmd') == 'on'):
                     s['node%d'%node].power_snap_2('on')
                 else:
@@ -99,9 +100,9 @@ try:
 
             if ((r.hget('commands:node:%d'%node, 'power_snap_3_ctrl_trig')) == 'True'):
                 while ((time.time() - float(r.hget('throttle:node:%d'%node,'last_command_sec'))) < cmd_time_sec):
-                    print('Command sent too soon, waiting 100ms and trying again...')
+                    #print('Command sent too soon, waiting 100ms and trying again...')
                     time.sleep(.1)
-                print("Sent!")
+                #print("Sent!")
                 if (r.hget('commands:node:%d'%node, 'power_snap_3_cmd') == 'on'):
                     s['node%d'%node].power_snap_3('on')
                 else:
@@ -111,9 +112,9 @@ try:
             
             if (r.hget('commands:node:%d'%node, 'power_fem_ctrl_trig') == 'True'):
                 while ((time.time() - float(r.hget('throttle:node:%d'%node,'last_command_sec'))) < cmd_time_sec):
-                    print('Command sent too soon, waiting 100ms and trying again...')
+                    #print('Command sent too soon, waiting 100ms and trying again...')
                     time.sleep(.1)
-                print("Sent!")
+                #print("Sent!")
                 if (r.hget('commands:node:%d'%node, 'power_fem_cmd') == 'on'):
                     s['node%d'%node].power_fem('on')
                 else:
@@ -123,9 +124,9 @@ try:
 
             if (r.hget('commands:node:%d'%node, 'power_pam_ctrl_trig') == 'True'):
                 while ((time.time() - float(r.hget('throttle:node:%d'%node,'last_command_sec'))) < cmd_time_sec):
-                    print('Command sent too soon, waiting 100ms and trying again...')
+                    #print('Command sent too soon, waiting 100ms and trying again...')
                     time.sleep(.1)
-                print("Sent!")
+                #print("Sent!")
                 if (r.hget('commands:node:%d'%node, 'power_pam_cmd') == 'on'):
                     s["node%d"%node].power_pam('on')
                 else:
@@ -138,7 +139,7 @@ try:
                 r.hset('commands:node:%d'%node, 'reset', False)
 
 except KeyboardInterrupt:
-    print("Interrupted")
+    print("Interrupted", file=sys.stderr)
     sys.exit(0)
     
 
