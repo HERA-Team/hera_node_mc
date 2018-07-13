@@ -1,9 +1,33 @@
-import os
+import sys
 import argparse
+import nodeControl
 
 parser = argparse.ArgumentParser(description = 'This scripts outputs the current node status',
                                     formatter_class = argparse.ArgumentDefaultsHelpFormatter)
-parser.add_argument('node',action='store', help='Specify the node ID number (int from 0 to 29) to get the corresponding Redis data')
+parser.add_argument('node',action='store', type=int, help='Specify the node ID number (int from 0 to 29) to get the corresponding Redis data')
 args = parser.parse_args()
 
-os.system("redis-cli -h redishost hgetall status:node:%d"%(int(args.node)))
+print "Attempting to connect to the node control redis database on \'redishost\'...",
+sys.stdout.flush()
+node = nodeControl.NodeControl(args.node)
+print "OK"
+
+print "Checking that staus key for Node %d exists in redis" % args.node,
+if node.check_exists():
+    print "OK"
+else:
+    print "Missing key!"
+    exit
+
+power_stat_time, power_stat = node.get_power_status()
+sensors_time, sensors = node.get_sensors()
+
+print "Node %d power states:" % args.node
+print "  (Updated at %s)" % power_stat_time
+for key, val in sorted(power_stat.iteritems()):
+    print "  %s: %s" % (key, val)
+
+print "Node %d sensor values:" % args.node
+print "  (Updated at %s)" % sensors_time
+for key, val in sorted(sensors.iteritems()):
+    print "  %s: %s" % (key, val)

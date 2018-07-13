@@ -21,7 +21,9 @@ class NodeControl():
 
     def get_sensors(self):
         """
-        Returns the sensor values inside the node. 
+        Returns the a tuple (timestamp, sensors), where
+        sensors is a dictionary of sensor values, and timestamp
+        is a string describing when the values were last updated in redis
         """
             
         timestamp = self.r.hget("status:node:%d"%self.node, "timestamp") 
@@ -29,14 +31,16 @@ class NodeControl():
         temp_top = float(self.r.hget("status:node:%d"%self.node,"temp_top"))
         temp_humid = float(self.r.hget("status:node:%d"%self.node,"temp_humid"))
         humid = float(self.r.hget("status:node:%d"%self.node,"humid"))
-        sensors = {'timestamp':timestamp,'temp_top':temp_top,'temp_mid':temp_mid,
+        sensors = {'temp_top':temp_top,'temp_mid':temp_mid,
                     'temp_humid':temp_humid,'humid':humid}
-        return sensors
+        return timestamp, sensors
 
 
     def get_power_status(self):
         """
-        Returns the current power status of SNAP relay, SNAPs, PAM and FEM. 
+        Returns the a tuple (timestamp, statii), where
+        statii is a dictionary of power status values, and timestamp
+        is a string describing when the values were last updated in redis
         """
 
         timestamp = self.r.hget("status:node:%d"%self.node, "timestamp") 
@@ -47,10 +51,16 @@ class NodeControl():
         power_snap_3 = self.r.hget("status:node:%d"%self.node,"power_snap_3")
         power_pam = self.r.hget("status:node:%d"%self.node,"power_pam")
         power_fem = self.r.hget("status:node:%d"%self.node,"power_fem")
-        statii = {'timestamp':timestamp,'power_snap_relay':power_snap_relay,'power_snap_0':power_snap_0,'power_snap_1':power_snap_1,'power_snap_2':power_snap_2,'power_snap_3':power_snap_3,
+        statii = {'power_snap_relay':power_snap_relay,'power_snap_0':power_snap_0,'power_snap_1':power_snap_1,'power_snap_2':power_snap_2,'power_snap_3':power_snap_3,
         'power_pam':power_pam,'power_fem':power_fem}
-        return statii
+        return timestamp, statii
 
+    def check_exists(self):
+        """
+        Check that the status key corresponding to this node exists.
+        Return True if it does, else False.
+        """
+        return "status:node:%d" % self.node in self.r.keys()
 
     # Power Control Methods 
     def power_snap_relay(self, command):
