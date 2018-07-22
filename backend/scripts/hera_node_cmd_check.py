@@ -31,7 +31,7 @@ s = {}
 if args.nodes is None:
     i = 0
     nodes = []
-    for key in r.scan_iter("status:*"):
+    for key in r.scan_iter("status:node:*"):
         nodes.append(int(r.hget(key,'node_ID')))
         s['node%d'%nodes[i]] = udpSender.UdpSender(r.hget(key,'ip'))
         r.hset('throttle:node:%d'%nodes[i],'last_command_sec',time.time())
