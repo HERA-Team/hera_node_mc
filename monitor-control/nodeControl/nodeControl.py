@@ -45,12 +45,20 @@ class NodeControl():
 
     def get_sensors(self):
         """
-        Returns the a tuple (timestamp, sensors), where
-        sensors is a dictionary of sensor values, and timestamp
-        is a string describing when the values were last updated in redis
+        Get the current node sensor values.
+
+        Returns a tuple `(timestamp, statii)`, where `timestamp` is a python `datetime` object
+        describing when the sensor values were last updated in redis, and `sensors` is a dictionary
+        of sensor values.
+
+        Valid sensor keywords are:
+            'temp_top' (float) : Temperature, in degrees C, reported by top node sensor.
+            'temp_mid' (float) : Temperature, in degrees C, reported by middle node sensor.
+            'temp_humid' (float) : Temperature, in degrees C, reported by humidity sensor.
+            'humid'      (float) : Relative Humidity, in percent, reported by humidity sensor.
         """
             
-        timestamp = self.r.hget("status:node:%d"%self.node, "timestamp") 
+        timestamp = dateutil.parser.parse(self.r.hget("status:node:%d"%self.node, "timestamp"))
         temp_mid = float(self.r.hget("status:node:%d"%self.node,"temp_mid"))
         temp_top = float(self.r.hget("status:node:%d"%self.node,"temp_top"))
         temp_humid = float(self.r.hget("status:node:%d"%self.node,"temp_humid"))
@@ -62,6 +70,8 @@ class NodeControl():
 
     def get_power_status(self):
         """
+        Get the current node power relay states.
+
         Returns a tuple `(timestamp, statii)`, where `timestamp` is a python `datetime` object
         describing when the values were last updated in redis, and `statii` is a dictionary
         of booleans for the various power switches the node can control. For each entry in this
