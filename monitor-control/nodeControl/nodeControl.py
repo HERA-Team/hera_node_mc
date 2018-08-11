@@ -1,5 +1,14 @@
 import redis
 import time
+import dateutil.parser
+
+def str2bool(x):
+    """
+    Convert the string `x` to a boolean.
+    :return: bool(x == '1')
+    """
+    return x == "1"
+        
         
 class NodeControl():
     """
@@ -23,6 +32,16 @@ class NodeControl():
         self.node = node    
         self.r = redis.StrictRedis(serverAddress)
 
+    def _get_raw_node_status(self):
+        """
+        Return the raw content of a node status hash in redis,
+        via redis's `hgetall` call. Data are returned as a dictionary,
+        where the keys are the redis hash fields (strings) and the
+        values are the stored values (strings).
+
+        :returns: Whatever key-value pairs exist for this node's `status:node` hash
+        """
+        return self.r.hgetall("status:node:%s" % self.node)
 
     def get_sensors(self):
         """
@@ -43,21 +62,28 @@ class NodeControl():
 
     def get_power_status(self):
         """
-        Returns the a tuple (timestamp, statii), where
-        statii is a dictionary of power status values, and timestamp
-        is a string describing when the values were last updated in redis
+        Returns a tuple `(timestamp, statii)`, where `timestamp` is a python `datetime` object
+        describing when the values were last updated in redis, and `statii` is a dictionary
+        of booleans for the various power switches the node can control. For each entry in this
+        dictionary, `True` indicates power is on, `False` indicates power is off.
+        
+        Valid power status keys are:
+          'power_fem' (Power of Front-End modules)
+          'power_pam' (Power of Post-amplifier modules)
+          'power_snap_0' (Power of first SNAP)
+          'power_snap_1' (Power of second SNAP)
+          'power_snap_2' (Power of third SNAP)
+          'power_snap_3' (Power of fourth SNAP)
+          'power_snap_relay' (Power of master SNAP relay)
         """
 
-        timestamp = self.r.hget("status:node:%d"%self.node, "timestamp") 
-        power_snap_relay = self.r.hget("status:node:%d"%self.node,"power_snap_relay")
-        power_snap_0 = self.r.hget("status:node:%d"%self.node,"power_snap_0")
-        power_snap_1 = self.r.hget("status:node:%d"%self.node,"power_snap_1")
-        power_snap_2 = self.r.hget("status:node:%d"%self.node,"power_snap_2")
-        power_snap_3 = self.r.hget("status:node:%d"%self.node,"power_snap_3")
-        power_pam = self.r.hget("status:node:%d"%self.node,"power_pam")
-        power_fem = self.r.hget("status:node:%d"%self.node,"power_fem")
-        statii = {'power_snap_relay':power_snap_relay,'power_snap_0':power_snap_0,'power_snap_1':power_snap_1,'power_snap_2':power_snap_2,'power_snap_3':power_snap_3,
-        'power_pam':power_pam,'power_fem':power_fem}
+        statii = self._get_raw_node_status()
+        timestamp = dateutil.parser.parse(statii["timestamp"])
+        for key in statii.keys():
+            if key.startswith("power"):
+                statii[key] = str2bool(statii[key])
+            else:
+                statii.pop(key)
         return timestamp, statii
 
     def check_exists(self):
@@ -67,7 +93,6 @@ class NodeControl():
         """
         return "status:node:%d" % self.node in self.r.keys()
 
-    # Power Control Methods 
     def power_snap_relay(self, command):
         """
         Takes in a string value of 'on' or 'off'.
