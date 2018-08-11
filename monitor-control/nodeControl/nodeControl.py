@@ -3,16 +3,21 @@ import time
         
 class NodeControl():
     """
-    This Class is used to control power to PAM, FEM, SNAPs 0 & 1 and 2 & 3 and get status information
-    through the Redis database running on the hera-digi-vm server.
+    This class is used to control power to PAM, FEM, and SNAP boards and get node status information
+    through a Redis database running on the correlator head node.
     """
 
     def __init__(self, node, serverAddress = "redishost"):
         """ 
-        Takes in the node argument, which is an integer value from
-        1 to eventually 30. It's set by the digital I/O card attached to the Power and Control Box.
-        Takes in the string ip address or the host name of the Redis database host server, default
-        is `redishost`. Returns the NodeControlClass object.
+        Create a NodeControl class instance to control a single node via the redis datastore
+        hosted at `serverAddress`.
+
+        :param node: The ID number of the node this instance of the NodeControl class will interact with.
+        :type node: Integer
+        :param serverAddress: The hostname, or dotted quad IP address, of the machine running the node
+                              control and monitoring redis server
+        :type serverAddress: String
+        :return: NodeControl instance
         """ 
 
         self.node = node    
