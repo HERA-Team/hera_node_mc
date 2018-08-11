@@ -9,9 +9,10 @@ See the 'Monitor and Control Subsystem Description' document for more details: h
 --recursive makes sure the git clone command downloads all the submodules. 
 ```shell
  cd monitor-control
- sudo python setup.py install 
+ pip install -r requirements.txt
+ python setup.py install 
 ```
-this installs the monitor-control package to your system, so you can import the nodeControl module and scripts from any directory. For example, running 'hera_node_turn_on.py 4 -p' from anywhere in your system will send 'on' command to the PAM inside node 4. 
+this installs the monitor-control package and it's dependencies (`redis` and `dateutil`) to your system, so you can import the nodeControl module and scripts from any directory. For example, running 'hera_node_turn_on.py 4 -p' from anywhere in your system will send 'on' command to the PAM inside node 4. 
 
 
 # Usage 
