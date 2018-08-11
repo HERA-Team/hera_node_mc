@@ -8,6 +8,25 @@ def str2bool(x):
     :return: bool(x == '1')
     """
     return x == "1"
+
+def get_valid_nodes(serverAddress = "redishost"):
+    """
+    Return a list of all node IDs which currently have status data
+    stored in the redis database hosted on `redishost`.
+
+    :param serverAddress: The hostname, or dotted quad IP address, of the machine running the node
+                          control and monitoring redis server
+    :type serverAddress: String
+    :return: List of integers representing the nodes whose status is currently available. Presence
+             of a node in this list just means that this node has is an associated `status:node` key in
+             redis. It does not mean the node is actively reporting.
+    """
+    valid_nodes = []
+    for key in redis.StrictRedis(serverAddress).keys():
+        if key.startswith("status:node"):
+            valid_nodes += [int(key.split(":")[2])]
+    return valid_nodes
+    
         
         
 class NodeControl():
