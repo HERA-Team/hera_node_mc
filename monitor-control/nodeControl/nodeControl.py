@@ -66,7 +66,7 @@ class NodeControl():
         """
         Get the current node sensor values.
 
-        Returns a tuple `(timestamp, statii)`, where `timestamp` is a python `datetime` object
+        Returns a tuple `(timestamp, sensors)`, where `timestamp` is a python `datetime` object
         describing when the sensor values were last updated in redis, and `sensors` is a dictionary
         of sensor values.
 
