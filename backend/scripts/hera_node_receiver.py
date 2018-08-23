@@ -95,6 +95,7 @@ try:
         'node_ID_metadata':unpacked_nodeID_metadata[0],
         'temp_top':round(unpacked_mcptemp_top[0],2),
         'temp_mid':round(unpacked_mcptemp_mid[0],2),
+        'temp_bot':round(unpacked_mcptemp_bot[0],2),
         'temp_humid':round(unpacked_htutemp[0],2),
         'humid':round(unpacked_htuhumid[0],2),
         'power_snap_relay': int(unpacked_snap_relay[0]),
