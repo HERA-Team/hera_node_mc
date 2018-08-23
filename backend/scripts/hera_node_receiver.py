@@ -5,6 +5,15 @@ pushes it up to Redis with status:node:x hash key.
 
 from __future__ import print_function
 
+def noneify(v, noneval=-99.0):
+    """
+    Return None if v==noneval. Else return v.
+    """
+    if v == noneval:
+        return None
+    else:
+        return v
+
 import datetime
 import struct
 import redis
@@ -49,42 +58,27 @@ try:
         data, addr =  client_socket.recvfrom(1024)
         # Arduino sends a Struct via UDP so unpacking is needed 
         # struct.unpack returns a tuple with one element
-        unpacked_cpu_uptime = struct.unpack('=L',data[0:4])
-        unpacked_mcptemp_top = struct.unpack('=f',data[4:8])
-        unpacked_mcptemp_mid = struct.unpack('=f',data[8:12])
-        unpacked_mcptemp_bot = struct.unpack('=f',data[12:16])
-        unpacked_htutemp = struct.unpack('=f',data[16:20])
-        unpacked_htuhumid = struct.unpack('=f',data[20:24])
-        unpacked_snap_relay = struct.unpack('=?',data[24])
-        unpacked_fem = struct.unpack('=?',data[25])
-        unpacked_pam = struct.unpack('=?',data[26])
-        unpacked_snapv2_0 = struct.unpack('=?',data[27])
-        unpacked_snapv2_1 = struct.unpack('=?',data[28])
-        unpacked_snapv2_2 = struct.unpack('=?',data[29])
-        unpacked_snapv2_3 = struct.unpack('=?',data[30])
+        unpacked_cpu_uptime = struct.unpack('=L',data[0:4])[0]
+        unpacked_mcptemp_top = noneify(round(struct.unpack('=f',data[4:8])[0], 2))
+        unpacked_mcptemp_mid = noneify(round(struct.unpack('=f',data[8:12])[0], 2))
+        unpacked_mcptemp_bot = noneify(round(struct.unpack('=f',data[12:16])[0], 2))
+        unpacked_htutemp     = noneify(round(struct.unpack('=f',data[16:20])[0], 2))
+        unpacked_htuhumid    = noneify(round(struct.unpack('=f',data[20:24])[0], 2))
+        unpacked_snap_relay  = int(struct.unpack('=?',data[24])[0])
+        unpacked_fem         = int(struct.unpack('=?',data[25])[0])
+        unpacked_pam         = int(struct.unpack('=?',data[26])[0])
+        unpacked_snapv2_0    = int(struct.unpack('=?',data[27])[0])
+        unpacked_snapv2_1    = int(struct.unpack('=?',data[28])[0])
+        unpacked_snapv2_2    = int(struct.unpack('=?',data[29])[0])
+        unpacked_snapv2_3    = int(struct.unpack('=?',data[30])[0])
         unpacked_mac[0]=hex(ord(struct.unpack('=s',data[31])[0]))
         unpacked_mac[1]=hex(ord(struct.unpack('=s',data[32])[0]))
-#        print(unpacked_cpu_uptime)
-#        print(unpacked_mcptemp_top)
-#        print(unpacked_mcptemp_mid)
-#        print(unpacked_mcptemp_bot)
-#        print(unpacked_htutemp)
-#        print(unpacked_htuhumid)
-#        print(unpacked_snap_relay)
-#        print(unpacked_fem)
-#        print(unpacked_pam)
-#        print(unpacked_snapv2_0)
-#        print(unpacked_snapv2_1)
-#        print(unpacked_snapv2_2)
-#        print(unpacked_snapv2_3)
-#        print(unpacked_mac[0])
-#        print(unpacked_mac[1])
         unpacked_mac[2]=hex(ord(struct.unpack('=s',data[33])[0]))
         unpacked_mac[3]=hex(ord(struct.unpack('=s',data[34])[0]))
         unpacked_mac[4]=hex(ord(struct.unpack('=s',data[35])[0]))
         unpacked_mac[5]=hex(ord(struct.unpack('=s',data[36])[0]))
         unpacked_nodeID = struct.unpack('=B',data[37])
-        unpacked_nodeID_metadata = struct.unpack('=B',data[38])
+        unpacked_nodeID_metadata = struct.unpack('=B',data[38])[0]
         
         node = unpacked_nodeID[0]
         mac_str = ':'.join((unpacked_mac[i][2:]).zfill(2) for i in range(len(unpacked_mac))) 
@@ -92,20 +86,20 @@ try:
         {'mac':mac_str,
         'ip':addr[0],
         'node_ID':node,
-        'node_ID_metadata':unpacked_nodeID_metadata[0],
-        'temp_top':round(unpacked_mcptemp_top[0],2),
-        'temp_mid':round(unpacked_mcptemp_mid[0],2),
-        'temp_bot':round(unpacked_mcptemp_bot[0],2),
-        'temp_humid':round(unpacked_htutemp[0],2),
-        'humid':round(unpacked_htuhumid[0],2),
-        'power_snap_relay': int(unpacked_snap_relay[0]),
-        'power_fem': int(unpacked_fem[0]),
-        'power_pam': int(unpacked_pam[0]),
-        'power_snap_0': int(unpacked_snapv2_0[0]),
-        'power_snap_1': int(unpacked_snapv2_1[0]),
-        'power_snap_2': int(unpacked_snapv2_2[0]),
-        'power_snap_3': int(unpacked_snapv2_3[0]),
-        'cpu_uptime_ms': unpacked_cpu_uptime[0],
+        'node_ID_metadata':unpacked_nodeID_metadata,
+        'temp_top': unpacked_mcptemp_top,
+        'temp_mid': unpacked_mcptemp_mid,
+        'temp_bot': unpacked_mcptemp_bot,
+        'temp_humid': unpacked_htutemp,
+        'humid': unpacked_htuhumid,
+        'power_snap_relay': unpacked_snap_relay,
+        'power_fem': unpacked_fem,
+        'power_pam': unpacked_pam,
+        'power_snap_0': unpacked_snapv2_0,
+        'power_snap_1': unpacked_snapv2_1,
+        'power_snap_2': unpacked_snapv2_2,
+        'power_snap_3': unpacked_snapv2_3,
+        'cpu_uptime_ms': unpacked_cpu_uptime,
         'timestamp':datetime.datetime.now()})
 
         #print(r.hgetall('status:node:%d'%node))
