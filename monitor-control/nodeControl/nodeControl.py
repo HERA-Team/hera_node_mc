@@ -51,6 +51,15 @@ class NodeControl():
         self.node = node    
         self.r = redis.StrictRedis(serverAddress)
 
+    def _conv_float(self, v):
+        """
+        Try and convert v into a float. If we can't, return None.
+        """
+        try:
+            return float(v)
+        except ValueError:
+            return None
+
     def _get_raw_node_status(self):
         """
         Return the raw content of a node status hash in redis,
@@ -69,21 +78,31 @@ class NodeControl():
         Returns a tuple `(timestamp, sensors)`, where `timestamp` is a python `datetime` object
         describing when the sensor values were last updated in redis, and `sensors` is a dictionary
         of sensor values.
+        If a sensor value is not available (e.g. because the sensor cannot be reached) it will be `None`
 
         Valid sensor keywords are:
             'temp_top' (float) : Temperature, in degrees C, reported by top node sensor.
             'temp_mid' (float) : Temperature, in degrees C, reported by middle node sensor.
+            'temp_bot' (float) : Temperature, in degrees C, reported by bottom node sensor.
             'temp_humid' (float) : Temperature, in degrees C, reported by humidity sensor.
             'humid'      (float) : Relative Humidity, in percent, reported by humidity sensor.
         """
             
-        timestamp = dateutil.parser.parse(self.r.hget("status:node:%d"%self.node, "timestamp"))
-        temp_mid = float(self.r.hget("status:node:%d"%self.node,"temp_mid"))
-        temp_top = float(self.r.hget("status:node:%d"%self.node,"temp_top"))
-        temp_humid = float(self.r.hget("status:node:%d"%self.node,"temp_humid"))
-        humid = float(self.r.hget("status:node:%d"%self.node,"humid"))
-        sensors = {'temp_top':temp_top,'temp_mid':temp_mid,
-                    'temp_humid':temp_humid,'humid':humid}
+        timestamp  = dateutil.parser.parse(self.r.hget("status:node:%d"%self.node, "timestamp"))
+        temp_bot   = self._conv_float(self.r.hget("status:node:%d"%self.node,"temp_bot"))
+        temp_mid   = self._conv_float(self.r.hget("status:node:%d"%self.node,"temp_mid"))
+        temp_top   = self._conv_float(self.r.hget("status:node:%d"%self.node,"temp_top"))
+        temp_humid = self._conv_float(self.r.hget("status:node:%d"%self.node,"temp_humid"))
+        humid      = self._conv_float(self.r.hget("status:node:%d"%self.node,"humid"))
+
+        sensors = {
+                    'temp_top':temp_top,
+                    'temp_mid':temp_mid,
+                    'temp_bot':temp_bot,
+                    'temp_humid':temp_humid,
+                    'humid':humid,
+                  }
+
         return timestamp, sensors
 
 
