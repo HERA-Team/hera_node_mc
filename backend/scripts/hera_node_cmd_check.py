@@ -11,7 +11,8 @@ import argparse
 import udpSender
 import time
 import sys
-
+import os
+import datetime
 
 parser = argparse.ArgumentParser(description = 'Takes in an optional argument of node array, ',
                                     formatter_class = argparse.ArgumentDefaultsHelpFormatter)
@@ -48,6 +49,10 @@ else:
 # not exceed the cmd_time_sec
 try:
     while True:
+        r.hmset("version:%s:%s" % (udpSender.__package__, os.path.basename(__file__)), {
+            "version" : udpSender.__version__,
+            "timestamp" : datetime.datetime.now().isoformat(),
+        })
         for node in nodes:
             if ((r.hget('commands:node:%d'%node, 'power_snap_relay_ctrl_trig')) == 'True'):
                 while ((time.time() - float(r.hget('throttle:node:%d'%node,'last_command_sec'))) < cmd_time_sec):

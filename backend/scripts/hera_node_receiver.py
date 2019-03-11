@@ -19,6 +19,8 @@ import struct
 import redis
 import socket
 import sys
+import os
+from udpSender import __version__, __package__
 
 # Define rcvPort for socket creation
 rcvPort = 8889
@@ -101,6 +103,9 @@ try:
         'power_snap_3': unpacked_snapv2_3,
         'cpu_uptime_ms': unpacked_cpu_uptime,
         'timestamp':datetime.datetime.now()})
+
+        # Write the version of this software to redis
+        r.hmset("version:%s:%s" % (__package__, os.path.basename(__file__)), {"version":__version__, "timestamp":datetime.datetime.now().isoformat()})
 
         #print(r.hgetall('status:node:%d'%node))
 

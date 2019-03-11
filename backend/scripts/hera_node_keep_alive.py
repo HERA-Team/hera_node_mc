@@ -9,8 +9,10 @@ from __future__ import print_function
 import time
 import redis
 import udpSender
+import os
 import sys
 import argparse
+import datetime
 
 parser = argparse.ArgumentParser(description = 'Takes in an optional argument of node array i.e."python hera_node_keep_alive.py  -n 0 4 \
 will send poke commands to nodes with IDs 0 and 4.', formatter_class = argparse.ArgumentDefaultsHelpFormatter)
@@ -46,6 +48,10 @@ else:
 # Sends poke signal to Arduinos inside the nodes
 try:
     while True:
+        r.hmset("version:%s:%s" % (udpSender.__package__, os.path.basename(__file__)), {
+            "version" : udpSender.__version__,
+            "timestamp" : datetime.datetime.now().isoformat(),
+        })
         while ((time.time() - float(r.hget('throttle:node:%d'%nodes[0],'last_poke_sec'))) < poke_time_sec):
             #print('Too soon to poke.')
             time.sleep(0.1)
