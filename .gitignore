@@ -1,0 +1,6 @@
+build/
+dist/
+*.pyc
+monitor-control/nodeControl/__version__.py
+backend/udpSender/__version__.py
+*.egg-info
