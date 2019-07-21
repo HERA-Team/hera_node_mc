@@ -84,24 +84,31 @@ class NodeControl():
             'temp_top' (float) : Temperature, in degrees C, reported by top node sensor.
             'temp_mid' (float) : Temperature, in degrees C, reported by middle node sensor.
             'temp_bot' (float) : Temperature, in degrees C, reported by bottom node sensor.
-            'temp_humid' (float) : Temperature, in degrees C, reported by humidity sensor.
-            'humid'      (float) : Relative Humidity, in percent, reported by humidity sensor.
+            'temp_humid'     (float) : Temperature, in degrees C, reported by humidity sensor.
+            'humid'          (float) : Relative Humidity, in percent, reported by humidity sensor.
+            'cpu_uptime_ms'  (int)   : Uptime of this node control module, in milliseconds
+            'ip'             (str)   : IP address of this node controler module, e.g. "10.1.1.123"
+            'mac'            (str)   : MAC address of this node controller module, e.g. "02:03:04:05:06:07"
         """
             
-        timestamp  = dateutil.parser.parse(self.r.hget("status:node:%d"%self.node, "timestamp"))
-        temp_bot   = self._conv_float(self.r.hget("status:node:%d"%self.node,"temp_bot"))
-        temp_mid   = self._conv_float(self.r.hget("status:node:%d"%self.node,"temp_mid"))
-        temp_top   = self._conv_float(self.r.hget("status:node:%d"%self.node,"temp_top"))
-        temp_humid = self._conv_float(self.r.hget("status:node:%d"%self.node,"temp_humid"))
-        humid      = self._conv_float(self.r.hget("status:node:%d"%self.node,"humid"))
-
-        sensors = {
-                    'temp_top':temp_top,
-                    'temp_mid':temp_mid,
-                    'temp_bot':temp_bot,
-                    'temp_humid':temp_humid,
-                    'humid':humid,
-                  }
+        stats = self.r.hgetall("status:node:%d"%self.node)
+        timestamp = dateutil.parser.parse(stats["timestamp"])
+        conv_methods = {
+            "temp_bot"       : float,
+            "temp_mid"       : float,
+            "temp_top"       : float,
+            "temp_humid"     : float,
+            "humid"          : float,
+            "ip"             : str,
+            "mac"            : str,
+            "cpu_uptime_ms"  : int,
+        }
+        sensors = {}
+        for key, convfunc in conv_methods.iteritems():
+            try:
+                sensors[key] = convfunc(stats[key])
+            except:
+                sensors[key] = None
 
         return timestamp, sensors
 
