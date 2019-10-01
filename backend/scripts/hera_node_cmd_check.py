@@ -17,8 +17,8 @@ import datetime
 def refresh_node_list(curr_nodes, redis_conn):
     new_node_list = {}
     for key in redis_conn.scan_iter("status:node:*"):
-        node_id = int(r.hget(key, 'node_ID'))
-        ip = r.hget(key, 'ip')
+        node_id = int(r.hget(key, 'node_ID').decode())
+        ip = r.hget(key, 'ip').decode()
         if node_id in list(curr_nodes.keys()):
             if ip == curr_nodes[node_id].arduinoAddress:
                 new_node_list[node_id] = curr_nodes[node_id]
@@ -61,7 +61,7 @@ try:
         })
         for node_id, node in nodes.items():
             if ((r.hget('commands:node:%d'%node_id, 'power_snap_relay_ctrl_trig').decode()) == 'True'):
-                while ((time.time() - float(r.hget('throttle:node:%d'%node_id,'last_command_sec'))) < cmd_time_sec):
+                while ((time.time() - float(r.hget('throttle:node:%d'%node_id,'last_command_sec').decode())) < cmd_time_sec):
                     #print('Command sent too soon, waiting 100ms and trying again...')
                     time.sleep(.1)
                 #print("Sent!")
@@ -74,7 +74,7 @@ try:
                 r.hset('throttle:node:%d'%node_id,'last_command_sec',time.time())
             
             if ((r.hget('commands:node:%d'%node_id, 'power_snap_0_ctrl_trig').decode()) == 'True'):
-                while ((time.time() - float(r.hget('throttle:node:%d'%node_id,'last_command_sec'))) < cmd_time_sec):
+                while ((time.time() - float(r.hget('throttle:node:%d'%node_id,'last_command_sec').decode())) < cmd_time_sec):
                     #print('Command sent too soon, waiting 100ms and trying again...')
                     time.sleep(.1)
                 #print("Sent!")
@@ -86,7 +86,7 @@ try:
                 r.hset('throttle:node:%d'%node_id,'last_command_sec',time.time())
 
             if ((r.hget('commands:node:%d'%node_id, 'power_snap_1_ctrl_trig').decode()) == 'True'):
-                while ((time.time() - float(r.hget('throttle:node:%d'%node_id,'last_command_sec'))) < cmd_time_sec):
+                while ((time.time() - float(r.hget('throttle:node:%d'%node_id,'last_command_sec').decode())) < cmd_time_sec):
                     #print('Command sent too soon, waiting 100ms and trying again...')
                     time.sleep(.1)
                 #print("Sent!")
@@ -122,11 +122,11 @@ try:
                 r.hset('throttle:node:%d'%node_id,'last_command_sec',time.time())
             
             if (r.hget('commands:node:%d'%node_id, 'power_fem_ctrl_trig').decode() == 'True'):
-                while ((time.time() - float(r.hget('throttle:node:%d'%node_id,'last_command_sec'))) < cmd_time_sec):
+                while ((time.time() - float(r.hget('throttle:node:%d'%node_id,'last_command_sec').decode())) < cmd_time_sec):
                     #print('Command sent too soon, waiting 100ms and trying again...')
                     time.sleep(.1)
                 #print("Sent!")
-                if (r.hget('commands:node:%d'%node_id, 'power_fem_cmd') == 'on'):
+                if (r.hget('commands:node:%d'%node_id, 'power_fem_cmd').decode() == 'on'):
                     node.power_fem('on')
                 else:
                     node.power_fem('off')
@@ -145,7 +145,7 @@ try:
                 r.hset('commands:node:%d'%node_id, 'power_pam_ctrl_trig', 'False')
                 r.hset('throttle:node:%d'%node_id,'last_command_sec',time.time())
 
-            if (r.hget('commands:node:%d'%node_id, 'reset') == 'True'):
+            if (r.hget('commands:node:%d'%node_id, 'reset').decode() == 'True'):
                 node.reset()
                 r.hset('commands:node:%d'%node_id, 'reset', 'False')
 
