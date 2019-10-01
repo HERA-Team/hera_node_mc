@@ -10,7 +10,7 @@ def noneify(v, noneval=-99.0):
     Return None if v==noneval. Else return v.
     """
     if v == noneval:
-        return None
+        return 'None'
     else:
         return v
 
@@ -66,26 +66,25 @@ try:
         unpacked_mcptemp_bot = noneify(round(struct.unpack('=f',data[12:16])[0], 2))
         unpacked_htutemp     = noneify(round(struct.unpack('=f',data[16:20])[0], 2))
         unpacked_htuhumid    = noneify(round(struct.unpack('=f',data[20:24])[0], 2))
-        unpacked_snap_relay  = int(struct.unpack('=?',data[24])[0])
-        unpacked_fem         = int(struct.unpack('=?',data[25])[0])
-        unpacked_pam         = int(struct.unpack('=?',data[26])[0])
-        unpacked_snapv2_0    = int(struct.unpack('=?',data[27])[0])
-        unpacked_snapv2_1    = int(struct.unpack('=?',data[28])[0])
-        unpacked_snapv2_2    = int(struct.unpack('=?',data[29])[0])
-        unpacked_snapv2_3    = int(struct.unpack('=?',data[30])[0])
-        unpacked_mac[0]=hex(ord(struct.unpack('=s',data[31])[0]))
-        unpacked_mac[1]=hex(ord(struct.unpack('=s',data[32])[0]))
-        unpacked_mac[2]=hex(ord(struct.unpack('=s',data[33])[0]))
-        unpacked_mac[3]=hex(ord(struct.unpack('=s',data[34])[0]))
-        unpacked_mac[4]=hex(ord(struct.unpack('=s',data[35])[0]))
-        unpacked_mac[5]=hex(ord(struct.unpack('=s',data[36])[0]))
-        unpacked_nodeID = struct.unpack('=B',data[37])
-        unpacked_nodeID_metadata = struct.unpack('=B',data[38])[0]
+        unpacked_snap_relay  = int(struct.unpack('=?',data[24:25])[0])
+        unpacked_fem         = int(struct.unpack('=?',data[25:26])[0])
+        unpacked_pam         = int(struct.unpack('=?',data[26:27])[0])
+        unpacked_snapv2_0    = int(struct.unpack('=?',data[27:28])[0])
+        unpacked_snapv2_1    = int(struct.unpack('=?',data[28:29])[0])
+        unpacked_snapv2_2    = int(struct.unpack('=?',data[29:30])[0])
+        unpacked_snapv2_3    = int(struct.unpack('=?',data[30:31])[0])
+        unpacked_mac[0]=hex(ord(struct.unpack('=s',data[31:32])[0]))
+        unpacked_mac[1]=hex(ord(struct.unpack('=s',data[32:33])[0]))
+        unpacked_mac[2]=hex(ord(struct.unpack('=s',data[33:34])[0]))
+        unpacked_mac[3]=hex(ord(struct.unpack('=s',data[34:35])[0]))
+        unpacked_mac[4]=hex(ord(struct.unpack('=s',data[35:36])[0]))
+        unpacked_mac[5]=hex(ord(struct.unpack('=s',data[36:37])[0]))
+        unpacked_nodeID = struct.unpack('=B',data[37:38])
+        unpacked_nodeID_metadata = struct.unpack('=B',data[38:39])[0]
         
         node = unpacked_nodeID[0]
         mac_str = ':'.join((unpacked_mac[i][2:]).zfill(2) for i in range(len(unpacked_mac))) 
-        r.hmset('status:node:%d'%node,
-        {'mac':mac_str,
+        data_dict = {'mac':mac_str,
         'ip':addr[0],
         'node_ID':node,
         'node_ID_metadata':unpacked_nodeID_metadata,
@@ -102,8 +101,10 @@ try:
         'power_snap_2': unpacked_snapv2_2,
         'power_snap_3': unpacked_snapv2_3,
         'cpu_uptime_ms': unpacked_cpu_uptime,
-        'timestamp':datetime.datetime.now()})
+        'timestamp':str(datetime.datetime.now()),
+        }
 
+        r.hmset('status:node:%d'%node, data_dict)
         # Write the version of this software to redis
         r.hmset("version:%s:%s" % (__package__, os.path.basename(__file__)), {"version":__version__, "timestamp":datetime.datetime.now().isoformat()})
 

@@ -8,7 +8,7 @@ import sys
 
 # Define PORT for socket creation
 serialPort = 8890
-serverAddress = '10.1.1.1'
+serverAddress = '10.80.2.1'
 
 # define socket address for binding; necessary for receiving data from Arduino 
 localSocket = (serverAddress, serialPort)

@@ -2,8 +2,9 @@
 Pokes Arduinos to ensure Arduino's connectivity to the server.
 It pokes either specified nodes with the -n argument or
 the nodes that have Redis status keys i.e. status:node:x where x is the node ID
-set by the I2C digital I/O cards plugged into PCBs.
+set by the I2C digital I/O cards plugged into PCBs.  
 """
+
 
 
 import time
@@ -14,9 +15,23 @@ import sys
 import argparse
 import datetime
 
-parser = argparse.ArgumentParser(description = 'Takes in an optional argument of node array i.e."python hera_node_keep_alive.py  -n 0 4 \
-will send poke commands to nodes with IDs 0 and 4.', formatter_class = argparse.ArgumentDefaultsHelpFormatter)
-parser.add_argument('-n', dest='nodes', type=int, nargs='+', help = 'List of node IDs to poke.')
+def refresh_node_list(curr_nodes, redis_conn):
+    new_node_list = {}
+    for key in redis_conn.scan_iter("status:node:*"):
+        node_id = int(r.hget(key, 'node_ID'))
+        ip = r.hget(key, 'ip')
+        if node_id in list(curr_nodes.keys()):
+            if ip == curr_nodes[node_id].arduinoAddress:
+                new_node_list[node_id] = curr_nodes[node_id]
+            else:
+                new_node_list[node_id] = udpSender.UdpSender(ip)
+                print("Updating IP address of node %d to %s" % (node_id, ip), file=sys.stderr)
+        else:
+            new_node_list[node_id] = udpSender.UdpSender(ip)
+            print("Adding node %d with ip %s" % (node_id, ip), file=sys.stderr)
+    return new_node_list
+
+parser = argparse.ArgumentParser(description = 'Send keepalive pokes to all nodes with a status entry in redis', formatter_class = argparse.ArgumentDefaultsHelpFormatter)
 parser.add_argument('-r', dest='redishost', type=str, default='redishost', help = 'IP or hostname string of host running the monitor redis server.')
 args = parser.parse_args()
 
@@ -27,38 +42,27 @@ poke_time_sec = 1
 
 # Define a dict of udpSender objects to send commands to Arduinos.
 # If nodes to check and throttle are specified, use those values.
-# If not, poke all the nodes that have Redis status:node:x keys.
-s = {}
-if args.nodes is None:
-    i = 0
-    nodes = []
-    for key in r.scan_iter("status:node:*"):
-        nodes.append(int(r.hget(key,'node_ID')))
-        s['node%d'%nodes[i]] = udpSender.UdpSender(r.hget(key,'ip'))
-        r.hset('throttle:node:%d'%nodes[i],'last_poke_sec',time.time())
-        i += 1
-    print("No node arguments were passed. Using nodes %s:"%nodes, file=sys.stderr)
-else:
-    nodes = args.nodes
-    for node in nodes:
-        s['node%d'%node] = udpSender.UdpSender(r.hget('status:node:%d'%node,'ip').decode())
-        r.hset('throttle:node:%d'%node,'last_poke_sec',time.time())
-    print("Passed node arguments %s:"%nodes, file=sys.stderr)
+# If not, poke all the nodes that have Redis status:node:x keys. 
+nodes = refresh_node_list({}, r)
+print("Using nodes %s:" % (list(nodes.keys())), file=sys.stderr)
 
 # Sends poke signal to Arduinos inside the nodes
 try:
     while True:
+        start_poke_time = time.time()
+        nodes = refresh_node_list(nodes, r)
         r.hmset("version:%s:%s" % (udpSender.__package__, os.path.basename(__file__)), {
             "version" : udpSender.__version__,
             "timestamp" : datetime.datetime.now().isoformat(),
         })
-        while ((time.time() - float(r.hget('throttle:node:%d'%nodes[0],'last_poke_sec').decode())) < poke_time_sec):
-            #print('Too soon to poke.')
-            time.sleep(0.1)
-        for node in nodes:
+        for node_id, node in nodes.items():
             #print("Poking node %d"%node)
-            s['node%d'%node].poke()
-            r.hset('throttle:node:%d'%node,'last_poke_sec',time.time())
+            node.poke()
+            r.hset('throttle:node:%d'%node_id,'last_poke_sec',time.time())
+        end_poke_time = time.time()
+        time_to_poke = end_poke_time - start_poke_time
+        if time_to_poke < poke_time_sec:
+            time.sleep(poke_time_sec - time_to_poke)
 
 except KeyboardInterrupt:
     print('Interrupted', file=sys.stderr)
