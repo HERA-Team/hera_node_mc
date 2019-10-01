@@ -28,6 +28,15 @@ def refresh_node_list(curr_nodes, redis_conn):
         else:
             new_node_list[node_id] = udpSender.UdpSender(ip)
             print("Adding node %d with ip %s" % (node_id, ip), file=sys.stderr)
+            # If this is a new node, default all the command triggers to idle
+            r.hset('commands:node:%d'%node_id, 'power_snap_relay_ctrl_trig', 'False')
+            r.hset('commands:node:%d'%node_id, 'power_snap_0_ctrl_trig', 'False')
+            r.hset('commands:node:%d'%node_id, 'power_snap_1_ctrl_trig', 'False')
+            r.hset('commands:node:%d'%node_id, 'power_snap_2_ctrl_trig', 'False')
+            r.hset('commands:node:%d'%node_id, 'power_snap_3_ctrl_trig', 'False')
+            r.hset('commands:node:%d'%node_id, 'power_fem_ctrl_trig', 'False')
+            r.hset('commands:node:%d'%node_id, 'power_pam_ctrl_trig', 'False')
+            r.hset('commands:node:%d'%node_id, 'reset', 'False')
     return new_node_list
 
 parser = argparse.ArgumentParser(description = 'Script to watch redis for commands and send them on to nodes',
