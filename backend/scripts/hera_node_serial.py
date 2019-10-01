@@ -19,16 +19,16 @@ try:
     # Set these options so multiple processes can connect to this socket
     client_socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
     print('Socket created')
-except socket.error, msg:
-    print('Failed to create socket. Error Code : ' + str(msg[0]) + ' Message ' + str(msg[1]))
+except socket.error as msg:
+    print(('Failed to create socket. Error Code : ' + str(msg[0]) + ' Message ' + str(msg[1])))
     sys.exit()
 
 # Bind socket to local host and port
 try:
     client_socket.bind(localSocket)
     print('Bound socket')
-except socket.error , msg:
-    print('Bind failed. Error Code : ' + str(msg[0]) + ' Message ' + msg[1])
+except socket.error as msg:
+    print(('Bind failed. Error Code : ' + str(msg[0]) + ' Message ' + msg[1]))
     sys.exit()
 
 try:
@@ -36,7 +36,7 @@ try:
         # Receive data continuously from all active Arduinos
         data, addr =  client_socket.recvfrom(2048)
         print(data)
-        print(datetime.datetime.now())
+        print((datetime.datetime.now()))
 except KeyboardInterrupt:
     print('Interrupted')
     sys.exit(0)

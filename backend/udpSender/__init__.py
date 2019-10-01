@@ -1,2 +1,2 @@
-from __version__ import __version__
-from udpSender import *
+from .__version__ import __version__
+from .udpSender import *

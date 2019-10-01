@@ -38,16 +38,16 @@ class UdpSender():
             # Make sure that specify that we want to reuse the socket address
             self.client_socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
             print('Socket created')
-        except socket.error, msg:
-            print('Failed to create socket. Error Code : ' + str(msg[0]) + ' Message ' + str(msg[1]))
+        except socket.error as msg:
+            print(('Failed to create socket. Error Code : ' + str(msg[0]) + ' Message ' + str(msg[1])))
             sys.exit()
 
         # Bind socket to local host and port
         try:
             self.client_socket.bind(self.localSocket)
             print('Bound socket')
-        except socket.error , msg:
-            print('Bind failed. Error Code : ' + str(msg[0]) + ' Message ' + msg[1])
+        except socket.error as msg:
+            print(('Bind failed. Error Code : ' + str(msg[0]) + ' Message ' + msg[1]))
             sys.exit()
 
     def poke(self):

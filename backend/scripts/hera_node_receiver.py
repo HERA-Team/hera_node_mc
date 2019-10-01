@@ -3,7 +3,7 @@ Receives UDP packets from all active Arduinos containing sensor data and status 
 pushes it up to Redis with status:node:x hash key. 
 """
 
-from __future__ import print_function
+
 
 def noneify(v, noneval=-99.0):
     """
@@ -42,7 +42,7 @@ try:
     # Set these options so multiple processes can connect to this socket
     client_socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
     print("Socket created", file=sys.stderr)
-except socket.error, msg:
+except socket.error as msg:
     print('Failed to create socket. Error Code : ' + str(msg[0]) + ' Message ' + str(msg[1]), file=sys.stderr)
     sys.exit()
 
@@ -50,7 +50,7 @@ except socket.error, msg:
 try:
     client_socket.bind(localSocket)
     print('Bound socket', file=sys.stderr)
-except socket.error , msg:
+except socket.error as msg:
     print('Bind failed. Error Code : ' + str(msg[0]) + ' Message ' + msg[1], file=sys.stderr)
     sys.exit()
 
