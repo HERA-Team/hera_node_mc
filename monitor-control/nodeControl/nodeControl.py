@@ -1,6 +1,8 @@
 import redis
 import time
 import dateutil.parser
+import datetime
+import json
 
 def str2bool(x):
     """
@@ -140,6 +142,135 @@ class NodeControl():
             else:
                 statii.pop(key)
         return timestamp, statii
+
+    def get_wr_status(self):
+        """
+        Get the current status of this node's White Rabbit endpoint (assumed to have hostname
+        `heraNode<node-number>wr`.
+
+        If no stats exist for this White Rabbit endpoint, returns `None`.
+
+        Otherwise Returns a tuple `(timestamp, statii)`, where `timestamp` is a python `datetime` object
+        describing when the values were last updated in redis, and `statii` is a dictionary
+        of status values.
+
+        If a status value is not available it will be `None`
+
+        Valid status keywords are:
+            'board_info_str' (str)      : A raw string representing the WR-LEN's response to the `ver` command.
+                                          Relevant parts of this string are individually unpacked in other entrise.
+            'aliases' (list of strings) : Hostname aliases of this node's WR-LEN
+            'ip' (str)                  : IP address of this node's WR-LEN
+            'mode' (str)                : WR-LEN operating mode (eg. "WRC_SLAVE_WR0")
+            'serial' (str)              : Canonical HERA hostname (~= serial number) of this node's WR-LEN
+            'temp' (float)              : WR-LEN temperature in degrees C
+            'sw_build_date' (datetime)  : Build date of WR-LEN software
+            'wr_gw_date' (datetime)     : WR-LEN gateware build date
+            'wr_gw_version' (str)       : WR-LEN gateware version number
+            'wr_gw_id' (str)            : WR-LEN gateware ID number
+            'wr_build' (str)            : WR-LEN build git hash
+            'wr_fru_custom' (str)   : Custom manufacturer tag'
+            'wr_fru_device' (str)   : Manufacturer device name designation
+            'wr_fru_fid' (datetime) : Manufacturer invoice(?) date
+            'wr_fru_partnum' (str)  : Manufacturer part number
+            'wr_fru_serial' (str)   : Manufacturer serial number
+            'wr_fru_vendor' (str)   : Vendor name
+            The following entries are prefixed `wr0` or `wr1` for WR-LEN ports 0 and 1, respectively.
+            Most values will only be not None for one of the two ports.
+            'wr[0|1]_ad'    (int)  : ???
+            'wr[0|1]_asym'  (int)  : Total link asymmetry (ps)
+            'wr[0|1]_aux'   (int)  : ??? Manual phase adjustment (ps)
+            'wr[0|1]_cko'   (int)  : Clock offset (ps)
+            'wr[0|1]_crtt'  (int)  : Cable round-trip delay (ps)
+            'wr[0|1]_dms'   (int)  : Master-Slave delay in (ps)
+            'wr[0|1]_drxm'  (int)  : Master RX PHY delay (ps)
+            'wr[0|1]_drxs'  (int)  : Slave RX PHY delay (ps)
+            'wr[0|1]_dtxm'  (int)  : Master TX PHY delay (ps)
+            'wr[0|1]_dtxs'  (int)  : Slave TX PHY delay (ps)
+            'wr[0|1]_hd'    (int)  : ???
+            'wr[0|1]_lnk'   (bool) : Link up state
+            'wr[0|1]_lock'  (bool) : Timing lock state
+            'wr[0|1]_md'    (int)  : ???
+            'wr[0|1]_mu'    (int)  : Round-trip time (ps)
+            'wr[0|1]_nsec'  (int)  : ???
+            'wr[0|1]_rx'    (int)  : Number of packets received
+            'wr[0|1]_setp'  (int)  : Phase setpoint (ps)
+            'wr[0|1]_ss'    (str)  : Servo state
+            'wr[0|1]_sv'    (int)  : ???
+            'wr[0|1]_syncs' (str)  : Source of synchronization (either 'wr0' or 'wr1')
+            'wr[0|1]_tx'    (int)  : Number of packets received
+            'wr[0|1]_ucnt'  (int)  : Update counter
+            'wr[0|1]_sec'   (datetime)  : Current TAI time
+        """
+
+        stats = self.r.hgetall("status:wr:heraNode%dwr" % self.node)
+        try:
+            timestamp = dateutil.parser.parse(stats["timestamp"])
+        except:
+            return None
+
+        conv_methods = {
+            'board_info_str' : str,
+            'aliases'        : json.loads,
+            'ip'             : str,
+            'mode'           : str,
+            'serial'         : str,
+            'temp'           : float,
+            'sw_build_date'  : dateutil.parser.parse,
+            'wr_gw_date'     : lambda x : dateutil.parser.parse('20' + x), #hack!
+            'wr_gw_version'  : str,
+            'wr_gw_id'       : str,
+            'wr_build'       : str,
+            'wr_fru_custom'  : str,
+            'wr_fru_device'  : str,
+            'wr_fru_fid'     : dateutil.parser.parse,
+            'wr_fru_partnum' : str,
+            'wr_fru_serial'  : str,
+            'wr_fru_vendor'  : str,
+            '_ad'          : int, 
+            '_asym'        : int, 
+            '_aux'         : int, 
+            '_cko'         : int, 
+            '_crtt'        : int, 
+            '_dms'         : int, 
+            '_drxm'        : int, 
+            '_drxs'        : int, 
+            '_dtxm'        : int, 
+            '_dtxs'        : int, 
+            '_hd'          : int, 
+            '_lnk'         : bool, 
+            '_lock'        : bool, 
+            '_md'          : int, 
+            '_mu'          : int, 
+            '_nsec'        : int, 
+            '_rx'          : int, 
+            '_setp'        : int, 
+            '_ss'          : int, 
+            '_sv'          : int, 
+            '_syncs'       : str,
+            '_tx'          : int, 
+            '_ucnt'        : int, 
+            '_sec'         : lambda x : datetime.datetime.fromtimestamp(int(x)), 
+        }
+
+        stats_formatted = {}
+
+        for key, convfunc in conv_methods.iteritems():
+            if key.startswith('_'):
+                for i in range(2):
+                    port_key = ('wr%d' % i) + key
+                    try:
+                        stats_formatted[port_key] = convfunc(stats[port_key])
+                    except:
+                        stats_formatted[port_key] = None
+            else:
+                try:
+                    stats_formatted[key] = convfunc(stats[key])
+                except:
+                    stats_formatted[key] = None
+
+        return timestamp, stats_formatted
+
 
     def check_exists(self):
         """
