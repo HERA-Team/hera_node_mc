@@ -22,6 +22,9 @@ import sys
 import os
 from udpSender import __version__, __package__
 
+hostname = socket.gethostname()
+script_redis_key = "status:script:%s:%s" % (hostname, __file__)
+
 # Define rcvPort for socket creation
 rcvPort = 8889
 serverAddress = '0.0.0.0'
@@ -56,6 +59,7 @@ except socket.error as msg:
 
 try:
     while True:
+        r.set(script_redis_key, "alive", ex=60)
         # Receive data continuously from the server (Arduino in this case)
         data, addr =  client_socket.recvfrom(1024)
         # Arduino sends a Struct via UDP so unpacking is needed 

@@ -13,6 +13,7 @@ import time
 import sys
 import os
 import datetime
+import socket
 
 def refresh_node_list(curr_nodes, redis_conn):
     new_node_list = {}
@@ -38,6 +39,9 @@ def refresh_node_list(curr_nodes, redis_conn):
             r.hset('commands:node:%d'%node_id, 'power_pam_ctrl_trig', 'False')
             r.hset('commands:node:%d'%node_id, 'reset', 'False')
     return new_node_list
+
+hostname = socket.gethostname()
+script_redis_key = "status:script:%s:%s" % (hostname, __file__)
 
 parser = argparse.ArgumentParser(description = 'Script to watch redis for commands and send them on to nodes',
                                     formatter_class = argparse.ArgumentDefaultsHelpFormatter)
@@ -68,6 +72,8 @@ try:
             "version" : udpSender.__version__,
             "timestamp" : datetime.datetime.now().isoformat(),
         })
+        r.set(script_redis_key, "alive", ex=60)
+
         for node_id, node in nodes.items():
             if ((r.hget('commands:node:%d'%node_id, 'power_snap_relay_ctrl_trig').decode()) == 'True'):
                 while ((time.time() - float(r.hget('throttle:node:%d'%node_id,'last_command_sec').decode())) < cmd_time_sec):

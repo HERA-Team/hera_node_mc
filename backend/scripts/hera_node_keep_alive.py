@@ -14,6 +14,7 @@ import os
 import sys
 import argparse
 import datetime
+import socket
 
 def refresh_node_list(curr_nodes, redis_conn):
     new_node_list = {}
@@ -30,6 +31,9 @@ def refresh_node_list(curr_nodes, redis_conn):
             new_node_list[node_id] = udpSender.UdpSender(ip)
             print("Adding node %d with ip %s" % (node_id, ip), file=sys.stderr)
     return new_node_list
+
+hostname = socket.gethostname()
+script_redis_key = "status:script:%s:%s" % (hostname, __file__)
 
 parser = argparse.ArgumentParser(description = 'Send keepalive pokes to all nodes with a status entry in redis', formatter_class = argparse.ArgumentDefaultsHelpFormatter)
 parser.add_argument('-r', dest='redishost', type=str, default='redishost', help = 'IP or hostname string of host running the monitor redis server.')
@@ -49,6 +53,7 @@ print("Using nodes %s:" % (list(nodes.keys())), file=sys.stderr)
 # Sends poke signal to Arduinos inside the nodes
 try:
     while True:
+        r.set(script_redis_key, "alive", ex=60)
         start_poke_time = time.time()
         nodes = refresh_node_list(nodes, r)
         r.hmset("version:%s:%s" % (udpSender.__package__, os.path.basename(__file__)), {
