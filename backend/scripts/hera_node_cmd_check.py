@@ -38,6 +38,7 @@ def refresh_node_list(curr_nodes, redis_conn):
             r.hset('commands:node:%d'%node_id, 'power_fem_ctrl_trig', 'False')
             r.hset('commands:node:%d'%node_id, 'power_pam_ctrl_trig', 'False')
             r.hset('commands:node:%d'%node_id, 'reset', 'False')
+            r.hset('throttle:node:%d'%node_id, 'last_command_sec', '0')
     return new_node_list
 
 hostname = socket.gethostname()
