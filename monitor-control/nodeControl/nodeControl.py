@@ -157,7 +157,7 @@ class NodeControl():
 
         Valid status keywords are:
             'board_info_str' (str)      : A raw string representing the WR-LEN's response to the `ver` command.
-                                          Relevant parts of this string are individually unpacked in other entrise.
+                                          Relevant parts of this string are individually unpacked in other entries.
             'aliases' (list of strings) : Hostname aliases of this node's WR-LEN
             'ip' (str)                  : IP address of this node's WR-LEN
             'mode' (str)                : WR-LEN operating mode (eg. "WRC_SLAVE_WR0")
@@ -197,7 +197,7 @@ class NodeControl():
             'wr[0|1]_ss'    (str)  : Servo state
             'wr[0|1]_sv'    (int)  : ???
             'wr[0|1]_syncs' (str)  : Source of synchronization (either 'wr0' or 'wr1')
-            'wr[0|1]_tx'    (int)  : Number of packets received
+            'wr[0|1]_tx'    (int)  : Number of packets transmitted
             'wr[0|1]_ucnt'  (int)  : Update counter
             'wr[0|1]_sec'   (datetime)  : Current TAI time
         """
