@@ -24,13 +24,12 @@ def get_valid_nodes(serverAddress = "redishost"):
              redis. It does not mean the node is actively reporting.
     """
     valid_nodes = []
-    for key in redis.StrictRedis(serverAddress).keys():
-        if key.startswith("status:node"):
-            valid_nodes += [int(key.split(":")[2])]
+    for key in list(redis.StrictRedis(serverAddress).scan_iter("status:node:*")):
+        valid_nodes += [int(key.decode().split(":")[2])]
     return valid_nodes
-    
-        
-        
+
+
+
 class NodeControl():
     """
     This class is used to control power to PAM, FEM, and SNAP boards and get node status information
@@ -38,7 +37,7 @@ class NodeControl():
     """
 
     def __init__(self, node, serverAddress = "redishost"):
-        """ 
+        """
         Create a NodeControl class instance to control a single node via the redis datastore
         hosted at `serverAddress`.
 
@@ -48,9 +47,9 @@ class NodeControl():
                               control and monitoring redis server
         :type serverAddress: String
         :return: NodeControl instance
-        """ 
+        """
 
-        self.node = node    
+        self.node = node
         self.r = redis.StrictRedis(serverAddress)
 
     def _conv_float(self, v):
@@ -71,7 +70,7 @@ class NodeControl():
 
         :returns: Whatever key-value pairs exist for this node's `status:node` hash
         """
-        return self.r.hgetall("status:node:%s" % self.node)
+        return {key.decode(): val.decode() for key, val in self.r.hgetall("status:node:%s" % self.node).items()}
 
     def get_sensors(self):
         """
@@ -92,8 +91,8 @@ class NodeControl():
             'ip'             (str)   : IP address of this node controler module, e.g. "10.1.1.123"
             'mac'            (str)   : MAC address of this node controller module, e.g. "02:03:04:05:06:07"
         """
-            
-        stats = self.r.hgetall("status:node:%d"%self.node)
+
+        stats = {key.decode(): val.decode() for key, val in self.r.hgetall("status:node:%d"%self.node).items()}
         timestamp = dateutil.parser.parse(stats["timestamp"])
         conv_methods = {
             "temp_bot"       : float,
@@ -106,7 +105,7 @@ class NodeControl():
             "cpu_uptime_ms"  : int,
         }
         sensors = {}
-        for key, convfunc in conv_methods.iteritems():
+        for key, convfunc in conv_methods.items():
             try:
                 sensors[key] = convfunc(stats[key])
             except:
@@ -123,7 +122,7 @@ class NodeControl():
         describing when the values were last updated in redis, and `statii` is a dictionary
         of booleans for the various power switches the node can control. For each entry in this
         dictionary, `True` indicates power is on, `False` indicates power is off.
-        
+
         Valid power status keys are:
           'power_fem' (Power of Front-End modules)
           'power_pam' (Power of Post-amplifier modules)
@@ -136,7 +135,7 @@ class NodeControl():
 
         statii = self._get_raw_node_status()
         timestamp = dateutil.parser.parse(statii["timestamp"])
-        for key in statii.keys():
+        for key in list(statii.keys()):
             if key.startswith("power"):
                 statii[key] = str2bool(statii[key])
             else:
@@ -277,7 +276,7 @@ class NodeControl():
         Check that the status key corresponding to this node exists.
         Return True if it does, else False.
         """
-        return "status:node:%d" % self.node in self.r.keys()
+        return self.r.exists("status:node:%d" % self.node) > 0
 
     def power_snap_relay(self, command):
         """
@@ -286,9 +285,9 @@ class NodeControl():
         has to be turn on before sending commands to individual SNAPs.
         """
 
-        self.r.hset("commands:node:%d"%self.node,"power_snap_relay_ctrl_trig",True)
+        self.r.hset("commands:node:%d"%self.node,"power_snap_relay_ctrl_trig","True")
         self.r.hset("commands:node:%d"%self.node,"power_snap_relay_cmd",command)
-        print("SNAP relay power is %s"%command)
+        print(("SNAP relay power is %s"%command))
 
 
     def power_snap_0(self, command):
@@ -297,9 +296,9 @@ class NodeControl():
         Controls the power to SNAP 0.
         """
 
-        self.r.hset("commands:node:%d"%self.node,"power_snap_0_ctrl_trig",True)
+        self.r.hset("commands:node:%d"%self.node,"power_snap_0_ctrl_trig","True")
         self.r.hset("commands:node:%d"%self.node,"power_snap_0_cmd",command)
-        print("SNAP 0 power is %s"%command)
+        print(("SNAP 0 power is %s"%command))
 
 
     def power_snap_1(self, command):
@@ -308,9 +307,9 @@ class NodeControl():
         Controls the power to SNAP 1.
         """
 
-        self.r.hset("commands:node:%d"%self.node,"power_snap_1_ctrl_trig",True)
+        self.r.hset("commands:node:%d"%self.node,"power_snap_1_ctrl_trig","True")
         self.r.hset("commands:node:%d"%self.node,"power_snap_1_cmd",command)
-        print("SNAP 1 power is %s"%command)
+        print(("SNAP 1 power is %s"%command))
 
 
     def power_snap_2(self, command):
@@ -319,9 +318,9 @@ class NodeControl():
         Controls the power to SNAP 2.
         """
 
-        self.r.hset("commands:node:%d"%self.node,"power_snap_2_ctrl_trig",True)
+        self.r.hset("commands:node:%d"%self.node,"power_snap_2_ctrl_trig","True")
         self.r.hset("commands:node:%d"%self.node,"power_snap_2_cmd",command)
-        print("SNAP 2 power is %s"%command)
+        print(("SNAP 2 power is %s"%command))
 
 
     def power_snap_3(self, command):
@@ -330,9 +329,9 @@ class NodeControl():
         Controls the power to SNAP 3.
         """
 
-        self.r.hset("commands:node:%d"%self.node,"power_snap_3_ctrl_trig",True)
+        self.r.hset("commands:node:%d"%self.node,"power_snap_3_ctrl_trig","True")
         self.r.hset("commands:node:%d"%self.node,"power_snap_3_cmd",command)
-        print("SNAP 3 power is %s"%command)
+        print(("SNAP 3 power is %s"%command))
 
 
     def power_fem(self, command):
@@ -341,9 +340,9 @@ class NodeControl():
         Controls the power to FEM.
         """
 
-        self.r.hset("commands:node:%d"%self.node,"power_fem_ctrl_trig",True)
+        self.r.hset("commands:node:%d"%self.node,"power_fem_ctrl_trig","True")
         self.r.hset("commands:node:%d"%self.node,"power_fem_cmd",command)
-        print("FEM power is %s"%command)
+        print(("FEM power is %s"%command))
 
 
     def power_pam(self, command):
@@ -352,17 +351,17 @@ class NodeControl():
         Controls the power to PAM.
         """
 
-        self.r.hset("commands:node:%d"%self.node,"power_pam_ctrl_trig",True)
+        self.r.hset("commands:node:%d"%self.node,"power_pam_ctrl_trig","True")
         self.r.hset("commands:node:%d"%self.node,"power_pam_cmd",command)
-        print("PAM power is %s"%command)
+        print(("PAM power is %s"%command))
 
 
     def reset(self):
         """
-        Sends the reset command to Arduino which restarts the bootloader. 
+        Sends the reset command to Arduino which restarts the bootloader.
         """
 
-        self.r.hset("commands:node:%d"%self.node,"reset",True)
+        self.r.hset("commands:node:%d"%self.node,"reset","True")
         print("Arduino is resetting...")
-     
+
 
