@@ -254,7 +254,7 @@ class NodeControl():
 
         stats_formatted = {}
 
-        for key, convfunc in conv_methods.iteritems():
+        for key, convfunc in conv_methods.items():
             if key.startswith('_'):
                 for i in range(2):
                     port_key = ('wr%d' % i) + key
