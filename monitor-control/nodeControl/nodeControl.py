@@ -202,7 +202,7 @@ class NodeControl():
             'wr[0|1]_sec'   (int)  : Current TAI time in seconds from UNIX epoch
         """
 
-        stats = self.r.hgetall("status:wr:heraNode%dwr" % self.node)
+        stats = {key.decode(): val.decode() for key, val in self.r.hgetall("status:wr:heraNode%dwr" % self.node).items()}
         try:
             timestamp = dateutil.parser.parse(stats["timestamp"])
         except:
@@ -226,29 +226,29 @@ class NodeControl():
             'wr_fru_partnum' : str,
             'wr_fru_serial'  : str,
             'wr_fru_vendor'  : str,
-            '_ad'          : int, 
-            '_asym'        : int, 
-            '_aux'         : int, 
-            '_cko'         : int, 
-            '_crtt'        : int, 
-            '_dms'         : int, 
-            '_drxm'        : int, 
-            '_drxs'        : int, 
-            '_dtxm'        : int, 
-            '_dtxs'        : int, 
-            '_hd'          : int, 
-            '_lnk'         : bool, 
-            '_lock'        : bool, 
-            '_md'          : int, 
-            '_mu'          : int, 
-            '_nsec'        : int, 
-            '_rx'          : int, 
-            '_setp'        : int, 
+            '_ad'          : int,
+            '_asym'        : int,
+            '_aux'         : int,
+            '_cko'         : int,
+            '_crtt'        : int,
+            '_dms'         : int,
+            '_drxm'        : int,
+            '_drxs'        : int,
+            '_dtxm'        : int,
+            '_dtxs'        : int,
+            '_hd'          : int,
+            '_lnk'         : bool,
+            '_lock'        : bool,
+            '_md'          : int,
+            '_mu'          : int,
+            '_nsec'        : int,
+            '_rx'          : int,
+            '_setp'        : int,
             '_ss'          : str,
-            '_sv'          : int, 
+            '_sv'          : int,
             '_syncs'       : str,
-            '_tx'          : int, 
-            '_ucnt'        : int, 
+            '_tx'          : int,
+            '_ucnt'        : int,
             '_sec'         : int,
         }
 
