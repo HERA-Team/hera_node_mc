@@ -244,7 +244,7 @@ class NodeControl():
             '_nsec'        : int, 
             '_rx'          : int, 
             '_setp'        : int, 
-            '_ss'          : int, 
+            '_ss'          : str,
             '_sv'          : int, 
             '_syncs'       : str,
             '_tx'          : int, 
