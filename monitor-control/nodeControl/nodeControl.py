@@ -199,7 +199,7 @@ class NodeControl():
             'wr[0|1]_syncs' (str)  : Source of synchronization (either 'wr0' or 'wr1')
             'wr[0|1]_tx'    (int)  : Number of packets transmitted
             'wr[0|1]_ucnt'  (int)  : Update counter
-            'wr[0|1]_sec'   (datetime)  : Current TAI time
+            'wr[0|1]_sec'   (int)  : Current TAI time in seconds from UNIX epoch
         """
 
         stats = self.r.hgetall("status:wr:heraNode%dwr" % self.node)
@@ -249,7 +249,7 @@ class NodeControl():
             '_syncs'       : str,
             '_tx'          : int, 
             '_ucnt'        : int, 
-            '_sec'         : lambda x : datetime.datetime.fromtimestamp(int(x)), 
+            '_sec'         : int,
         }
 
         stats_formatted = {}
