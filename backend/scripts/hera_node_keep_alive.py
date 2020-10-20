@@ -2,10 +2,8 @@
 Pokes Arduinos to ensure Arduino's connectivity to the server.
 It pokes either specified nodes with the -n argument or
 the nodes that have Redis status keys i.e. status:node:x where x is the node ID
-set by the I2C digital I/O cards plugged into PCBs.  
+set by the I2C digital I/O cards plugged into PCBs.
 """
-
-
 
 import time
 import redis
@@ -16,10 +14,14 @@ import argparse
 import datetime
 import socket
 
+
 def refresh_node_list(curr_nodes, redis_conn):
     new_node_list = {}
     for key in redis_conn.scan_iter("status:node:*"):
-        node_id = int(r.hget(key, 'node_ID'))
+        try:
+            node_id = int(r.hget(key, 'node_ID'))
+        except ValueError:
+            continue
         ip = r.hget(key, 'ip')
         if node_id in list(curr_nodes.keys()):
             if ip == curr_nodes[node_id].arduinoAddress:
@@ -46,7 +48,7 @@ poke_time_sec = 1
 
 # Define a dict of udpSender objects to send commands to Arduinos.
 # If nodes to check and throttle are specified, use those values.
-# If not, poke all the nodes that have Redis status:node:x keys. 
+# If not, poke all the nodes that have Redis status:node:x keys.
 nodes = refresh_node_list({}, r)
 print("Using nodes %s:" % (list(nodes.keys())), file=sys.stderr)
 
@@ -72,16 +74,3 @@ try:
 except KeyboardInterrupt:
     print('Interrupted', file=sys.stderr)
     sys.exit(0)
-
-
-
-
-
-
-
-
-
-
-
-
-

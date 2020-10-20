@@ -1,13 +1,13 @@
 """
-Checks Redis for commands sent by the monitor-control user. 
-Makes sure commands are spaced out properly to prevent rapid power cycling and 
+Checks Redis for commands sent by the monitor-control user.
+Makes sure commands are spaced out properly to prevent rapid power cycling and
 turning everything on at once. Uses throttle:node:x flag to enforce a 2 second delay
 between commands. Checks for command triggers inside the commands:status:node key.
 """
 
 
 import redis
-import argparse 
+import argparse
 import udpSender
 import time
 import sys
@@ -15,10 +15,14 @@ import os
 import datetime
 import socket
 
+
 def refresh_node_list(curr_nodes, redis_conn):
     new_node_list = {}
     for key in redis_conn.scan_iter("status:node:*"):
-        node_id = int(r.hget(key, 'node_ID').decode())
+        try:
+            node_id = int(r.hget(key, 'node_ID').decode())
+        except ValueError:
+            continue
         ip = r.hget(key, 'ip').decode()
         if node_id in list(curr_nodes.keys()):
             if ip == curr_nodes[node_id].arduinoAddress:
@@ -53,14 +57,14 @@ r = redis.StrictRedis(host="redishost")
 
 # Time between checks for new commands
 cmd_check_sec = 0.05
-# Time to wait between commands 
+# Time to wait between commands
 cmd_time_sec = 2
 # Time between checks for new / changed nodes
 node_refresh_sec = 10
 
 # Define a dict of udpSender objects to send commands to Arduinos.
 # If nodes to check and throttle are specified, use those values.
-# If not, use all the nodes that have Redis entries. 
+# If not, use all the nodes that have Redis entries.
 nodes = refresh_node_list({}, r)
 last_node_refresh_time = time.time()
 print("Using nodes %s:" % (list(nodes.keys())), file=sys.stderr)
@@ -82,13 +86,13 @@ try:
                     time.sleep(.1)
                 #print("Sent!")
                 if ((r.hget('commands:node:%d'%node_id, 'power_snap_relay_cmd').decode()) == 'on'):
-                    node.power_snap_relay('on') 
-                else: 
-                    node.power_snap_relay('off') 
+                    node.power_snap_relay('on')
+                else:
+                    node.power_snap_relay('off')
                 r.hset('commands:node:%d'%node_id, 'power_snap_relay_ctrl_trig', 'False')
                 # reset the last command flag
                 r.hset('throttle:node:%d'%node_id,'last_command_sec',time.time())
-            
+
             if ((r.hget('commands:node:%d'%node_id, 'power_snap_0_ctrl_trig').decode()) == 'True'):
                 while ((time.time() - float(r.hget('throttle:node:%d'%node_id,'last_command_sec').decode())) < cmd_time_sec):
                     #print('Command sent too soon, waiting 100ms and trying again...')
@@ -136,7 +140,7 @@ try:
                     node.power_snap_3('off')
                 r.hset('commands:node:%d'%node_id, 'power_snap_3_ctrl_trig', 'False')
                 r.hset('throttle:node:%d'%node_id,'last_command_sec',time.time())
-            
+
             if (r.hget('commands:node:%d'%node_id, 'power_fem_ctrl_trig').decode() == 'True'):
                 while ((time.time() - float(r.hget('throttle:node:%d'%node_id,'last_command_sec').decode())) < cmd_time_sec):
                     #print('Command sent too soon, waiting 100ms and trying again...')
