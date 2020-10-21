@@ -34,11 +34,15 @@ def refresh_node_list(curr_nodes, redis_conn):
             print("Adding node %d with ip %s" % (node_id, ip), file=sys.stderr)
     return new_node_list
 
+
 hostname = socket.gethostname()
 script_redis_key = "status:script:%s:%s" % (hostname, __file__)
 
-parser = argparse.ArgumentParser(description = 'Send keepalive pokes to all nodes with a status entry in redis', formatter_class = argparse.ArgumentDefaultsHelpFormatter)
-parser.add_argument('-r', dest='redishost', type=str, default='redishost', help = 'IP or hostname string of host running the monitor redis server.')
+parser = argparse.ArgumentParser(description='Send keepalive pokes to all nodes with '
+                                 'a status entry in redis',
+                                 formatter_class=argparse.ArgumentDefaultsHelpFormatter)
+parser.add_argument('-r', dest='redishost', type=str, default='redishost',
+                    help='IP or hostname string of host running the monitor redis server.')
 args = parser.parse_args()
 
 r = redis.StrictRedis(host=args.redishost)
@@ -59,13 +63,13 @@ try:
         start_poke_time = time.time()
         nodes = refresh_node_list(nodes, r)
         r.hmset("version:%s:%s" % (udpSender.__package__, os.path.basename(__file__)), {
-            "version" : udpSender.__version__,
-            "timestamp" : datetime.datetime.now().isoformat(),
+            "version": udpSender.__version__,
+            "timestamp": datetime.datetime.now().isoformat(),
         })
         for node_id, node in nodes.items():
-            #print("Poking node %d"%node)
+            # print("Poking node %d"%node)
             node.poke()
-            r.hset('throttle:node:%d'%node_id,'last_poke_sec',time.time())
+            r.hset('throttle:node:%d' % node_id, 'last_poke_sec', time.time())
         end_poke_time = time.time()
         time_to_poke = end_poke_time - start_poke_time
         if time_to_poke < poke_time_sec:
