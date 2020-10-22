@@ -1,10 +1,6 @@
 import time
-import datetime
-import struct
-import redis
 import socket
 import sys
-import smtplib
 
 
 # Define sendPort for socket creation
@@ -16,21 +12,28 @@ serverAddress = '0.0.0.0'
 class UdpSender():
     """
     This class is used for sending UDP commands to Arduino directly.
-    Has ability to turn on/off FEM, PAM, relay and SNAPs. Could also reset the Arduino bootloader. 
+    Has ability to turn on/off FEM, PAM, relay and SNAPs. Could also reset the
+    Arduino bootloader.
     """
 
-    def __init__(self, arduinoAddress):
+    def __init__(self, arduinoAddress, throttle=2.):
         """
         Takes in the arduino IP address and sends commands directly, using udp.
         You have to be on the hera-digi-vm server to use it, otherwise use
         the nodeControl class to send commands via Redis.
-        """
 
+        Parameters
+        ----------
+        arduinoAddress : str
+            IP address of desired arduino
+        throttle : float
+            Delay time in seconds
+        """
+        self.throttle = throttle
         self.arduinoAddress = arduinoAddress
 
-        # define socket address for binding; necessary for receiving data from Arduino 
+        # define socket address for binding; necessary for receiving data from Arduino
         self.localSocket = (serverAddress, sendPort)
-
 
         # Create a UDP socket
         try:
@@ -39,7 +42,8 @@ class UdpSender():
             self.client_socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
             print('Socket created')
         except socket.error as msg:
-            print(('Failed to create socket. Error Code : ' + str(msg[0]) + ' Message ' + str(msg[1])))
+            print('Failed to create socket. Error Code : {}  Message {}'
+                  .format(str(msg[0]), str(msg[1])))
             sys.exit()
 
         # Bind socket to local host and port
@@ -47,13 +51,13 @@ class UdpSender():
             self.client_socket.bind(self.localSocket)
             print('Bound socket')
         except socket.error as msg:
-            print(('Bind failed. Error Code : ' + str(msg[0]) + ' Message ' + msg[1]))
+            print('Bind failed. Error Code : {}  Message {}'.format(str(msg[0]), msg[1]))
             sys.exit()
 
     def poke(self):
         """
         Sends poke commands to the Arduino. Used by hera_node_keep_alive script
-        to send keep Arduinos from resetting. 
+        to send keep Arduinos from resetting.
         """
 
         arduinoSocket = (self.arduinoAddress, sendPort)
@@ -62,16 +66,20 @@ class UdpSender():
     def power_snap_relay(self, command):
         """
         Takes in a string value of 'on' or 'off'.
-        Controls the power to SNAP relay, must be turned on first before gaining 
-        control over individual SNAPs. 
+        Controls the power to SNAP relay, must be turned on first before gaining
+        control over individual SNAPs.
         """
+
+        command = command.lower()
+        if not self.check_command(command, allowed=['on', 'off']):
+            return
 
         # define arduino socket to send requests
         arduinoSocket = (self.arduinoAddress, sendPort)
-        self.client_socket.sendto(('snapRelay_%s'%command).encode(), arduinoSocket)
+        self.client_socket.sendto(('snapRelay_%s' % command).encode(), arduinoSocket)
 
         # Set delay before receiving more data
-        time.sleep(2)
+        time.sleep(self.throttle)
 
     def power_fem(self, command):
         """
@@ -79,12 +87,16 @@ class UdpSender():
         Controls the power to FEM.
         """
 
+        command = command.lower()
+        if not self.check_command(command, allowed=['on', 'off']):
+            return
+
         # define arduino socket to send requests
         arduinoSocket = (self.arduinoAddress, sendPort)
-        self.client_socket.sendto(('FEM_%s'%command).encode(), arduinoSocket)
+        self.client_socket.sendto(('FEM_%s' % command).encode(), arduinoSocket)
 
         # Set delay before receiving more data
-        time.sleep(2)
+        time.sleep(self.throttle)
 
     def power_pam(self, command):
         """
@@ -92,68 +104,88 @@ class UdpSender():
         Controls the power to PAM.
         """
 
+        command = command.lower()
+        if not self.check_command(command, allowed=['on', 'off']):
+            return
+
         # define arduino socket to send requests
         arduinoSocket = (self.arduinoAddress, sendPort)
-        self.client_socket.sendto(('PAM_%s'%command).encode(), arduinoSocket)
+        self.client_socket.sendto(('PAM_%s' % command).encode(), arduinoSocket)
 
         # Set delay before receiving more data
-        time.sleep(2)
+        time.sleep(self.throttle)
 
     def power_snap_0(self, command):
         """
         Takes in the arduino IP address string and a command "on"/"off".
         Controls the power to SNAP 0.
-        """ 
+        """
+
+        command = command.lower()
+        if not self.check_command(command, allowed=['on', 'off']):
+            return
 
         # define arduino socket to send requests
         arduinoSocket = (self.arduinoAddress, sendPort)
-        self.client_socket.sendto(('snapv2_0_%s'%command).encode(), arduinoSocket)
+        self.client_socket.sendto(('snapv2_0_%s' % command).encode(), arduinoSocket)
 
         # Set delay before receiving more data
-        time.sleep(2)
+        time.sleep(self.throttle)
 
     def power_snap_1(self, command):
         """
         Takes in the arduino IP address string and a command "on"/"off".
         Controls the power to SNAP 1.
-        """ 
+        """
+
+        command = command.lower()
+        if not self.check_command(command, allowed=['on', 'off']):
+            return
 
         # define arduino socket to send requests
         arduinoSocket = (self.arduinoAddress, sendPort)
-        self.client_socket.sendto(('snapv2_1_%s'%command).encode(), arduinoSocket)
+        self.client_socket.sendto(('snapv2_1_%s' % command).encode(), arduinoSocket)
 
         # Set delay before receiving more data
-        time.sleep(2)
+        time.sleep(self.throttle)
 
     def power_snap_2(self, command):
         """
         Takes in the arduino IP address string and a command "on"/"off".
         Controls the power to SNAP 2.
-        """ 
+        """
+
+        command = command.lower()
+        if not self.check_command(command, allowed=['on', 'off']):
+            return
 
         # define arduino socket to send requests
         arduinoSocket = (self.arduinoAddress, sendPort)
-        self.client_socket.sendto(('snapv2_2_%s'%command).encode(), arduinoSocket)
+        self.client_socket.sendto(('snapv2_2_%s' % command).encode(), arduinoSocket)
 
         # Set delay before receiving more data
-        time.sleep(2)
+        time.sleep(self.throttle)
 
     def power_snap_3(self, command):
         """
         Takes in the arduino IP address string and a command "on"/"off".
-        Controls the power to SNAP 3. 
-        """ 
+        Controls the power to SNAP 3.
+        """
+
+        command = command.lower()
+        if not self.check_command(command, allowed=['on', 'off']):
+            return
 
         # define arduino socket to send requests
         arduinoSocket = (self.arduinoAddress, sendPort)
-        self.client_socket.sendto(('snapv2_3_%s'%command).encode(), arduinoSocket)
+        self.client_socket.sendto(('snapv2_3_%s' % command).encode(), arduinoSocket)
 
         # Set delay before receiving more data
-        time.sleep(2)
+        time.sleep(self.throttle)
 
     def reset(self):
         """
-        Resets the Arduino bootloader. 
+        Resets the Arduino bootloader.
         """
 
         # define arduino socket to send requests
@@ -161,5 +193,10 @@ class UdpSender():
         self.client_socket.sendto(b'reset', arduinoSocket)
 
         # Set delay before receiving more data
-        time.sleep(2)
+        time.sleep(self.throttle)
 
+    def check_command(command, allowed):
+        if command in allowed:
+            return True
+        print("{} is not allowed command ({})".format(command, allowed))
+        return False
