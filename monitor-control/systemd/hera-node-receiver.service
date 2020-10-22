@@ -1,0 +1,21 @@
+# Configuration file for systemd that keeps the HERA node receiver
+# node -> redis  daemon running.
+#
+# Copy this file to /etc/systemd/system/hera-node-receiver.service . Then run
+# `systemctl enable hera-node-receiver` and `systemctl start hera-node-receiver`.
+#
+# This service is meant to be run on hera-node-head.
+
+[Unit]
+Description=HERA Node Receiver Daemon
+
+[Service]
+Type=simple
+Restart=always
+RestartSec=60
+User=hera
+Group=hera
+ExecStart=/usr/local/bin/hera_node_receiver.py
+
+[Install]
+WantedBy=multi-user.target
