@@ -31,8 +31,6 @@ setup(
     scripts=[
                 'monitor-control/scripts/hera_node_data_dump.py',
                 'monitor-control/scripts/hera_node_get_status.py',
-                'monitor-control/scripts/hera_node_turn_off.py',
-                'monitor-control/scripts/hera_node_turn_on.py',
                 'monitor-control/scripts/hera_node_cmd_check.py',
                 'monitor-control/scripts/hera_node_keep_alive.py',
                 'monitor-control/scripts/hera_node_receiver.py',
