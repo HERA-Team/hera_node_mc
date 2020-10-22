@@ -40,12 +40,17 @@ class NodeControl():
         Create a NodeControl class instance to control a single node via the redis datastore
         hosted at `serverAddress`.
 
-        :param node: ID number of the node with which this instance of NodeControl will interact.
-        :type node: Integer
-        :param serverAddress: The hostname, or dotted quad IP address, of the machine running the
-                              node control and monitoring redis server
-        :type serverAddress: String
-        :return: NodeControl instance
+        Parameters
+        ----------
+        node : int
+            ID numbers of the nodes with which this instance of NodeControl will interact.
+        serverAddress : str
+            The hostname, or dotted quad IP address, of the machine running the node control and
+            monitoring redis server
+
+        Returns
+        -------
+        NodeControl instance
         """
 
         self.node = node

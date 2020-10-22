@@ -2,17 +2,18 @@ import sys
 import argparse
 import nodeControl
 
-parser = argparse.ArgumentParser(description = 'This scripts outputs the current node status',
-                                    formatter_class = argparse.ArgumentDefaultsHelpFormatter)
-parser.add_argument('node',action='store', type=int, help='Specify the node ID number (int from 0 to 29) to get the corresponding Redis data')
+parser = argparse.ArgumentParser(description='This scripts outputs the current node status',
+                                 formatter_class=argparse.ArgumentDefaultsHelpFormatter)
+parser.add_argument('node', type=int, help='Specify the node ID number (int from 0 to 29) '
+                    'to get the corresponding Redis data')
 args = parser.parse_args()
 
 print("Attempting to connect to the node control redis database on \'redishost\'...", end=' ')
 sys.stdout.flush()
-node = nodeControl.NodeControl(args.node)
+node = nodeControl.NodeControl([args.node])
 print("OK")
 
-print("Checking that staus key for Node %d exists in redis" % args.node, end=' ')
+print("Checking that status key for Node %d exists in redis" % args.node, end=' ')
 if node.check_exists():
     print("OK")
 else:
