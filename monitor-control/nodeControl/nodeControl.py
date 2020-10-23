@@ -354,7 +354,6 @@ class NodeControl():
         """
         for node, sender in self.senders.items():
             self.r.hset("commands:node:%d" % node, "reset", "True")
-            print("Arduino for {} is resetting...".format(node))
             sender.reset()
             time.sleep(self.throttle)
 
