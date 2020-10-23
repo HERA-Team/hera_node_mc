@@ -1,7 +1,7 @@
 from setuptools import setup
 import os
 
-ver = '0.0.1'
+ver = '0.2.0'
 try:
     import subprocess
     ver = (ver + '-' + subprocess.check_output(['git', 'describe', '--abbrev=8',
@@ -16,7 +16,7 @@ with open(os.path.join(here, 'monitor-control', 'nodeControl', '__version__.py')
 
 setup(
     name='nodeControl',
-    version='0.2',
+    version=ver,
     description='A node monitor and control interface',
     license='BSD',
     author='David DeBoer',
