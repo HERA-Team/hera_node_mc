@@ -16,7 +16,7 @@ class UdpSender():
     Arduino bootloader.
     """
 
-    def __init__(self, arduinoAddress, throttle=2.):
+    def __init__(self, arduinoAddress, throttle=1):
         """
         Takes in the arduino IP address and sends commands directly, using udp.
         You have to be on the hera-digi-vm server to use it, otherwise use
@@ -59,7 +59,6 @@ class UdpSender():
         Sends poke commands to the Arduino. Used by hera_node_keep_alive script
         to send keep Arduinos from resetting.
         """
-
         arduinoSocket = (self.arduinoAddress, sendPort)
         self.client_socket.sendto(b'poke', arduinoSocket)
 
@@ -69,9 +68,8 @@ class UdpSender():
         Controls the power to SNAP relay, must be turned on first before gaining
         control over individual SNAPs.
         """
-
         command = command.lower()
-        if not self.check_command(command, allowed=['on', 'off']):
+        if not self._check_command(command, allowed=['on', 'off']):
             return
 
         # define arduino socket to send requests
@@ -86,9 +84,8 @@ class UdpSender():
         Takes in a string value of 'on' or 'off'.
         Controls the power to FEM.
         """
-
         command = command.lower()
-        if not self.check_command(command, allowed=['on', 'off']):
+        if not self._check_command(command, allowed=['on', 'off']):
             return
 
         # define arduino socket to send requests
@@ -103,9 +100,8 @@ class UdpSender():
         Takes in a string value of 'on' or 'off'.
         Controls the power to PAM.
         """
-
         command = command.lower()
-        if not self.check_command(command, allowed=['on', 'off']):
+        if not self._check_command(command, allowed=['on', 'off']):
             return
 
         # define arduino socket to send requests
@@ -120,9 +116,8 @@ class UdpSender():
         Takes in the arduino IP address string and a command "on"/"off".
         Controls the power to SNAP 0.
         """
-
         command = command.lower()
-        if not self.check_command(command, allowed=['on', 'off']):
+        if not self._check_command(command, allowed=['on', 'off']):
             return
 
         # define arduino socket to send requests
@@ -137,9 +132,8 @@ class UdpSender():
         Takes in the arduino IP address string and a command "on"/"off".
         Controls the power to SNAP 1.
         """
-
         command = command.lower()
-        if not self.check_command(command, allowed=['on', 'off']):
+        if not self._check_command(command, allowed=['on', 'off']):
             return
 
         # define arduino socket to send requests
@@ -154,9 +148,8 @@ class UdpSender():
         Takes in the arduino IP address string and a command "on"/"off".
         Controls the power to SNAP 2.
         """
-
         command = command.lower()
-        if not self.check_command(command, allowed=['on', 'off']):
+        if not self._check_command(command, allowed=['on', 'off']):
             return
 
         # define arduino socket to send requests
@@ -171,9 +164,8 @@ class UdpSender():
         Takes in the arduino IP address string and a command "on"/"off".
         Controls the power to SNAP 3.
         """
-
         command = command.lower()
-        if not self.check_command(command, allowed=['on', 'off']):
+        if not self._check_command(command, allowed=['on', 'off']):
             return
 
         # define arduino socket to send requests
@@ -187,7 +179,6 @@ class UdpSender():
         """
         Resets the Arduino bootloader.
         """
-
         # define arduino socket to send requests
         arduinoSocket = (self.arduinoAddress, sendPort)
         self.client_socket.sendto(b'reset', arduinoSocket)
@@ -195,7 +186,7 @@ class UdpSender():
         # Set delay before receiving more data
         time.sleep(self.throttle)
 
-    def check_command(command, allowed):
+    def _check_command(command, allowed):
         if command in allowed:
             return True
         print("{} is not allowed command ({})".format(command, allowed))

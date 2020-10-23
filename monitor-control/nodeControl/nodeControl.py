@@ -29,7 +29,7 @@ class NodeControl():
     through a Redis database running on the correlator head node.
     """
 
-    def __init__(self, node=None, serverAddress="redishost", throttle=0.5):
+    def __init__(self, nodes, serverAddress="redishost", throttle=0.5):
         """
         Create a NodeControl class instance to control a single node via the redis datastore
         hosted at `serverAddress`.
@@ -45,9 +45,7 @@ class NodeControl():
         throttle : float
             Delay in seconds between calls to turn on power
         """
-        if node is None:
-            node = list(range(30))
-        self.node = node
+        self.nodes = nodes
         self.throttle = throttle
         self.r = redis.StrictRedis(serverAddress)
         self.get_node_senders()
@@ -59,7 +57,7 @@ class NodeControl():
                 node_id = int(self.r.hget(key, 'node_ID').decode())
             except ValueError:
                 continue
-            if node_id not in self.node:
+            if node_id not in self.nodes:
                 continue
             ip = self.r.hget(key, 'ip').decode()
             if ip is None:
@@ -334,8 +332,8 @@ class NodeControl():
         Controls the power to FEM.
         """
         for node, sender in self.senders.items():
-            self.r.hset("commands:node:%d" % self.node, "power_fem_ctrl_trig", "True")
-            self.r.hset("commands:node:%d" % self.node, "power_fem_cmd", command)
+            self.r.hset("commands:node:%d" % node, "power_fem_ctrl_trig", "True")
+            self.r.hset("commands:node:%d" % node, "power_fem_cmd", command)
             sender.power_fem(command)
             time.sleep(self.throttle)
 
@@ -350,17 +348,22 @@ class NodeControl():
             sender.power_pam(command)
             time.sleep(self.throttle)
 
-    def reset(self, node):
+    def reset(self):
         """
         Sends the reset command to Arduino which restarts the bootloader.
         """
-        self.r.hset("commands:node:%d" % node, "reset", "True")
-        print("Arduino is resetting...")
-        self.senders[node].reset()
+        for node, sender in self.senders.items():
+            self.r.hset("commands:node:%d" % node, "reset", "True")
+            print("Arduino for {} is resetting...".format(node))
+            sender.reset()
+            time.sleep(self.throttle)
 
-    def check_exists(self, node):
+    def check_exists(self):
         """
-        Check that the status key corresponding to this node exists.
-        Return True if it does, else False.
+        Check that the node exists.
+        Return dict
         """
-        return self.r.exists("status:node:%d" % node) > 0
+        ex = {}
+        for node in self.nodes:
+            ex[node] = node in self.senders.keys()
+        return ex
