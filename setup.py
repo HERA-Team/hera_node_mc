@@ -7,7 +7,7 @@ try:
     ver = (ver + '-' + subprocess.check_output(['git', 'describe', '--abbrev=8',
            '--always', '--dirty', '--tags']).strip().decode())
 except:  # noqa
-    print(('Couldn\'t get version from git. Defaulting to %s' % ver))
+    print(("Couldn't get version from git. Defaulting to %s" % ver))
 
 # Generate a __version__.py file with this version in it
 here = os.path.abspath(os.path.dirname(__file__))
@@ -15,7 +15,7 @@ with open(os.path.join(here, 'monitor-control', 'nodeControl', '__version__.py')
     fh.write('__version__ = "%s"' % ver)
 
 setup(
-    name='monitor-control',
+    name='nodeControl',
     version='0.2',
     description='A node monitor and control interface',
     license='BSD',

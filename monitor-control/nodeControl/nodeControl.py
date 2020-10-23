@@ -46,7 +46,6 @@ class NodeControl():
             Delay in seconds between calls to turn on power
         """
         self.nodes = nodes
-        print("NC49:  ",nodes)
         self.throttle = throttle
         self.r = redis.StrictRedis(serverAddress)
         self.get_node_senders()
