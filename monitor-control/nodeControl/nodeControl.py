@@ -377,6 +377,7 @@ class NodeControl():
         Check that the node exists.
         Return dict
         """
+        print("NC380-------------------------")
         ex = {}
         for node in self.nodes:
             ex[node] = node in self.senders.keys()
