@@ -34,7 +34,7 @@ setup(
                 'monitor-control/scripts/hera_node_receiver.py',
                 'monitor-control/scripts/hera_node_serial_dump.py',
                 'monitor-control/scripts/hera_node_serial.py',
-                'monitor-control/scripts/hera_node_turn_power.py',
+                'monitor-control/scripts/hera_node_power.py',
             ]
 )
 
