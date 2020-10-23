@@ -13,8 +13,6 @@ except:  # noqa
 here = os.path.abspath(os.path.dirname(__file__))
 with open(os.path.join(here, 'monitor-control', 'nodeControl', '__version__.py'), 'w') as fh:
     fh.write('__version__ = "%s"' % ver)
-with open(os.path.join(here, 'monitor-control', 'udpSender', '__version__.py'), 'w') as fh:
-    fh.write('__version__ = "%s"' % ver)
 
 setup(
     name='monitor-control',
