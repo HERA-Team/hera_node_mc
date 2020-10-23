@@ -16,7 +16,7 @@ if args.node.lower() == 'all':
 else:
     nodes2use = [int(x) for x in args.node.split(',')]
 
-print("Attempting to connect to the node control redis database on \'redishost\'...")
+print("Attempting to connect to the node control redis database on 'redishost'...", end=' ')
 sys.stdout.flush()
 node = nodeControl.NodeControl(nodes2use, serverAddress=args.serverAddress)
 print("OK")
