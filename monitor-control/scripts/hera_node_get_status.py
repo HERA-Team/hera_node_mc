@@ -2,7 +2,7 @@ import sys
 import argparse
 import nodeControl
 
-parser = argparse.ArgumentParser(description='This scripts outputs the current node status',
+parser = argparse.ArgumentParser(description='This script outputs the current node status',
                                  formatter_class=argparse.ArgumentDefaultsHelpFormatter)
 parser.add_argument('node', help="Specify the node ID numbers (csv list of int "
                     "from 0 to 29) to get the corresponding Redis data or use 'all'")
