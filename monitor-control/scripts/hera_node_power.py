@@ -19,6 +19,7 @@ parser.add_argument('-f', '--fem', action='store_true', help='Flag to turn on th
 parser.add_argument('--reset', action='store_true', help='Flag to reset Arduino (abruptly')
 parser.add_argument('--check', action='store_true', help='Flag to check node existence')
 parser.add_argument('--init', action='store_true', help='Flag to reset power flags in redis')
+parser.add_argument('--serverAddress', help='Name or redis server', default='redishost')
 args = parser.parse_args()
 
 if args.node.lower() == 'all':
@@ -26,7 +27,7 @@ if args.node.lower() == 'all':
 else:
     nodes2use = [int(x) for x in args.node.split(',')]
 
-n = nodeControl.NodeControl(nodes2use)
+n = nodeControl.NodeControl(nodes2use, serverAddress=args.serverAddress)
 if args.snaps:
     args.snap0 = True
     args.snap1 = True
