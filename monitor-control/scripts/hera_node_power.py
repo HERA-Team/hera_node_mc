@@ -4,7 +4,7 @@ import nodeControl
 parser = argparse.ArgumentParser(description='Turn on SNAP relay, SNAPs, FEM and PAM via flags',
                                  formatter_class=argparse.ArgumentDefaultsHelpFormatter)
 
-parser.add_argument('node', help='Specify the node.')
+parser.add_argument('node', help='Specify the list of node (csv).')
 parser.add_argument('switch', help="Specify 'on' or 'off'", choices=['on', 'off'])
 parser.add_argument('-r', dest='snapRelay', action='store_true',
                     help='Use this flag to turn on the snapRelay (redundant if turning on any snap)')  # noqa
@@ -26,8 +26,8 @@ parser.add_argument('--reset', dest='reset', action='store_true',
                     help='Use this flag to reset Arduino (turn everything off abruptly')
 args = parser.parse_args()
 
-nodes2use = [int(x) for x in args.node.split(',')]  # Want to change to list.
-n = nodeControl.NodeControl(nodes2use[0])
+nodes2use = [int(x) for x in args.node.split(',')]
+n = nodeControl.NodeControl(nodes2use)
 if args.snaps:
     args.snap0 = True
     args.snap1 = True

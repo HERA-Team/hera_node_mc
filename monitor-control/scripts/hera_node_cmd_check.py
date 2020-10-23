@@ -16,6 +16,9 @@ import datetime
 import socket
 
 
+print(">>>>>TO BE DEPRECATED<<<<<")
+
+
 def refresh_node_list(curr_nodes, redis_conn):
     new_node_list = {}
     for key in redis_conn.scan_iter("status:node:*"):

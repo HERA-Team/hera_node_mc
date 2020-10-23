@@ -1,6 +1,8 @@
 import redis
 import dateutil.parser
 import json
+import time
+from . import udpSender
 
 
 def str2bool(x):
@@ -11,22 +13,14 @@ def str2bool(x):
     return x == "1"
 
 
-def get_valid_nodes(serverAddress="redishost"):
+def conv_float(v):
     """
-    Return a list of all node IDs which currently have status data
-    stored in the redis database hosted on `redishost`.
-
-    :param serverAddress: The hostname, or dotted quad IP address, of the machine running the node
-                          control and monitoring redis server
-    :type serverAddress: String
-    :return: List of integers representing the nodes whose status is currently available. Presence
-             of a node in this list just means that this node has is an associated `status:node`
-             key in redis. It does not mean the node is actively reporting.
+    Try and convert v into a float. If we can't, return None.
     """
-    valid_nodes = []
-    for key in list(redis.StrictRedis(serverAddress).scan_iter("status:node:*")):
-        valid_nodes += [int(key.decode().split(":")[2])]
-    return valid_nodes
+    try:
+        return float(v)
+    except ValueError:
+        return None
 
 
 class NodeControl():
@@ -35,55 +29,65 @@ class NodeControl():
     through a Redis database running on the correlator head node.
     """
 
-    def __init__(self, node, serverAddress="redishost"):
+    def __init__(self, node=None, serverAddress="redishost", throttle=0.5):
         """
         Create a NodeControl class instance to control a single node via the redis datastore
         hosted at `serverAddress`.
 
         Parameters
         ----------
-        node : int
+        node : list of int or None
             ID numbers of the nodes with which this instance of NodeControl will interact.
+            If None, it will check them all.
         serverAddress : str
             The hostname, or dotted quad IP address, of the machine running the node control and
             monitoring redis server
-
-        Returns
-        -------
-        NodeControl instance
+        throttle : float
+            Delay in seconds between calls to turn on power
         """
-
+        if node is None:
+            node = list(range(30))
         self.node = node
+        self.throttle = throttle
         self.r = redis.StrictRedis(serverAddress)
+        self.get_node_senders()
 
-    def _conv_float(self, v):
-        """
-        Try and convert v into a float. If we can't, return None.
-        """
-        try:
-            return float(v)
-        except ValueError:
-            return None
+    def get_node_senders(self):
+        self.senders = {}
+        for key in self.r.scan_iter("status:node:*"):
+            try:
+                node_id = int(self.r.hget(key, 'node_ID').decode())
+            except ValueError:
+                continue
+            if node_id not in self.node:
+                continue
+            ip = self.r.hget(key, 'ip').decode()
+            if ip is None:
+                continue
+            self.senders[node_id] = udpSender.UdpSender(ip)
 
-    def _get_raw_node_status(self):
+    def _get_raw_node_hash(self, this_key):
         """
         Return the raw content of a node status hash in redis,
         via redis's `hgetall` call. Data are returned as a dictionary,
         where the keys are the redis hash fields (strings) and the
         values are the stored values (strings).
 
-        :returns: Whatever key-value pairs exist for this node's `status:node` hash
+        :returns: Whatever key-value pairs exist for this node's hash
         """
-        return {key.decode(): val.decode()
-                for key, val in self.r.hgetall("status:node:%s" % self.node).items()}
+        rawstat = {}
+        for node in self.senders.keys():
+            nkey = this_key.replace('*', '{}'.format(node))
+            rawstat[node] = {key.decode(): val.decode()
+                             for key, val in self.r.hgetall(nkey).items()}
+        return rawstat
 
     def get_sensors(self):
         """
         Get the current node sensor values.
 
-        Returns a tuple `(timestamp, sensors)`, where `timestamp` is a python `datetime` object
-        describing when the sensor values were last updated in redis, and `sensors` is a dictionary
-        of sensor values.
+        Returns a dict where `timestamp` is a python `datetime` object describing when the
+        sensor values were last updated in redis, and `sensors` is a dictionary of sensor values.
         If a sensor value is not available (e.g. because it cannot be reached) it will be `None`
 
         Valid sensor keywords are:
@@ -96,10 +100,6 @@ class NodeControl():
             'ip' (str) : IP address of node controller module, e.g. "10.1.1.123"
             'mac' (str) : MAC address of node controller module, e.g. "02:03:04:05:06:07"
         """
-
-        stats = {key.decode(): val.decode()
-                 for key, val in self.r.hgetall("status:node:%d" % self.node).items()}
-        timestamp = dateutil.parser.parse(stats["timestamp"])
         conv_methods = {
             "temp_bot": float,
             "temp_mid": float,
@@ -109,21 +109,23 @@ class NodeControl():
             "ip": str,
             "mac": str,
             "cpu_uptime_ms": int,
+            "timestamp": dateutil.parser.parse
         }
         sensors = {}
-        for key, convfunc in conv_methods.items():
-            try:
-                sensors[key] = convfunc(stats[key])
-            except:  # noqa
-                sensors[key] = None
-
-        return timestamp, sensors
+        for node, stats in self._get_raw_node_hash("status:node:*").items():
+            sensors[node] = {}
+            for key, convfunc in conv_methods.items():
+                try:
+                    sensors[node][key] = convfunc(stats[key])
+                except:  # noqa
+                    sensors[node][key] = None
+        return sensors
 
     def get_power_status(self):
         """
         Get the current node power relay states.
 
-        Returns a tuple `(timestamp, statii)`, where `timestamp` is a python `datetime` object
+        Returns a dict where `timestamp` is a python `datetime` object
         describing when the values were last updated in redis, and `statii` is a dictionary
         of booleans for the various power switches the node can control. For each entry in this
         dictionary, `True` indicates power is on, `False` indicates power is off.
@@ -137,15 +139,15 @@ class NodeControl():
           'power_snap_3' (Power of fourth SNAP)
           'power_snap_relay' (Power of master SNAP relay)
         """
-
-        statii = self._get_raw_node_status()
-        timestamp = dateutil.parser.parse(statii["timestamp"])
-        for key in list(statii.keys()):
-            if key.startswith("power"):
-                statii[key] = str2bool(statii[key])
-            else:
-                statii.pop(key)
-        return timestamp, statii
+        power = {}
+        for node, statii in self._get_raw_node_status("status:node:*").items():
+            power[node] = {}
+            for key in list(statii.keys()):
+                if key == 'timestamp':
+                    power[node][key] = dateutil.parser.parse(statii["timestamp"])
+                elif key.startswith("power"):
+                    power[node][key] = str2bool(statii[key])
+        return power
 
     def get_wr_status(self):
         """
@@ -154,9 +156,8 @@ class NodeControl():
 
         If no stats exist for this White Rabbit endpoint, returns `None`.
 
-        Otherwise Returns a tuple `(timestamp, statii)`, where `timestamp` is a python `datetime`
-        object describing when the values were last updated in redis, and `statii` is a dictionary
-        of status values.
+        Otherwise Returns a dict where `timestamp` is a python `datetime` object describing when
+        the values were last updated in redis, and `statii` is a dictionary of status values.
 
         If a status value is not available it will be `None`
 
@@ -207,14 +208,6 @@ class NodeControl():
             'wr[0|1]_ucnt'  (int)  : Update counter
             'wr[0|1]_sec'   (int)  : Current TAI time in seconds from UNIX epoch
         """
-
-        stats = {key.decode(): val.decode()
-                 for key, val in self.r.hgetall("status:wr:heraNode%dwr" % self.node).items()}
-        try:
-            timestamp = dateutil.parser.parse(stats["timestamp"])
-        except:  # noqa
-            return None
-
         conv_methods = {
             'board_info_str': str,
             'aliases': json.loads,
@@ -257,32 +250,27 @@ class NodeControl():
             '_tx': int,
             '_ucnt': int,
             '_sec': int,
+            "timestamp": dateutil.parser.parse
         }
-
-        stats_formatted = {}
-
-        for key, convfunc in conv_methods.items():
-            if key.startswith('_'):
-                for i in range(2):
-                    port_key = ('wr%d' % i) + key
+        wrstat = {}
+        for node, stats in self._get_raw_node_status("status:wr:heraNode*wr").items():
+            if 'timestamp' not in stats.key():
+                continue
+            wrstat[node] = {}
+            for key, convfunc in conv_methods.items():
+                if key.startswith('_'):
+                    for i in range(2):
+                        port_key = ('wr%d' % i) + key
+                        try:
+                            wrstat[node][port_key] = convfunc(stats[port_key])
+                        except:  # noqa
+                            wrstat[node][port_key] = None
+                else:
                     try:
-                        stats_formatted[port_key] = convfunc(stats[port_key])
+                        wrstat[node][key] = convfunc(stats[key])
                     except:  # noqa
-                        stats_formatted[port_key] = None
-            else:
-                try:
-                    stats_formatted[key] = convfunc(stats[key])
-                except:  # noqa
-                    stats_formatted[key] = None
-
-        return timestamp, stats_formatted
-
-    def check_exists(self):
-        """
-        Check that the status key corresponding to this node exists.
-        Return True if it does, else False.
-        """
-        return self.r.exists("status:node:%d" % self.node) > 0
+                        wrstat[node][key] = None
+        return wrstat
 
     def power_snap_relay(self, command):
         """
@@ -290,75 +278,89 @@ class NodeControl():
         Controls the power to SNAP relay. The SNAP relay
         has to be turn on before sending commands to individual SNAPs.
         """
-
-        self.r.hset("commands:node:%d" % self.node, "power_snap_relay_ctrl_trig", "True")
-        self.r.hset("commands:node:%d" % self.node, "power_snap_relay_cmd", command)
-        print(("SNAP relay power commanded %s" % command))
+        for node, sender in self.senders.items():
+            self.r.hset("commands:node:%d" % node, "power_snap_relay_ctrl_trig", "True")
+            self.r.hset("commands:node:%d" % node, "power_snap_relay_cmd", command)
+            sender.power_snap_relay(command)
+            time.sleep(self.throttle)
 
     def power_snap_0(self, command):
         """
         Takes in a string value of 'on' or 'off'.
         Controls the power to SNAP 0.
         """
-
-        self.r.hset("commands:node:%d" % self.node, "power_snap_0_ctrl_trig", "True")
-        self.r.hset("commands:node:%d" % self.node, "power_snap_0_cmd", command)
-        print(("SNAP 0 power commanded %s" % command))
+        for node, sender in self.senders.items():
+            self.r.hset("commands:node:%d" % node, "power_snap_0_ctrl_trig", "True")
+            self.r.hset("commands:node:%d" % node, "power_snap_0_cmd", command)
+            sender.power_snap_0(command)
+            time.sleep(self.throttle)
 
     def power_snap_1(self, command):
         """
         Takes in a string value of 'on' or 'off'.
         Controls the power to SNAP 1.
         """
-
-        self.r.hset("commands:node:%d" % self.node, "power_snap_1_ctrl_trig", "True")
-        self.r.hset("commands:node:%d" % self.node, "power_snap_1_cmd", command)
-        print(("SNAP 1 power commanded %s" % command))
+        for node, sender in self.senders.items():
+            self.r.hset("commands:node:%d" % node, "power_snap_1_ctrl_trig", "True")
+            self.r.hset("commands:node:%d" % node, "power_snap_1_cmd", command)
+            sender.power_snap_1(command)
+            time.sleep(self.throttle)
 
     def power_snap_2(self, command):
         """
         Takes in a string value of 'on' or 'off'.
         Controls the power to SNAP 2.
         """
-
-        self.r.hset("commands:node:%d" % self.node, "power_snap_2_ctrl_trig", "True")
-        self.r.hset("commands:node:%d" % self.node, "power_snap_2_cmd", command)
-        print(("SNAP 2 power commanded %s" % command))
+        for node, sender in self.senders.items():
+            self.r.hset("commands:node:%d" % node, "power_snap_2_ctrl_trig", "True")
+            self.r.hset("commands:node:%d" % node, "power_snap_2_cmd", command)
+            sender.power_snap_2(command)
+            time.sleep(self.throttle)
 
     def power_snap_3(self, command):
         """
         Takes in a string value of 'on' or 'off'.
         Controls the power to SNAP 3.
         """
-
-        self.r.hset("commands:node:%d" % self.node, "power_snap_3_ctrl_trig", "True")
-        self.r.hset("commands:node:%d" % self.node, "power_snap_3_cmd", command)
-        print(("SNAP 3 power commanded %s" % command))
+        for node, sender in self.senders.items():
+            self.r.hset("commands:node:%d" % node, "power_snap_3_ctrl_trig", "True")
+            self.r.hset("commands:node:%d" % node, "power_snap_3_cmd", command)
+            sender.power_snap_3(command)
+            time.sleep(self.throttle)
 
     def power_fem(self, command):
         """
         Takes in a string value of 'on' or 'off'.
         Controls the power to FEM.
         """
-
-        self.r.hset("commands:node:%d" % self.node, "power_fem_ctrl_trig", "True")
-        self.r.hset("commands:node:%d" % self.node, "power_fem_cmd", command)
-        print(("FEM power commanded %s" % command))
+        for node, sender in self.senders.items():
+            self.r.hset("commands:node:%d" % self.node, "power_fem_ctrl_trig", "True")
+            self.r.hset("commands:node:%d" % self.node, "power_fem_cmd", command)
+            sender.power_fem(command)
+            time.sleep(self.throttle)
 
     def power_pam(self, command):
         """
         Takes in a string value of 'on' or 'off'.
         Controls the power to PAM.
         """
+        for node, sender in self.senders.items():
+            self.r.hset("commands:node:%d" % node, "power_pam_ctrl_trig", "True")
+            self.r.hset("commands:node:%d" % node, "power_pam_cmd", command)
+            sender.power_pam(command)
+            time.sleep(self.throttle)
 
-        self.r.hset("commands:node:%d" % self.node, "power_pam_ctrl_trig", "True")
-        self.r.hset("commands:node:%d" % self.node, "power_pam_cmd", command)
-        print(("PAM power commanded %s" % command))
-
-    def reset(self):
+    def reset(self, node):
         """
         Sends the reset command to Arduino which restarts the bootloader.
         """
-
-        self.r.hset("commands:node:%d" % self.node, "reset", "True")
+        self.r.hset("commands:node:%d" % node, "reset", "True")
         print("Arduino is resetting...")
+        self.senders[node].reset()
+
+    def check_exists(self, node):
+        """
+        Check that the status key corresponding to this node exists.
+        Return True if it does, else False.
+        """
+        return self.r.exists("status:node:%d" % node) > 0
