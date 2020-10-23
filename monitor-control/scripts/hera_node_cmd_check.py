@@ -5,7 +5,7 @@ turning everything on at once. Uses throttle:node:x flag to enforce a 2 second d
 between commands. Checks for command triggers inside the commands:status:node key.
 """
 
-
+from __future__ import print_function
 import redis
 import argparse
 import udpSender

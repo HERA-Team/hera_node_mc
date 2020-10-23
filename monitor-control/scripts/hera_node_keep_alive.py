@@ -4,7 +4,7 @@ It pokes either specified nodes with the -n argument or
 the nodes that have Redis status keys i.e. status:node:x where x is the node ID
 set by the I2C digital I/O cards plugged into PCBs.
 """
-
+from __future__ import print_function
 import time
 import redis
 import udpSender
