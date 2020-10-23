@@ -18,7 +18,7 @@ with open(os.path.join(here, 'monitor-control', 'udpSender', '__version__.py'), 
 
 setup(
     name='monitor-control',
-    version='0.1',
+    version='0.2',
     description='A node monitor and control interface',
     license='BSD',
     author='David DeBoer',
@@ -38,7 +38,6 @@ setup(
                 'monitor-control/scripts/hera_node_serial.py',
                 'monitor-control/scripts/hera_node_turn_power.py',
             ]
-
 )
 
 if ver.endswith("dirty"):
