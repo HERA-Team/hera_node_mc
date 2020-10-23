@@ -17,6 +17,7 @@ parser.add_argument('-p', '--pam', action='store_true', help='Flag to turn on th
 parser.add_argument('-f', '--fem', action='store_true', help='Flag to turn on the FEM')
 parser.add_argument('--reset', action='store_true', help='Flag to reset Arduino (abruptly')
 parser.add_argument('--check', action='store_true', help='Flag to check node existence')
+parser.add_argument('--init', action='store_true', help='Flag to reset power flags in redis')
 args = parser.parse_args()
 
 if args.node.lower() == 'all':
@@ -59,3 +60,6 @@ if args.reset:
 if args.check:
     for key, val in n.check_exists().items():
         print('{}:  {}'.format(key, val))
+
+if args.init:
+    n.init_redis()

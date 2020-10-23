@@ -358,6 +358,20 @@ class NodeControl():
             sender.reset()
             time.sleep(self.throttle)
 
+    def init_redis(self):
+        for node in self.nodes:
+            comnoid = 'commands:node:{:d}'.format(node)
+            thronoid = 'throttle:node:{:d}'.format(node)
+            self.r.hset(comnoid, 'power_snap_relay_ctrl_trig', 'False')
+            self.r.hset(comnoid, 'power_snap_0_ctrl_trig', 'False')
+            self.r.hset(comnoid, 'power_snap_1_ctrl_trig', 'False')
+            self.r.hset(comnoid, 'power_snap_2_ctrl_trig', 'False')
+            self.r.hset(comnoid, 'power_snap_3_ctrl_trig', 'False')
+            self.r.hset(comnoid, 'power_fem_ctrl_trig', 'False')
+            self.r.hset(comnoid, 'power_pam_ctrl_trig', 'False')
+            self.r.hset(comnoid, 'reset', 'False')
+            self.r.hset(thronoid, 'last_command_sec', '0')
+
     def check_exists(self):
         """
         Check that the node exists.
@@ -366,4 +380,6 @@ class NodeControl():
         ex = {}
         for node in self.nodes:
             ex[node] = node in self.senders.keys()
+        if True not in ex.values():
+            ex = {}
         return ex
