@@ -138,7 +138,7 @@ class NodeControl():
           'power_snap_relay' (Power of master SNAP relay)
         """
         power = {}
-        for node, statii in self._get_raw_node_status("status:node:*").items():
+        for node, statii in self._get_raw_node_hash("status:node:*").items():
             power[node] = {}
             for key in list(statii.keys()):
                 if key == 'timestamp':
@@ -251,7 +251,7 @@ class NodeControl():
             "timestamp": dateutil.parser.parse
         }
         wrstat = {}
-        for node, stats in self._get_raw_node_status("status:wr:heraNode*wr").items():
+        for node, stats in self._get_raw_node_hash("status:wr:heraNode*wr").items():
             if 'timestamp' not in stats.key():
                 continue
             wrstat[node] = {}
