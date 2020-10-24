@@ -2,6 +2,7 @@ import redis
 import dateutil.parser
 import json
 import time
+import socket
 from . import udpSender
 
 
@@ -19,6 +20,8 @@ class NodeControl():
     through a Redis database running on the correlator head node.
     """
 
+    direct_control_hostnames = ['hera-mobile', 'hera-node-head']
+
     def __init__(self, nodes, serverAddress="redishost", throttle=0.5):
         """
         Create a NodeControl class instance to control a single node via the redis datastore
@@ -35,6 +38,8 @@ class NodeControl():
         throttle : float
             Delay in seconds between calls to turn on power
         """
+        self.hostname = socket.gethostname()
+        self.allow_direct_control = self.hostname in self.direct_control_hostnames
         self.nodes = nodes
         self.throttle = throttle
         self.r = redis.StrictRedis(serverAddress)
@@ -60,7 +65,10 @@ class NodeControl():
             ip = self.r.hget(key, 'ip').decode()
             if ip is None:
                 continue
-            self.senders[node_id] = udpSender.UdpSender(ip)
+            if self.allow_direct_control:
+                self.senders[node_id] = udpSender.UdpSender(ip)
+            else:
+                self.senders[node_id] = 'remote'
 
     def _get_raw_node_hash(self, this_key):
         """
@@ -278,8 +286,9 @@ class NodeControl():
         for node, sender in self.senders.items():
             self.r.hset("commands:node:%d" % node, "power_snap_relay_ctrl_trig", "True")
             self.r.hset("commands:node:%d" % node, "power_snap_relay_cmd", command)
-            sender.power_snap_relay(command)
-            time.sleep(self.throttle)
+            if isinstance(sender, udpSender.UdpSender):
+                sender.power_snap_relay(command)
+                time.sleep(self.throttle)
 
     def power_snap_0(self, command):
         """
@@ -290,8 +299,9 @@ class NodeControl():
         for node, sender in self.senders.items():
             self.r.hset("commands:node:%d" % node, "power_snap_0_ctrl_trig", "True")
             self.r.hset("commands:node:%d" % node, "power_snap_0_cmd", command)
-            sender.power_snap_0(command)
-            time.sleep(self.throttle)
+            if isinstance(sender, udpSender.UdpSender):
+                sender.power_snap_0(command)
+                time.sleep(self.throttle)
 
     def power_snap_1(self, command):
         """
@@ -302,8 +312,9 @@ class NodeControl():
         for node, sender in self.senders.items():
             self.r.hset("commands:node:%d" % node, "power_snap_1_ctrl_trig", "True")
             self.r.hset("commands:node:%d" % node, "power_snap_1_cmd", command)
-            sender.power_snap_1(command)
-            time.sleep(self.throttle)
+            if isinstance(sender, udpSender.UdpSender):
+                sender.power_snap_1(command)
+                time.sleep(self.throttle)
 
     def power_snap_2(self, command):
         """
@@ -314,8 +325,9 @@ class NodeControl():
         for node, sender in self.senders.items():
             self.r.hset("commands:node:%d" % node, "power_snap_2_ctrl_trig", "True")
             self.r.hset("commands:node:%d" % node, "power_snap_2_cmd", command)
-            sender.power_snap_2(command)
-            time.sleep(self.throttle)
+            if isinstance(sender, udpSender.UdpSender):
+                sender.power_snap_2(command)
+                time.sleep(self.throttle)
 
     def power_snap_3(self, command):
         """
@@ -326,8 +338,9 @@ class NodeControl():
         for node, sender in self.senders.items():
             self.r.hset("commands:node:%d" % node, "power_snap_3_ctrl_trig", "True")
             self.r.hset("commands:node:%d" % node, "power_snap_3_cmd", command)
-            sender.power_snap_3(command)
-            time.sleep(self.throttle)
+            if isinstance(sender, udpSender.UdpSender):
+                sender.power_snap_3(command)
+                time.sleep(self.throttle)
 
     def power_fem(self, command):
         """
@@ -338,8 +351,9 @@ class NodeControl():
         for node, sender in self.senders.items():
             self.r.hset("commands:node:%d" % node, "power_fem_ctrl_trig", "True")
             self.r.hset("commands:node:%d" % node, "power_fem_cmd", command)
-            sender.power_fem(command)
-            time.sleep(self.throttle)
+            if isinstance(sender, udpSender.UdpSender):
+                sender.power_fem(command)
+                time.sleep(self.throttle)
 
     def power_pam(self, command):
         """
@@ -350,8 +364,9 @@ class NodeControl():
         for node, sender in self.senders.items():
             self.r.hset("commands:node:%d" % node, "power_pam_ctrl_trig", "True")
             self.r.hset("commands:node:%d" % node, "power_pam_cmd", command)
-            sender.power_pam(command)
-            time.sleep(self.throttle)
+            if isinstance(sender, udpSender.UdpSender):
+                sender.power_pam(command)
+                time.sleep(self.throttle)
 
     def reset(self):
         """
@@ -360,8 +375,9 @@ class NodeControl():
         print("Resetting nodes {}".format(self.node_string))
         for node, sender in self.senders.items():
             self.r.hset("commands:node:%d" % node, "reset", "True")
-            sender.reset()
-            time.sleep(self.throttle)
+            if isinstance(sender, udpSender.UdpSender):
+                sender.reset()
+                time.sleep(self.throttle)
 
     def init_redis(self):
         print("Initializing node power flags to False for nodes {}".format(self.node_string))
