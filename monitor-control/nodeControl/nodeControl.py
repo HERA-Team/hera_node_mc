@@ -360,8 +360,7 @@ class NodeControl():
         """
         Sends the reset command to Arduino which restarts the bootloader.
         """
-        print("Resetting Arduino/turning everything off at once", end=' ')
-        print("for nodes {}".format(', '.join(self.found_nodes)))
+        print("Resetting nodes {}".format(', '.join(self.found_nodes)))
         for node, sender in self.senders.items():
             self.r.hset("commands:node:%d" % node, "reset", "True")
             sender.reset()
