@@ -6,11 +6,9 @@ import nodeControl
 
 parser = argparse.ArgumentParser(description='This script outputs the current node status',
                                  formatter_class=argparse.ArgumentDefaultsHelpFormatter)
-parser.add_argument('node', help="Specify the node ID numbers (csv list of int "
+parser.add_argument('node', nargs='?', help="Specify the node ID numbers (csv list of int "
                     "from 0 to 29) to get the corresponding Redis data or use 'all'")
 parser.add_argument('--exists', action='store_true', help='Check node existence')
-parser.add_argument('-s', '--show-redis-nodes', dest='show_redis_nodes', action='store_true',
-                    help="Show list of nodes found in redis.")
 parser.add_argument('--serverAddress', help='Name or redis server', default='redishost')
 args = parser.parse_args()
 
@@ -24,13 +22,12 @@ sys.stdout.flush()
 node = nodeControl.NodeControl(nodes2use, serverAddress=args.serverAddress)
 print("OK")
 
-if args.exists:
-    for key, val in node.check_exists().items():
-        print('{}:  {}'.format(key, val))
-if args.show_redis_nodes:
-    print("Nodes found in redis: {}".format(', '.join([str(x) for x in node.nodes_in_redis])))
-
 node_status = node.check_exists()
+if args.exists:
+    for key, val in node_status.items():
+        print('{}:  {}'.format(key, val))
+print("Nodes found in redis: {}".format(', '.join([str(x) for x in node.nodes_in_redis])))
+
 if node_status:
     nodes_present = []
     nodes_missing = []
