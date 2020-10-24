@@ -50,7 +50,11 @@ class NodeControl():
         self.r = redis.StrictRedis(serverAddress)
         self.get_node_senders()
         self.found_nodes = sorted(self.senders.keys())
-        self.node_string = ', '.join([str(x) for x in self.found_nodes])
+        if not len(self.found_nodes):
+            self.node_string = 'No nodes found'
+        else:
+            plural = 'nodes' if len(self.found_nodes) > 1 else 'node'
+            self.node_string = "{} {}".format(plural, ', '.join([str(x) for x in self.found_nodes]))
 
     def get_node_senders(self):
         self.senders = {}
