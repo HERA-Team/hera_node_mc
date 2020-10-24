@@ -10,16 +10,17 @@ parser.add_argument('command', help="Specify 'on' or 'off'", choices=['on', 'off
 parser.add_argument('node', help="Specify the list of nodes (csv) or 'all'", default='all')
 parser.add_argument('-r', '--snap-relay', dest='snap_relay', action='store_true',
                     help='Flag to turn on the snap-relay (redundant if turning on any snap)')
-parser.add_argument('-s', '--snaps', action='store_true', help='Flag to turn on all the snaps')
-parser.add_argument('-0', '--snap0', action='store_true', help='Flag to turn on SNAP 0')
-parser.add_argument('-1', '--snap1', action='store_true', help='Flag to turn on SNAP 1')
-parser.add_argument('-2', '--snap2', action='store_true', help='Flag to turn on SNAP 2')
-parser.add_argument('-3', '--snap3', action='store_true', help='Flag to turn on SNAP 3')
-parser.add_argument('-p', '--pam', action='store_true', help='Flag to turn on the PAM')
-parser.add_argument('-f', '--fem', action='store_true', help='Flag to turn on the FEM')
-parser.add_argument('--reset', action='store_true', help='Flag to reset Arduino (abruptly')
-parser.add_argument('--check', action='store_true', help='Flag to check node existence')
-parser.add_argument('--init', action='store_true', help='Flag to reset power flags in redis')
+parser.add_argument('-s', '--snaps', action='store_true', help='Turn on all the snaps')
+parser.add_argument('-0', '--snap0', action='store_true', help='Turn on SNAP 0')
+parser.add_argument('-1', '--snap1', action='store_true', help='Turn on SNAP 1')
+parser.add_argument('-2', '--snap2', action='store_true', help='Turn on SNAP 2')
+parser.add_argument('-3', '--snap3', action='store_true', help='Turn on SNAP 3')
+parser.add_argument('-p', '--pam', action='store_true', help='Turn on the PAM')
+parser.add_argument('-f', '--fem', action='store_true', help='Turn on the FEM')
+parser.add_argument('--all', action='store_true', help='Turn on snaps, pam and fem')
+parser.add_argument('--reset', action='store_true', help='Reset Arduino (abruptly')
+parser.add_argument('--exists', action='store_true', help='Check node existence')
+parser.add_argument('--init', action='store_true', help='Reset power flags in redis')
 parser.add_argument('--serverAddress', help='Name or redis server', default='redishost')
 args = parser.parse_args()
 
@@ -29,6 +30,12 @@ else:
     nodes2use = [int(x) for x in args.node.split(',')]
 
 n = nodeControl.NodeControl(nodes2use, serverAddress=args.serverAddress)
+
+if args.all:
+    args.snaps = True
+    args.pam = True
+    args.fem = True
+
 if args.snaps:
     args.snap0 = True
     args.snap1 = True
@@ -60,7 +67,7 @@ if args.reset:
     print("Resetting Arduino/turning everything off at once")
     n.reset()
 
-if args.check:
+if args.exists:
     for key, val in n.check_exists().items():
         print('{}:  {}'.format(key, val))
 
