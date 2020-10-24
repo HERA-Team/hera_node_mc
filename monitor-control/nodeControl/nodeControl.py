@@ -13,16 +13,6 @@ def str2bool(x):
     return x == "1"
 
 
-def conv_float(v):
-    """
-    Try and convert v into a float. If we can't, return None.
-    """
-    try:
-        return float(v)
-    except ValueError:
-        return None
-
-
 class NodeControl():
     """
     This class is used to control power to PAM, FEM, and SNAP boards and get node status information
@@ -57,12 +47,14 @@ class NodeControl():
             self.node_string = "{} {}".format(plural, ', '.join([str(x) for x in self.found_nodes]))
 
     def get_node_senders(self):
+        self.nodes_in_redis = []
         self.senders = {}
         for key in self.r.scan_iter("status:node:*"):
             try:
                 node_id = int(self.r.hget(key, 'node_ID').decode())
             except ValueError:
                 continue
+            self.nodes_in_redis.append(node_id)
             if node_id not in self.nodes:
                 continue
             ip = self.r.hget(key, 'ip').decode()
@@ -282,7 +274,7 @@ class NodeControl():
         Controls the power to SNAP relay. The SNAP relay
         has to be turn on before sending commands to individual SNAPs.
         """
-        print("Turning on snap relays for nodes {}".format(self.node_string))
+        print("Turning {} snap relays for {}".format(command, self.node_string))
         for node, sender in self.senders.items():
             self.r.hset("commands:node:%d" % node, "power_snap_relay_ctrl_trig", "True")
             self.r.hset("commands:node:%d" % node, "power_snap_relay_cmd", command)
@@ -294,7 +286,7 @@ class NodeControl():
         Takes in a string value of 'on' or 'off'.
         Controls the power to SNAP 0.
         """
-        print("Turning on snap0 for nodes {}".format(self.node_string))
+        print("Turning {} snap0 for {}".format(command, self.node_string))
         for node, sender in self.senders.items():
             self.r.hset("commands:node:%d" % node, "power_snap_0_ctrl_trig", "True")
             self.r.hset("commands:node:%d" % node, "power_snap_0_cmd", command)
@@ -306,7 +298,7 @@ class NodeControl():
         Takes in a string value of 'on' or 'off'.
         Controls the power to SNAP 1.
         """
-        print("Turning on snap1 for nodes {}".format(self.node_string))
+        print("Turning {} snap1 for {}".format(command, self.node_string))
         for node, sender in self.senders.items():
             self.r.hset("commands:node:%d" % node, "power_snap_1_ctrl_trig", "True")
             self.r.hset("commands:node:%d" % node, "power_snap_1_cmd", command)
@@ -318,7 +310,7 @@ class NodeControl():
         Takes in a string value of 'on' or 'off'.
         Controls the power to SNAP 2.
         """
-        print("Turning on snap2 for nodes {}".format(self.node_string))
+        print("Turning {} snap2 for {}".format(command, self.node_string))
         for node, sender in self.senders.items():
             self.r.hset("commands:node:%d" % node, "power_snap_2_ctrl_trig", "True")
             self.r.hset("commands:node:%d" % node, "power_snap_2_cmd", command)
@@ -330,7 +322,7 @@ class NodeControl():
         Takes in a string value of 'on' or 'off'.
         Controls the power to SNAP 3.
         """
-        print("Turning on snap3 for nodes {}".format(self.node_string))
+        print("Turning {} snap3 for {}".format(command, self.node_string))
         for node, sender in self.senders.items():
             self.r.hset("commands:node:%d" % node, "power_snap_3_ctrl_trig", "True")
             self.r.hset("commands:node:%d" % node, "power_snap_3_cmd", command)
@@ -342,7 +334,7 @@ class NodeControl():
         Takes in a string value of 'on' or 'off'.
         Controls the power to FEM.
         """
-        print("Turning on fem for nodes {}".format(self.node_string))
+        print("Turning {} fem for {}".format(command, self.node_string))
         for node, sender in self.senders.items():
             self.r.hset("commands:node:%d" % node, "power_fem_ctrl_trig", "True")
             self.r.hset("commands:node:%d" % node, "power_fem_cmd", command)
@@ -354,7 +346,7 @@ class NodeControl():
         Takes in a string value of 'on' or 'off'.
         Controls the power to PAM.
         """
-        print("Turning on pam for nodes {}".format(self.node_string))
+        print("Turning {} pam for {}".format(command, self.node_string))
         for node, sender in self.senders.items():
             self.r.hset("commands:node:%d" % node, "power_pam_ctrl_trig", "True")
             self.r.hset("commands:node:%d" % node, "power_pam_cmd", command)

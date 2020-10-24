@@ -8,6 +8,9 @@ parser = argparse.ArgumentParser(description='This script outputs the current no
                                  formatter_class=argparse.ArgumentDefaultsHelpFormatter)
 parser.add_argument('node', help="Specify the node ID numbers (csv list of int "
                     "from 0 to 29) to get the corresponding Redis data or use 'all'")
+parser.add_argument('--exists', action='store_true', help='Check node existence')
+parser.add_argument('-s', '--show-redis-nodes', dest='show_redis_nodes', action='store_true',
+                    help="Show list of nodes found in redis.")
 parser.add_argument('--serverAddress', help='Name or redis server', default='redishost')
 args = parser.parse_args()
 
@@ -20,6 +23,12 @@ print("Attempting to connect to the node control redis database on 'redishost'..
 sys.stdout.flush()
 node = nodeControl.NodeControl(nodes2use, serverAddress=args.serverAddress)
 print("OK")
+
+if args.exists:
+    for key, val in node.check_exists().items():
+        print('{}:  {}'.format(key, val))
+if args.show_redis_nodes:
+    print("Nodes found in redis: {}".format(', '.join([str(x) for x in node.nodes_in_redis])))
 
 node_status = node.check_exists()
 if node_status:
