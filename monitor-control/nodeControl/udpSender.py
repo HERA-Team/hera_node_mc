@@ -70,7 +70,7 @@ class UdpSender():
         control over individual SNAPs.
         """
         command = command.lower()
-        if not self._check_command(command, allowed=['on', 'off']):
+        if not self._check_command(command, allowed_command=['on', 'off']):
             return
 
         # define arduino socket to send requests
@@ -80,13 +80,13 @@ class UdpSender():
         # Set delay before receiving more data
         time.sleep(self.throttle)
 
-    def power_fem(self, command):
+    def power_fem(self, command, checking):
         """
         Takes in a string value of 'on' or 'off'.
         Controls the power to FEM.
         """
         command = command.lower()
-        if not self._check_command(command, allowed=['on', 'off']):
+        if not self._check_command(command, allowed_command=['on', 'off']):
             return
 
         # define arduino socket to send requests
@@ -102,7 +102,7 @@ class UdpSender():
         Controls the power to PAM.
         """
         command = command.lower()
-        if not self._check_command(command, allowed=['on', 'off']):
+        if not self._check_command(command, ['on', 'off']):
             return
 
         # define arduino socket to send requests
@@ -118,7 +118,7 @@ class UdpSender():
         Controls the power to SNAP 0.
         """
         command = command.lower()
-        if not self._check_command(command, allowed=['on', 'off']):
+        if not self._check_command(command, allowed_command=['on', 'off']):
             return
 
         # define arduino socket to send requests
@@ -134,7 +134,7 @@ class UdpSender():
         Controls the power to SNAP 1.
         """
         command = command.lower()
-        if not self._check_command(command, allowed=['on', 'off']):
+        if not self._check_command(command, allowed_command=['on', 'off']):
             return
 
         # define arduino socket to send requests
@@ -150,7 +150,7 @@ class UdpSender():
         Controls the power to SNAP 2.
         """
         command = command.lower()
-        if not self._check_command(command, allowed=['on', 'off']):
+        if not self._check_command(command, allowed_command=['on', 'off']):
             return
 
         # define arduino socket to send requests
@@ -166,7 +166,7 @@ class UdpSender():
         Controls the power to SNAP 3.
         """
         command = command.lower()
-        if not self._check_command(command, allowed=['on', 'off']):
+        if not self._check_command(command, allowed_command=['on', 'off']):
             return
 
         # define arduino socket to send requests
@@ -187,8 +187,8 @@ class UdpSender():
         # Set delay before receiving more data
         time.sleep(self.throttle)
 
-    def _check_command(command, allowed):
-        if command in allowed:
+    def _check_command(command, allowed_command):
+        if command in allowed_command:
             return True
-        print("{} is not allowed command ({})".format(command, allowed))
+        print("{} is not allowed command ({})".format(command, allowed_command))
         return False
