@@ -8,6 +8,8 @@ import sys
 sendPort = 8888
 # Define IP address on which to send commands
 serverAddress = '0.0.0.0'
+# Define hosts that can directly control the arduinos
+direct_control_hostnames = ['hera-mobile', 'hera-node-head']
 
 
 class UdpSender():
@@ -32,28 +34,30 @@ class UdpSender():
         """
         self.throttle = throttle
         self.arduinoAddress = arduinoAddress
+        self.control_type = 'remote'
+        if socket.gethostname() in direct_control_hostnames:
+            self.control_type = 'direct'
+            # define socket address for binding; necessary for receiving data from Arduino
+            self.localSocket = (serverAddress, sendPort)
 
-        # define socket address for binding; necessary for receiving data from Arduino
-        self.localSocket = (serverAddress, sendPort)
+            # Create a UDP socket
+            try:
+                self.client_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+                # Make sure that specify that we want to reuse the socket address
+                self.client_socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+                # print('Socket created')
+            except socket.error as msg:
+                print('Failed to create socket. Error Code : {}  Message {}'
+                      .format(str(msg[0]), str(msg[1])))
+                sys.exit()
 
-        # Create a UDP socket
-        try:
-            self.client_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-            # Make sure that specify that we want to reuse the socket address
-            self.client_socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
-            # print('Socket created')
-        except socket.error as msg:
-            print('Failed to create socket. Error Code : {}  Message {}'
-                  .format(str(msg[0]), str(msg[1])))
-            sys.exit()
-
-        # Bind socket to local host and port
-        try:
-            self.client_socket.bind(self.localSocket)
-            # print('Bound socket')
-        except socket.error as msg:
-            print('Bind failed. Error Code : {}  Message {}'.format(str(msg[0]), msg[1]))
-            sys.exit()
+            # Bind socket to local host and port
+            try:
+                self.client_socket.bind(self.localSocket)
+                # print('Bound socket')
+            except socket.error as msg:
+                print('Bind failed. Error Code : {}  Message {}'.format(str(msg[0]), msg[1]))
+                sys.exit()
 
     def poke(self):
         """
@@ -188,6 +192,9 @@ class UdpSender():
         time.sleep(self.throttle)
 
     def _check_command(self, command, allowed):
+        if self.control_type == 'remote':
+            print("Remote control")
+            return False
         if command in allowed:
             return True
         print("{} is not allowed command ({})".format(command, allowed))
