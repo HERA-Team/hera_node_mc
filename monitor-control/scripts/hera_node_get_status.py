@@ -48,6 +48,7 @@ else:
 powers = node.get_power_status()
 sensors = node.get_sensors()
 
+switch = {True: 'On', False: 'Off'}
 print("\nNode power states")
 print("-----------------")
 for nd, pwr in powers.items():
@@ -55,7 +56,7 @@ for nd, pwr in powers.items():
     for key, val in sorted(pwr.items()):
         if key == 'timestamp':
             continue
-        print("  {}: {}".format(key, val))
+        print("  {}: {}".format(key, switch[val]))
 
 print("\nNode sensor values")
 print("------------------")

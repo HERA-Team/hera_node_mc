@@ -50,10 +50,11 @@ else:
         args.snap1 = True
         args.snap2 = True
         args.snap3 = True
+    any_snap = args.snap0 or args.snap1 or args.snap2 or args.snap3
+    all_snap = args.snap0 and args.snap1 and args.snap2 and args.snap3
 
-    if args.command == 'on':
-        if args.snap_relay or args.snap0 or args.snap1 or args.snap2 or args.snap3:
-            n.power_snap_relay('on')
+    if args.command == 'on' and (args.snap_relay or any_snap):
+        n.power_snap_relay('on')
 
     if args.snap0:
         n.power_snap_0(args.command)
@@ -73,5 +74,5 @@ else:
     if args.fem:
         n.power_fem(args.command)
 
-    if args.command == 'off' and args.snap_relay:
+    if args.command == 'off' and (args.snap_relay or all_snap):
         n.power_snap_relay('off')
