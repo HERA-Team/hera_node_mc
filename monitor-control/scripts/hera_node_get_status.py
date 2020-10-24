@@ -40,19 +40,19 @@ else:
 powers = node.get_power_status()
 sensors = node.get_sensors()
 
-print("Node power states")
+print("\nNode power states")
 print("-----------------")
 for nd, pwr in powers.items():
-    print("{}   updated at {}".format(nd, pwr['timestamp']))
+    print("Node {}   updated at {}".format(nd, pwr['timestamp']))
     for key, val in sorted(pwr.items()):
         if key == 'timestamp':
             continue
         print("  {}: {}".format(key, val))
 
-print("Node sensor values")
+print("\nNode sensor values")
 print("------------------")
 for nd, sens in sensors.items():
-    print("{}   updated at {}".format(nd, sens['timestamp']))
+    print("Node {}   updated at {}".format(nd, sens['timestamp']))
     for key, val in sorted(sens.items()):
         if key == 'timestamp':
             continue
