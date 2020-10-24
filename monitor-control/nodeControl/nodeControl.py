@@ -50,6 +50,7 @@ class NodeControl():
         self.r = redis.StrictRedis(serverAddress)
         self.get_node_senders()
         self.found_nodes = sorted(self.senders.keys())
+        self.node_string = ', '.join([str(x) for x in self.found_nodes])
 
     def get_node_senders(self):
         self.senders = {}
@@ -75,7 +76,7 @@ class NodeControl():
         :returns: Whatever key-value pairs exist for this node's hash
         """
         rawstat = {}
-        for node in self.senders.keys():
+        for node in self.found_nodes:
             nkey = this_key.replace('*', '{}'.format(node))
             rawstat[node] = {key.decode(): val.decode()
                              for key, val in self.r.hgetall(nkey).items()}
@@ -277,7 +278,7 @@ class NodeControl():
         Controls the power to SNAP relay. The SNAP relay
         has to be turn on before sending commands to individual SNAPs.
         """
-        print("Turning on snap relays for nodes {}".format(', '.join(self.found_nodes)))
+        print("Turning on snap relays for nodes {}".format(self.node_string))
         for node, sender in self.senders.items():
             self.r.hset("commands:node:%d" % node, "power_snap_relay_ctrl_trig", "True")
             self.r.hset("commands:node:%d" % node, "power_snap_relay_cmd", command)
@@ -289,7 +290,7 @@ class NodeControl():
         Takes in a string value of 'on' or 'off'.
         Controls the power to SNAP 0.
         """
-        print("Turning on snap0 for nodes {}".format(', '.join(self.found_nodes)))
+        print("Turning on snap0 for nodes {}".format(self.node_string))
         for node, sender in self.senders.items():
             self.r.hset("commands:node:%d" % node, "power_snap_0_ctrl_trig", "True")
             self.r.hset("commands:node:%d" % node, "power_snap_0_cmd", command)
@@ -301,7 +302,7 @@ class NodeControl():
         Takes in a string value of 'on' or 'off'.
         Controls the power to SNAP 1.
         """
-        print("Turning on snap1 for nodes {}".format(', '.join(self.found_nodes)))
+        print("Turning on snap1 for nodes {}".format(self.node_string))
         for node, sender in self.senders.items():
             self.r.hset("commands:node:%d" % node, "power_snap_1_ctrl_trig", "True")
             self.r.hset("commands:node:%d" % node, "power_snap_1_cmd", command)
@@ -313,7 +314,7 @@ class NodeControl():
         Takes in a string value of 'on' or 'off'.
         Controls the power to SNAP 2.
         """
-        print("Turning on snap2 for nodes {}".format(', '.join(self.found_nodes)))
+        print("Turning on snap2 for nodes {}".format(self.node_string))
         for node, sender in self.senders.items():
             self.r.hset("commands:node:%d" % node, "power_snap_2_ctrl_trig", "True")
             self.r.hset("commands:node:%d" % node, "power_snap_2_cmd", command)
@@ -325,7 +326,7 @@ class NodeControl():
         Takes in a string value of 'on' or 'off'.
         Controls the power to SNAP 3.
         """
-        print("Turning on snap3 for nodes {}".format(', '.join(self.found_nodes)))
+        print("Turning on snap3 for nodes {}".format(self.node_string))
         for node, sender in self.senders.items():
             self.r.hset("commands:node:%d" % node, "power_snap_3_ctrl_trig", "True")
             self.r.hset("commands:node:%d" % node, "power_snap_3_cmd", command)
@@ -337,7 +338,7 @@ class NodeControl():
         Takes in a string value of 'on' or 'off'.
         Controls the power to FEM.
         """
-        print("Turning on fem for nodes {}".format(', '.join(self.found_nodes)))
+        print("Turning on fem for nodes {}".format(self.node_string))
         for node, sender in self.senders.items():
             self.r.hset("commands:node:%d" % node, "power_fem_ctrl_trig", "True")
             self.r.hset("commands:node:%d" % node, "power_fem_cmd", command)
@@ -349,7 +350,7 @@ class NodeControl():
         Takes in a string value of 'on' or 'off'.
         Controls the power to PAM.
         """
-        print("Turning on pam for nodes {}".format(', '.join(self.found_nodes)))
+        print("Turning on pam for nodes {}".format(self.node_string))
         for node, sender in self.senders.items():
             self.r.hset("commands:node:%d" % node, "power_pam_ctrl_trig", "True")
             self.r.hset("commands:node:%d" % node, "power_pam_cmd", command)
@@ -360,15 +361,14 @@ class NodeControl():
         """
         Sends the reset command to Arduino which restarts the bootloader.
         """
-        print("Resetting nodes {}".format(', '.join(self.found_nodes)))
+        print("Resetting nodes {}".format(self.node_string))
         for node, sender in self.senders.items():
             self.r.hset("commands:node:%d" % node, "reset", "True")
             sender.reset()
             time.sleep(self.throttle)
 
     def init_redis(self):
-        print("Initializing node power flags to False for nodes {}"
-              .format(', '.join(self.found_nodes)))
+        print("Initializing node power flags to False for nodes {}".format(self.node_string))
         for node in self.nodes:
             comnoid = 'commands:node:{:d}'.format(node)
             self.r.hset(comnoid, 'power_snap_relay_ctrl_trig', 'False')
