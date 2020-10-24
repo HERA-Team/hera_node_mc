@@ -274,7 +274,7 @@ class NodeControl():
         Controls the power to SNAP relay. The SNAP relay
         has to be turn on before sending commands to individual SNAPs.
         """
-        print("Turning {} snap relays for {}".format(command, self.node_string))
+        print("Turning {} snap relay for {}".format(command, self.node_string))
         for node, sender in self.senders.items():
             self.r.hset("commands:node:%d" % node, "power_snap_relay_ctrl_trig", "True")
             self.r.hset("commands:node:%d" % node, "power_snap_relay_cmd", command)

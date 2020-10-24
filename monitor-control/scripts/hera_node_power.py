@@ -10,7 +10,8 @@ parser.add_argument('command', help="Specify 'on', 'off', 'reset', 'init'",
                     choices=['on', 'off', 'reset', 'init'])
 parser.add_argument('node', help="Specify the list of nodes (csv) or 'all'", default='all')
 parser.add_argument('-r', '--snap-relay', dest='snap_relay', action='store_true',
-                    help='Turn on the snap-relay (redundant if turning on any snap)')
+                    help='Turn on the snap-relay (redundant if turning on any snap '
+                    'and needed explicitly when turning off all snaps)')
 parser.add_argument('-s', '--snaps', action='store_true', help='Turn on all the snaps')
 parser.add_argument('-0', '--snap0', action='store_true', help='Turn on SNAP 0')
 parser.add_argument('-1', '--snap1', action='store_true', help='Turn on SNAP 1')
@@ -40,6 +41,7 @@ elif args.command == 'init':
 else:
     if args.all:
         args.snaps = True
+        args.snap_relay = True
         args.pam = True
         args.fem = True
 
@@ -49,8 +51,9 @@ else:
         args.snap2 = True
         args.snap3 = True
 
-    if args.snap_relay or args.snap0 or args.snap1 or args.snap2 or args.snap3:
-        n.power_snap_relay(args.command)
+    if args.command == 'on':
+        if args.snap_relay or args.snap0 or args.snap1 or args.snap2 or args.snap3:
+            n.power_snap_relay('on')
 
     if args.snap0:
         n.power_snap_0(args.command)
@@ -69,3 +72,6 @@ else:
 
     if args.fem:
         n.power_fem(args.command)
+
+    if args.command == 'off' and args.snap_relay:
+        n.power_snap_relay('off')
