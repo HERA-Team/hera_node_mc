@@ -64,7 +64,6 @@ if args.fem:
     n.power_fem(args.command)
 
 if args.reset:
-    print("Resetting Arduino/turning everything off at once")
     n.reset()
 
 if args.exists:
