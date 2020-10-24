@@ -56,13 +56,13 @@ for nd, pwr in powers.items():
     for key, val in sorted(pwr.items()):
         if key == 'timestamp':
             continue
-        print("  {}: {}".format(key, switch[val]))
+        print("  {:20s} {}".format(key, switch[val]))
 
-print("\nNode sensor values")
+print("\nNode values")
 print("------------------")
 for nd, sens in sensors.items():
     print("Node {}   updated at {}".format(nd, sens['timestamp']))
     for key, val in sorted(sens.items()):
         if key == 'timestamp':
             continue
-        print("  {}: {}".format(key, val))
+        print("  {:20s} {}".format(key, val))
