@@ -46,7 +46,6 @@ class NodeControl():
             Delay in seconds between calls to turn on power
         """
         self.nodes = nodes
-        print("NC49:  ",nodes)
         self.throttle = throttle
         self.r = redis.StrictRedis(serverAddress)
         self.get_node_senders()
@@ -377,7 +376,6 @@ class NodeControl():
         Check that the node exists.
         Return dict
         """
-        print("NC380-------------------------")
         ex = {}
         for node in self.nodes:
             ex[node] = node in self.senders.keys()

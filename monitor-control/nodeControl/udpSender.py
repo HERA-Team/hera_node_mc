@@ -41,7 +41,7 @@ class UdpSender():
             self.client_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
             # Make sure that specify that we want to reuse the socket address
             self.client_socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
-            print('Socket created')
+            # print('Socket created')
         except socket.error as msg:
             print('Failed to create socket. Error Code : {}  Message {}'
                   .format(str(msg[0]), str(msg[1])))
@@ -50,7 +50,7 @@ class UdpSender():
         # Bind socket to local host and port
         try:
             self.client_socket.bind(self.localSocket)
-            print('Bound socket')
+            # print('Bound socket')
         except socket.error as msg:
             print('Bind failed. Error Code : {}  Message {}'.format(str(msg[0]), msg[1]))
             sys.exit()
