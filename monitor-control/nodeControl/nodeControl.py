@@ -269,8 +269,6 @@ class NodeControl():
         }
         wrstat = {}
         for node, stats in self._get_raw_node_hash("status:wr:heraNode*wr").items():
-            if 'timestamp' not in stats.keys():
-                continue
             wrstat[node] = {}
             for key, convfunc in conv_methods.items():
                 if key.startswith('_'):
