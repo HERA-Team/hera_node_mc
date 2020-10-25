@@ -1,3 +1,4 @@
+from __future__ import print_function
 import redis
 import dateutil.parser
 import json
@@ -18,7 +19,7 @@ class NodeControl():
     through a Redis database running on the correlator head node.
     """
 
-    def __init__(self, nodes, serverAddress="redishost", throttle=0.5):
+    def __init__(self, nodes, serverAddress="redishost", throttle=0.5, force_redis_only=False):
         """
         Create a NodeControl class instance to control a single node via the redis datastore
         hosted at `serverAddress`.
@@ -33,19 +34,31 @@ class NodeControl():
             monitoring redis server
         throttle : float
             Delay in seconds between calls to turn on power
+        force_redis_only : bool
+            Force only using redis (won't send directly even if allowed, ignore redis commands:node)
         """
         self.nodes = nodes
         self.throttle = throttle
+        self.force_redis_only = force_redis_only
         self.r = redis.StrictRedis(serverAddress)
         self.get_node_senders()
-        self.found_nodes = sorted(self.senders.keys())
-        if not len(self.found_nodes):
-            self.node_string = 'No nodes found'
-        else:
-            plural = 'nodes' if len(self.found_nodes) > 1 else 'node'
-            self.node_string = "{} {}".format(plural, ', '.join([str(x) for x in self.found_nodes]))
+        self.redis_control = self.get_redis_control()
 
     def get_node_senders(self):
+        """
+        Get udp node class for requested nodes that are also in redis.
+
+        Attributes
+        ----------
+        senders : dict
+            Sender classes keyed on node_id (int)
+        nodes_in_redis : list
+            List of all nodes in redis
+        found_nodes : list
+            List of all found nodes (request+redis+arduino)
+        node_string : str
+            Nice string to use to print found nodes
+        """
         self.nodes_in_redis = []
         self.senders = {}
         for key in self.r.scan_iter("status:node:*"):
@@ -59,7 +72,14 @@ class NodeControl():
             ip = self.r.hget(key, 'ip').decode()
             if ip is None:
                 continue
-            self.senders[node_id] = udpSender.UdpSender(ip, throttle=self.throttle)
+            self.senders[node_id] = udpSender.UdpSender(ip, throttle=self.throttle,
+                                                        force_remote=self.force_redis_only)
+        self.found_nodes = sorted(self.senders.keys())
+        if not len(self.found_nodes):
+            self.node_string = 'No nodes found'
+        else:
+            plural = 'nodes' if len(self.found_nodes) > 1 else 'node'
+            self.node_string = "{} {}".format(plural, ', '.join([str(x) for x in self.found_nodes]))
 
     def _get_raw_node_hash(self, this_key):
         """
@@ -275,58 +295,25 @@ class NodeControl():
         """
         print("Turning {} snap relay for {}".format(command, self.node_string))
         for node, sender in self.senders.items():
-            self.r.hset("commands:node:%d" % node, "power_snap_relay_ctrl_trig", "True")
-            self.r.hset("commands:node:%d" % node, "power_snap_relay_cmd", command)
+            if self.redis_control:
+                self.r.hset("commands:node:%d" % node, "power_snap_relay_ctrl_trig", "True")
+                self.r.hset("commands:node:%d" % node, "power_snap_relay_cmd", command)
             if sender.control_type == 'direct':
                 sender.power_snap_relay(command)
 
-    def power_snap_0(self, command):
+    def power_snap(self, snap_n, command):
         """
-        Takes in a string value of 'on' or 'off'.
-        Controls the power to SNAP 0.
+        Takes in a string value of 'on' or 'off' for snap_n
         """
-        print("Turning {} snap0 for {}".format(command, self.node_string))
+        print("Turning {} snap{} for {}".format(command, snap_n, self.node_string))
         for node, sender in self.senders.items():
-            self.r.hset("commands:node:%d" % node, "power_snap_0_ctrl_trig", "True")
-            self.r.hset("commands:node:%d" % node, "power_snap_0_cmd", command)
+            if self.redis_control:
+                self.r.hset("commands:node:{}".format(node),
+                            "power_snap_{}_ctrl_trig".format(snap_n), "True")
+                self.r.hset("commands:node:{}".format(node),
+                            "power_snap_{}_cmd".format(snap_n), command)
             if sender.control_type == 'direct':
-                sender.power_snap_0(command)
-
-    def power_snap_1(self, command):
-        """
-        Takes in a string value of 'on' or 'off'.
-        Controls the power to SNAP 1.
-        """
-        print("Turning {} snap1 for {}".format(command, self.node_string))
-        for node, sender in self.senders.items():
-            self.r.hset("commands:node:%d" % node, "power_snap_1_ctrl_trig", "True")
-            self.r.hset("commands:node:%d" % node, "power_snap_1_cmd", command)
-            if sender.control_type == 'direct':
-                sender.power_snap_1(command)
-
-    def power_snap_2(self, command):
-        """
-        Takes in a string value of 'on' or 'off'.
-        Controls the power to SNAP 2.
-        """
-        print("Turning {} snap2 for {}".format(command, self.node_string))
-        for node, sender in self.senders.items():
-            self.r.hset("commands:node:%d" % node, "power_snap_2_ctrl_trig", "True")
-            self.r.hset("commands:node:%d" % node, "power_snap_2_cmd", command)
-            if sender.control_type == 'direct':
-                sender.power_snap_2(command)
-
-    def power_snap_3(self, command):
-        """
-        Takes in a string value of 'on' or 'off'.
-        Controls the power to SNAP 3.
-        """
-        print("Turning {} snap3 for {}".format(command, self.node_string))
-        for node, sender in self.senders.items():
-            self.r.hset("commands:node:%d" % node, "power_snap_3_ctrl_trig", "True")
-            self.r.hset("commands:node:%d" % node, "power_snap_3_cmd", command)
-            if sender.control_type == 'direct':
-                sender.power_snap_3(command)
+                sender.power_snap(snap_n, command)
 
     def power_fem(self, command):
         """
@@ -335,8 +322,9 @@ class NodeControl():
         """
         print("Turning {} fem for {}".format(command, self.node_string))
         for node, sender in self.senders.items():
-            self.r.hset("commands:node:%d" % node, "power_fem_ctrl_trig", "True")
-            self.r.hset("commands:node:%d" % node, "power_fem_cmd", command)
+            if self.redis_control:
+                self.r.hset("commands:node:%d" % node, "power_fem_ctrl_trig", "True")
+                self.r.hset("commands:node:%d" % node, "power_fem_cmd", command)
             if sender.control_type == 'direct':
                 sender.power_fem(command)
 
@@ -347,8 +335,9 @@ class NodeControl():
         """
         print("Turning {} pam for {}".format(command, self.node_string))
         for node, sender in self.senders.items():
-            self.r.hset("commands:node:%d" % node, "power_pam_ctrl_trig", "True")
-            self.r.hset("commands:node:%d" % node, "power_pam_cmd", command)
+            if self.redis_control:
+                self.r.hset("commands:node:{}".format(node), "power_pam_ctrl_trig", "True")
+                self.r.hset("commands:node:{}".format(node), "power_pam_cmd", command)
             if sender.control_type == 'direct':
                 sender.power_pam(command)
 
@@ -358,9 +347,21 @@ class NodeControl():
         """
         print("Resetting nodes {}".format(self.node_string))
         for node, sender in self.senders.items():
-            self.r.hset("commands:node:%d" % node, "reset", "True")
+            if self.redis_control:
+                self.r.hset("commands:node:%d" % node, "reset", "True")
             if sender.control_type == 'direct':
                 sender.reset()
+
+    def set_redis_control(self, allow=True):
+        if allow:
+            self.r.set('commands:node', 'Enable')
+        else:
+            self.r.set('commands:node', 'Disable')
+
+    def get_redis_control(self):
+        if self.force_redis_only:
+            return True
+        return False if self.r.get('commands:node').decode() == 'Disable' else True
 
     def init_redis(self):
         print("Initializing node power flags to False for nodes {}".format(self.node_string))

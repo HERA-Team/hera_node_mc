@@ -19,7 +19,7 @@ class UdpSender():
     Arduino bootloader.
     """
 
-    def __init__(self, arduinoAddress, throttle=1):
+    def __init__(self, arduinoAddress, throttle=0.5, force_remote=False):
         """
         Takes in the arduino IP address and sends commands directly, using udp.
         You have to be on the hera-digi-vm server to use it, otherwise use
@@ -35,7 +35,7 @@ class UdpSender():
         self.throttle = throttle
         self.arduinoAddress = arduinoAddress
         self.control_type = 'remote'
-        if socket.gethostname() in direct_control_hostnames:
+        if not force_remote and socket.gethostname() in direct_control_hostnames:
             self.control_type = 'direct'
             # define socket address for binding; necessary for receiving data from Arduino
             self.localSocket = (serverAddress, sendPort)
@@ -74,7 +74,7 @@ class UdpSender():
         control over individual SNAPs.
         """
         command = command.lower()
-        if not self._check_command(command, allowed=['on', 'off']):
+        if not self._command_OK(command, allowed=['on', 'off']):
             return
 
         # define arduino socket to send requests
@@ -90,7 +90,7 @@ class UdpSender():
         Controls the power to FEM.
         """
         command = command.lower()
-        if not self._check_command(command, allowed=['on', 'off']):
+        if not self._command_OK(command, allowed=['on', 'off']):
             return
 
         # define arduino socket to send requests
@@ -106,7 +106,7 @@ class UdpSender():
         Controls the power to PAM.
         """
         command = command.lower()
-        if not self._check_command(command, ['on', 'off']):
+        if not self._command_OK(command, ['on', 'off']):
             return
 
         # define arduino socket to send requests
@@ -116,66 +116,20 @@ class UdpSender():
         # Set delay before receiving more data
         time.sleep(self.throttle)
 
-    def power_snap_0(self, command):
+    def power_snap(self, snap_n, command):
         """
         Takes in the arduino IP address string and a command "on"/"off".
-        Controls the power to SNAP 0.
+        Controls the power to SNAP snap_n.
         """
+        if not self._command_OK(snap_n, allowed=[0, 1, 2, 3]):
+            return
         command = command.lower()
-        if not self._check_command(command, allowed=['on', 'off']):
+        if not self._command_OK(command, allowed=['on', 'off']):
             return
 
         # define arduino socket to send requests
         arduinoSocket = (self.arduinoAddress, sendPort)
-        self.client_socket.sendto(('snapv2_0_%s' % command).encode(), arduinoSocket)
-
-        # Set delay before receiving more data
-        time.sleep(self.throttle)
-
-    def power_snap_1(self, command):
-        """
-        Takes in the arduino IP address string and a command "on"/"off".
-        Controls the power to SNAP 1.
-        """
-        command = command.lower()
-        if not self._check_command(command, allowed=['on', 'off']):
-            return
-
-        # define arduino socket to send requests
-        arduinoSocket = (self.arduinoAddress, sendPort)
-        self.client_socket.sendto(('snapv2_1_%s' % command).encode(), arduinoSocket)
-
-        # Set delay before receiving more data
-        time.sleep(self.throttle)
-
-    def power_snap_2(self, command):
-        """
-        Takes in the arduino IP address string and a command "on"/"off".
-        Controls the power to SNAP 2.
-        """
-        command = command.lower()
-        if not self._check_command(command, allowed=['on', 'off']):
-            return
-
-        # define arduino socket to send requests
-        arduinoSocket = (self.arduinoAddress, sendPort)
-        self.client_socket.sendto(('snapv2_2_%s' % command).encode(), arduinoSocket)
-
-        # Set delay before receiving more data
-        time.sleep(self.throttle)
-
-    def power_snap_3(self, command):
-        """
-        Takes in the arduino IP address string and a command "on"/"off".
-        Controls the power to SNAP 3.
-        """
-        command = command.lower()
-        if not self._check_command(command, allowed=['on', 'off']):
-            return
-
-        # define arduino socket to send requests
-        arduinoSocket = (self.arduinoAddress, sendPort)
-        self.client_socket.sendto(('snapv2_3_%s' % command).encode(), arduinoSocket)
+        self.client_socket.sendto('snapv2_{}_{}'.format(snap_n, command).encode(), arduinoSocket)
 
         # Set delay before receiving more data
         time.sleep(self.throttle)
@@ -191,11 +145,11 @@ class UdpSender():
         # Set delay before receiving more data
         time.sleep(self.throttle)
 
-    def _check_command(self, command, allowed):
+    def _command_OK(self, command, allowed):
         if self.control_type == 'remote':
             print("Remote control")
             return False
         if command in allowed:
             return True
-        print("{} is not allowed command ({})".format(command, allowed))
+        print("{} is not allowed ({})".format(command, allowed))
         return False
