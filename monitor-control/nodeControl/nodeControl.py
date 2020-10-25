@@ -361,20 +361,23 @@ class NodeControl():
     def get_redis_control(self):
         if self.force_redis_only:
             return True
-        return False if self.r.get('commands:node').decode() == 'Disable' else True
+        current_control = self.r.get('commands:node')
+        if current_control is None:
+            return True
+        return False if current_control.decode() == 'Disable' else True
 
     def init_redis(self):
         print("Initializing node power flags to False for nodes {}".format(self.node_string))
         for node in self.nodes:
-            comnoid = 'commands:node:{:d}'.format(node)
-            self.r.hset(comnoid, 'power_snap_relay_ctrl_trig', 'False')
-            self.r.hset(comnoid, 'power_snap_0_ctrl_trig', 'False')
-            self.r.hset(comnoid, 'power_snap_1_ctrl_trig', 'False')
-            self.r.hset(comnoid, 'power_snap_2_ctrl_trig', 'False')
-            self.r.hset(comnoid, 'power_snap_3_ctrl_trig', 'False')
-            self.r.hset(comnoid, 'power_fem_ctrl_trig', 'False')
-            self.r.hset(comnoid, 'power_pam_ctrl_trig', 'False')
-            self.r.hset(comnoid, 'reset', 'False')
+            command_node = 'commands:node:{}'.format(node)
+            self.r.hset(command_node, 'power_snap_relay_ctrl_trig', 'False')
+            self.r.hset(command_node, 'power_snap_0_ctrl_trig', 'False')
+            self.r.hset(command_node, 'power_snap_1_ctrl_trig', 'False')
+            self.r.hset(command_node, 'power_snap_2_ctrl_trig', 'False')
+            self.r.hset(command_node, 'power_snap_3_ctrl_trig', 'False')
+            self.r.hset(command_node, 'power_fem_ctrl_trig', 'False')
+            self.r.hset(command_node, 'power_pam_ctrl_trig', 'False')
+            self.r.hset(command_node, 'reset', 'False')
             self.r.hset('throttle:node:{:d}'.format(node), 'last_command_sec', '0')
 
     def check_exists(self):

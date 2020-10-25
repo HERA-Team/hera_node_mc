@@ -9,7 +9,7 @@ parser = argparse.ArgumentParser(description='Turn on SNAP relay, SNAPs, FEM and
 parser.add_argument('command', help="Specify 'on', 'off'. "
                     "Also can: 'node_reset', 'redis_init', 'redis_enable', 'redis_disable'",
                     choices=['on', 'off', 'reset', 'redis_init', 'redis_enable', 'redis_disable'])
-parser.add_argument('node', help="Specify the list of nodes (csv list of int) or 'all'",
+parser.add_argument('node', help="Specify the list of nodes (csv list of int) or 'all'", nargs='?',
                     default='all')
 parser.add_argument('-r', '--snap-relay', dest='snap_relay', action='store_true',
                     help="Turn on/off the snap-relay "
