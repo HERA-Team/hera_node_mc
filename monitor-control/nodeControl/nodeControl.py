@@ -352,11 +352,11 @@ class NodeControl():
             if sender.control_type == 'direct':
                 sender.reset()
 
-    def set_redis_control(self, allow=True):
-        if allow:
-            self.r.set('commands:node', 'Enable')
-        else:
+    def set_redis_control(self, allow):
+        if allow == 'Disable':
             self.r.set('commands:node', 'Disable')
+        else:
+            self.r.set('commands:node', 'Enable')
 
     def get_redis_control(self):
         if self.force_redis_only:
