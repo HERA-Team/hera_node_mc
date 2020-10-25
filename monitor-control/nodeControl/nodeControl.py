@@ -269,7 +269,7 @@ class NodeControl():
         }
         wrstat = {}
         for node, stats in self._get_raw_node_hash("status:wr:heraNode*wr").items():
-            if 'timestamp' not in stats.key():
+            if 'timestamp' not in stats.keys():
                 continue
             wrstat[node] = {}
             for key, convfunc in conv_methods.items():
@@ -353,6 +353,7 @@ class NodeControl():
                 sender.reset()
 
     def set_redis_control(self, allow):
+        print("Setting redis control to {}".format(allow))
         if allow == 'Disable':
             self.r.set('commands:node', 'Disable')
         else:

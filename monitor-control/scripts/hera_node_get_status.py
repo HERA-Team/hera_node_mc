@@ -9,6 +9,7 @@ parser = argparse.ArgumentParser(description='This script outputs the current no
 parser.add_argument('node', nargs='?', help="Specify the node ID numbers (csv list of int "
                     "from 0 to 29) to get the corresponding Redis data or use 'all'",
                     default='all')
+parser.add_argument('--wr', action='store_true', help="Flag to add white rabbit status")
 parser.add_argument('--exists', action='store_true', help='Check node existence')
 parser.add_argument('--serverAddress', help='Name or redis server', default='redishost')
 args = parser.parse_args()
@@ -59,10 +60,21 @@ for nd, pwr in powers.items():
         print("  {:20s} {}".format(key, switch[val]))
 
 print("\nNode values")
-print("------------------")
+print("-----------")
 for nd, sens in sensors.items():
     print("Node {}   updated at {}".format(nd, sens['timestamp']))
     for key, val in sorted(sens.items()):
         if key == 'timestamp':
             continue
         print("  {:20s} {}".format(key, val))
+
+if args.wr:
+    wr = node.get_wr_status()
+    print("\nWhite Rabbit")
+    print("------------")
+    for nd, wrs in wr.items():
+        print("Node {}   updated at {}".format(nd, wrs['timestamp']))
+        for key, val in sorted(wrs.items()):
+            if key == 'timestamp':
+                continue
+            print("  {:20s} {}".format(key, val))
