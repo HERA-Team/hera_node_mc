@@ -17,6 +17,8 @@ class NodeControl():
     """
     This class is used to control power to PAM, FEM, and SNAP boards and get node status information
     through a Redis database running on the correlator head node.
+
+    It also provides a status for the White Rabbit
     """
 
     def __init__(self, nodes, serverAddress="redishost", throttle=0.5, force_redis_only=False):
