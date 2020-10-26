@@ -20,7 +20,7 @@ try:
     client_socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
     print('Socket created')
 except socket.error as msg:
-    print(('Failed to create socket. Error Code : ' + str(msg[0]) + ' Message ' + str(msg[1])))
+    print('Failed to create socket. Error Code : {}  Message {}'.format(msg[0], msg[1]))
     sys.exit()
 
 # Bind socket to local host and port
@@ -28,7 +28,7 @@ try:
     client_socket.bind(localSocket)
     print('Bound socket')
 except socket.error as msg:
-    print(('Bind failed. Error Code : ' + str(msg[0]) + ' Message ' + msg[1]))
+    print('Bind failed. Error Code : {}  Message {}'.format(msg[0], msg[1]))
     sys.exit()
 
 try:

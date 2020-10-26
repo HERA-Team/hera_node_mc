@@ -2,7 +2,12 @@ from __future__ import print_function
 import redis
 import dateutil.parser
 import json
+import sys
 from . import udpSender
+
+
+sender_pkg = udpSender.__package__
+sender_ver = udpSender.__version__
 
 
 def str2bool(x):
@@ -11,6 +16,41 @@ def str2bool(x):
     :return: bool(x == '1')
     """
     return x == "1"
+
+
+def init_trig(node_ID, redis_conn):
+    command_node = 'commands:node:{}'.format(node_ID)
+    redis_conn.hset(command_node, 'power_snap_relay_ctrl_trig', 'False')
+    redis_conn.hset(command_node, 'power_snap_0_ctrl_trig', 'False')
+    redis_conn.hset(command_node, 'power_snap_1_ctrl_trig', 'False')
+    redis_conn.hset(command_node, 'power_snap_2_ctrl_trig', 'False')
+    redis_conn.hset(command_node, 'power_snap_3_ctrl_trig', 'False')
+    redis_conn.hset(command_node, 'power_fem_ctrl_trig', 'False')
+    redis_conn.hset(command_node, 'power_pam_ctrl_trig', 'False')
+    redis_conn.hset(command_node, 'reset', 'False')
+    redis_conn.hset('throttle:node:{:d}'.format(node_ID), 'last_command_sec', '0')
+
+
+def refresh_node_list(curr_nodes, redis_conn):
+    new_node_list = {}
+    for key in redis_conn.scan_iter("status:node:*"):
+        try:
+            node_id = int(redis_conn.hget(key, 'node_ID').decode())
+        except ValueError:
+            continue
+        ip = redis_conn.hget(key, 'ip').decode()
+        if node_id in list(curr_nodes.keys()):
+            if ip == curr_nodes[node_id].arduinoAddress:
+                new_node_list[node_id] = curr_nodes[node_id]
+            else:
+                new_node_list[node_id] = udpSender.UdpSender(ip)
+                print("Updating IP address of node {} to {}".format(node_id, ip), file=sys.stderr)
+        else:
+            new_node_list[node_id] = udpSender.UdpSender(ip)
+            print("Adding node {} with ip {}".format(node_id, ip), file=sys.stderr)
+            # If this is a new node, default all the command triggers to idle
+            init_trig(node_id, redis_conn)
+    return new_node_list
 
 
 class NodeControl():
@@ -370,16 +410,7 @@ class NodeControl():
     def init_redis(self):
         print("Initializing node power flags to False for nodes {}".format(self.node_string))
         for node in self.nodes:
-            command_node = 'commands:node:{}'.format(node)
-            self.r.hset(command_node, 'power_snap_relay_ctrl_trig', 'False')
-            self.r.hset(command_node, 'power_snap_0_ctrl_trig', 'False')
-            self.r.hset(command_node, 'power_snap_1_ctrl_trig', 'False')
-            self.r.hset(command_node, 'power_snap_2_ctrl_trig', 'False')
-            self.r.hset(command_node, 'power_snap_3_ctrl_trig', 'False')
-            self.r.hset(command_node, 'power_fem_ctrl_trig', 'False')
-            self.r.hset(command_node, 'power_pam_ctrl_trig', 'False')
-            self.r.hset(command_node, 'reset', 'False')
-            self.r.hset('throttle:node:{:d}'.format(node), 'last_command_sec', '0')
+            init_trig(node, self.r)
 
     def check_exists(self):
         """

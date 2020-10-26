@@ -9,7 +9,7 @@ import redis
 import socket
 import sys
 import os
-from udpSender import __version__, __package__
+from nodeControl import sender_ver, sender_pkg
 
 
 def noneify(v, noneval=-99.0):
@@ -23,7 +23,9 @@ def noneify(v, noneval=-99.0):
 
 
 hostname = socket.gethostname()
-script_redis_key = "status:script:%s:%s" % (hostname, __file__)
+script_redis_key = "status:script:{}:{}".format(hostname, __file__)
+
+heartbeat = 60.0
 
 # Define rcvPort for socket creation
 rcvPort = 8889
@@ -46,7 +48,7 @@ try:
     client_socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
     print("Socket created", file=sys.stderr)
 except socket.error as msg:
-    print('Failed to create socket. Error Code : ' + str(msg[0]) + ' Message ' + str(msg[1]),
+    print('Failed to create socket. Error Code : {}  Message {}'.format(msg[0], msg[1]),
           file=sys.stderr)
     sys.exit()
 
@@ -55,12 +57,12 @@ try:
     client_socket.bind(localSocket)
     print('Bound socket', file=sys.stderr)
 except socket.error as msg:
-    print('Bind failed. Error Code : ' + str(msg[0]) + ' Message ' + msg[1], file=sys.stderr)
+    print('Bind failed. Error Code : {}  Message {}'.format(msg[0], msg[1]), file=sys.stderr)
     sys.exit()
 
 try:
     while True:
-        r.set(script_redis_key, "alive", ex=60)
+        r.set(script_redis_key, "alive", ex=heartbeat)
         # Receive data continuously from the server (Arduino in this case)
         data, addr = client_socket.recvfrom(1024)
         # Arduino sends a Struct via UDP so unpacking is needed
@@ -109,12 +111,10 @@ try:
                      'timestamp': str(datetime.datetime.now()),
                      }
 
-        r.hmset('status:node:%d' % node, data_dict)
+        r.hmset('status:node:{}'.format(node), data_dict)
         # Write the version of this software to redis
-        r.hmset("version:%s:%s" % (__package__, os.path.basename(__file__)),
-                {"version": __version__, "timestamp": datetime.datetime.now().isoformat()})
-
-        # print(r.hgetall('status:node:%d'%node))
+        r.hmset("version:{}:{}".format(sender_pkg, os.path.basename(__file__)),
+                {"version": sender_ver, "timestamp": datetime.datetime.now().isoformat()})
 
 except KeyboardInterrupt:
     print('Interrupted', file=sys.stderr)
