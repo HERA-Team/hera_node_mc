@@ -39,9 +39,9 @@ if node_status:
             nodes_present.append(str(nd))
         else:
             nodes_missing.append(str(nd))
-    print("Nodes present:  {}".format(', '.join(nodes_present)))
+    print("Requested nodes present:  {}".format(', '.join(nodes_present)))
     if len(nodes_missing):
-        print("Nodes missing:  {}".format(', '.join(nodes_missing)))
+        print("Requested nodes missing:  {}".format(', '.join(nodes_missing)))
 else:
     print("None are present")
     exit
