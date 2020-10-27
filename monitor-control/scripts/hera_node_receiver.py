@@ -110,7 +110,6 @@ try:
                      'cpu_uptime_ms': unpacked_cpu_uptime,
                      'timestamp': str(datetime.datetime.now()),
                      }
-        print(data_dict)
         r.hmset('status:node:{}'.format(node), data_dict)
         # Write the version of this software to redis
         r.hmset("version:{}:{}".format(__package__, os.path.basename(__file__)),
