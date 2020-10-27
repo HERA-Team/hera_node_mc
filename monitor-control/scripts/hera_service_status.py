@@ -21,7 +21,7 @@ for key in r.keys():
     if key.decode().startswith('version'):
         for this_service in expected_services.keys():
             if this_service in dkey:
-                expected_services[this_service]['version]'] = [dkey, r.hgetall(key)]
+                expected_services[this_service]['version'] = [dkey, r.hgetall(key)]
                 break
         else:
             print("Other service")
