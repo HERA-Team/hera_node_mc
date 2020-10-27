@@ -16,7 +16,7 @@ import socket
 
 
 hostname = socket.gethostname()
-script_redis_key = "status:script:%s:%s" % (hostname, __file__)
+script_redis_key = "status:script:{}:{}".format(hostname, __file__)
 
 parser = argparse.ArgumentParser(description='Send keepalive pokes to all nodes with '
                                  'a status entry in redis',
@@ -50,7 +50,7 @@ try:
         for node_id, node in nodes.items():
             # print("Poking node %d"%node)
             node.poke()
-            r.hset('throttle:node:%d' % node_id, 'last_poke_sec', time.time())
+            r.hset('throttle:node:{}'.format(node_id), 'last_poke_sec', time.time())
         end_poke_time = time.time()
         time_to_poke = end_poke_time - start_poke_time
         if time_to_poke < poke_time_sec:
