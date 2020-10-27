@@ -10,7 +10,7 @@ import redis
 import socket
 import sys
 import os
-from nodeControl import nodeControl
+from nodeControl import __version__, __package__
 
 
 def noneify(v, noneval=-99.0):
@@ -114,8 +114,8 @@ try:
 
         r.hmset('status:node:{}'.format(node), data_dict)
         # Write the version of this software to redis
-        r.hmset("version:{}:{}".format(nodeControl.__package__, os.path.basename(__file__)),
-                {"version": nodeControl.__version__,
+        r.hmset("version:{}:{}".format(__package__, os.path.basename(__file__)),
+                {"version": __version__,
                  "timestamp": datetime.datetime.now().isoformat()})
 
 except KeyboardInterrupt:

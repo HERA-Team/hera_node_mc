@@ -9,7 +9,7 @@ between commands. Checks for command triggers inside the commands:status:node ke
 from __future__ import print_function
 import redis
 import argparse
-from nodeControl import nodeControl
+from nodeControl import nodeControl, __package__, __version__
 import time
 import sys
 import os
@@ -48,8 +48,8 @@ print("Using nodes {}:".format(list(nodes.keys())), file=sys.stderr)
 # not exceed the cmd_time_sec
 try:
     while True:
-        r.hmset("version:{}:{}".format(nodeControl.__package__, os.path.basename(__file__)), {
-            "version": nodeControl.__version__, "timestamp": datetime.datetime.now().isoformat(),
+        r.hmset("version:{}:{}".format(__package__, os.path.basename(__file__)), {
+            "version": __version__, "timestamp": datetime.datetime.now().isoformat(),
         })
         r.set(script_redis_key, "alive", ex=args.heartbeat)
 
