@@ -35,6 +35,7 @@ setup(
                 'monitor-control/scripts/hera_node_serial_dump.py',
                 'monitor-control/scripts/hera_node_serial.py',
                 'monitor-control/scripts/hera_node_power.py',
+                'monitor-control/scripts/hera_service_status.py'
             ]
 )
 
