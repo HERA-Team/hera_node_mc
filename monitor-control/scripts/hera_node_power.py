@@ -24,14 +24,13 @@ parser.add_argument('-p', '--pam', action='store_true', help='Turn on/off the PA
 parser.add_argument('-f', '--fem', action='store_true', help='Turn on/off the FEM')
 parser.add_argument('--all', action='store_true', help='Turn on/off all snaps, pam and fem')
 parser.add_argument('--serverAddress', help='Name or redis server', default='redishost')
-parser.add_argument('--throttle', help='Throttle time in sec', default=0.5)
+parser.add_argument('--throttle', help='Throttle time in sec', type=float, default=0.5)
 args = parser.parse_args()
 
 if args.node.lower() == 'all':
     nodes2use = list(range(30))
 else:
     nodes2use = [int(x) for x in args.node.split(',')]
-args.throttle = float(args.throttle)
 
 n = nodeControl.NodeControl(nodes2use, serverAddress=args.serverAddress, throttle=args.throttle)
 
