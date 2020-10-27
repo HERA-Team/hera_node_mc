@@ -119,7 +119,7 @@ try:
         r.hmset("version:{}:{}".format(__package__, os.path.basename(__file__)),
                 {"version": __version__,
                  "timestamp": datetime.datetime.now().isoformat()})
-        time.sleep(throttle)
+        # time.sleep(throttle)
 except KeyboardInterrupt:
     print('Interrupted', file=sys.stderr)
     sys.exit(0)
