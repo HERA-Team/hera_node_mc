@@ -1,3 +1,4 @@
+#! /usr/bin/env python
 """
 Checks Redis for commands sent by the monitor-control user.
 Makes sure commands are spaced out properly to prevent rapid power cycling and

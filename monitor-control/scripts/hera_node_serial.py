@@ -1,3 +1,4 @@
+#! /usr/bin/env python
 """
 This class is used for receiving debug messages on port 8890 from all the active Arduinos.
 """
