@@ -27,7 +27,7 @@ def noneify(v, noneval=-99.0):
 hostname = socket.gethostname()
 script_redis_key = "status:script:{}:{}".format(hostname, __file__)
 
-throttle = 5
+throttle = 0.5
 heartbeat = 60
 
 # Define rcvPort for socket creation
@@ -66,6 +66,7 @@ except socket.error as msg:
 try:
     while True:
         r.set(script_redis_key, "alive", ex=heartbeat)
+        print(script_redis_key)
         # Receive data continuously from the server (Arduino in this case)
         data, addr = client_socket.recvfrom(1024)
         # Arduino sends a Struct via UDP so unpacking is needed
@@ -115,10 +116,12 @@ try:
                      }
 
         r.hmset('status:node:{}'.format(node), data_dict)
+        print(data_dict)
         # Write the version of this software to redis
         r.hmset("version:{}:{}".format(__package__, os.path.basename(__file__)),
                 {"version": __version__,
                  "timestamp": datetime.datetime.now().isoformat()})
+        print(__package__, __version__)
         time.sleep(throttle)
 except KeyboardInterrupt:
     print('Interrupted', file=sys.stderr)
