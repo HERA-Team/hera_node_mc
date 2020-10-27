@@ -5,13 +5,14 @@ import os
 import time
 import json
 import redis
+import socket
 
 ap = argparse.ArgumentParser()
-ap.add_argument('snap0', help="SNAP serial number. E.g. 42")
-ap.add_argument('snap1', help="SNAP serial number. E.g. 43")
-ap.add_argument('snap2', help="SNAP serial number. E.g. 54")
-ap.add_argument('snap3', help="SNAP serial number. E.g. 7")
-ap.add_argument('node_num', help="Node number. E.g. 10")
+ap.add_argument('snap0', help="SNAP serial number. E.g. 42", type=int)
+ap.add_argument('snap1', help="SNAP serial number. E.g. 43", type=int)
+ap.add_argument('snap2', help="SNAP serial number. E.g. 54", type=int)
+ap.add_argument('snap3', help="SNAP serial number. E.g. 7", type=int)
+ap.add_argument('node_num', help="Node number. E.g. 10", type=int)
 ap.add_argument('--hosts_file', help="__Shouldn't need to change__  Name of hosts file.",
                 default="/etc/hosts")
 ap.add_argument('--snap_rev', help="__Shouldn't need to change__  Rev letter of SNAP (csv-list).  "
@@ -27,9 +28,11 @@ this_node_num = int(args.node_num)
 snaps = {}
 for i in range(4):
     snpi = 'heraNode{}Snap{}'.format(this_node_num, i)
-    snaps[snpi] = 'SNP{}{:06d}'.format(snap_rev[i], int(getattr(args, 'snap{}'.format(i))))
-with open('CurrentNode.txt', 'w') as fp:
-    fp.write(this_node_num)
+    snaps[snpi] = 'SNP{}{:06d}'.format(snap_rev[i], getattr(args, 'snap{}'.format(i)))
+hostname = socket.gethostname()
+if hostname == 'hera-mobile':  # RFI testing machine, so want to write the current node.
+    with open('CurrentNode.txt', 'w') as fp:
+        fp.write(this_node_num)
 
 print("Rewriting {} with".format(args.hosts_file))
 for loc, snr in snaps.items():
