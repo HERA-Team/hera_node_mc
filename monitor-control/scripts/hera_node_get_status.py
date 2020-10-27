@@ -2,7 +2,7 @@
 from __future__ import print_function
 import sys
 import argparse
-import nodeControl
+from nodeControl import nodeControl
 
 parser = argparse.ArgumentParser(description='This script outputs the current node status',
                                  formatter_class=argparse.ArgumentDefaultsHelpFormatter)

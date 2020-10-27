@@ -1,7 +1,7 @@
 #! /usr/bin/env python
 from __future__ import print_function
 import argparse
-import nodeControl
+from nodeControl import nodeControl
 
 parser = argparse.ArgumentParser(description='Turn on SNAP relay, SNAPs, FEM and PAM',
                                  formatter_class=argparse.ArgumentDefaultsHelpFormatter)
