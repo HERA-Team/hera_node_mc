@@ -5,6 +5,7 @@ information and pushes it up to Redis with status:node:x hash key.
 """
 from __future__ import print_function
 import datetime
+import time
 import struct
 import redis
 import socket
@@ -26,6 +27,7 @@ def noneify(v, noneval=-99.0):
 hostname = socket.gethostname()
 script_redis_key = "status:script:{}:{}".format(hostname, __file__)
 
+throttle = 0.5
 heartbeat = 60
 
 # Define rcvPort for socket creation
@@ -117,7 +119,7 @@ try:
         r.hmset("version:{}:{}".format(__package__, os.path.basename(__file__)),
                 {"version": __version__,
                  "timestamp": datetime.datetime.now().isoformat()})
-
+        time.sleep(throttle)
 except KeyboardInterrupt:
     print('Interrupted', file=sys.stderr)
     sys.exit(0)
