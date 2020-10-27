@@ -1,4 +1,3 @@
-#! /usr/bin/env python
 """
 Receives UDP packets from all active Arduinos containing sensor data and status
 information and pushes it up to Redis with status:node:x hash key.
@@ -111,7 +110,7 @@ try:
                      'cpu_uptime_ms': unpacked_cpu_uptime,
                      'timestamp': str(datetime.datetime.now()),
                      }
-
+        print(data_dict)
         r.hmset('status:node:{}'.format(node), data_dict)
         # Write the version of this software to redis
         r.hmset("version:{}:{}".format(__package__, os.path.basename(__file__)),
