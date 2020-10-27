@@ -1,4 +1,5 @@
 #! /usr/bin/env python
+from __future__ import print_function
 import redis
 
 connection_pool = redis.ConnectionPool(host='redishost', decode_responses=True)
