@@ -48,8 +48,8 @@ print("Using nodes {}:".format(list(nodes.keys())), file=sys.stderr)
 # not exceed the cmd_time_sec
 try:
     while True:
-        r.hmset("version:{}:{}".format(nodeControl.sender_pkg, os.path.basename(__file__)), {
-            "version": nodeControl.sender_ver, "timestamp": datetime.datetime.now().isoformat(),
+        r.hmset("version:{}:{}".format(nodeControl.__package__, os.path.basename(__file__)), {
+            "version": nodeControl.__version__, "timestamp": datetime.datetime.now().isoformat(),
         })
         r.set(script_redis_key, "alive", ex=args.heartbeat)
 

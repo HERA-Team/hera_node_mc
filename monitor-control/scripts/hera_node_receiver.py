@@ -114,8 +114,8 @@ try:
 
         r.hmset('status:node:{}'.format(node), data_dict)
         # Write the version of this software to redis
-        r.hmset("version:{}:{}".format(nodeControl.sender_pkg, os.path.basename(__file__)),
-                {"version": nodeControl.sender_ver,
+        r.hmset("version:{}:{}".format(nodeControl.__package__, os.path.basename(__file__)),
+                {"version": nodeControl.__version__,
                  "timestamp": datetime.datetime.now().isoformat()})
 
 except KeyboardInterrupt:

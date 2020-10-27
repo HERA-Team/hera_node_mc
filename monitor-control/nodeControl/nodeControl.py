@@ -5,10 +5,6 @@ import json
 import sys
 from . import udpSender
 
-sender_pkg = udpSender.__package__
-#sender_ver = udpSender.__version__
-sender_ver = '0.2'
-
 
 def str2bool(x):
     """
