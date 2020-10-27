@@ -37,7 +37,7 @@ heartbeat = float(args.heartbeat)
 # If nodes to check and throttle are specified, use those values.
 # If not, poke all the nodes that have Redis status:node:x keys.
 nodes = nodeControl.refresh_node_list({}, r)
-print("Using nodes {}:".format(', '.join(list(nodes.keys()))), file=sys.stderr)
+print("Using nodes {}:".format(list(nodes.keys())), file=sys.stderr)
 
 # Sends poke signal to Arduinos inside the nodes
 try:

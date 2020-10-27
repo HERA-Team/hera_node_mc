@@ -44,7 +44,7 @@ throttle = float(args.throttle)
 # If not, use all the nodes that have Redis entries.
 nodes = nodeControl.refresh_node_list({}, r)
 last_node_refresh_time = time.time()
-print("Using nodes {}:".format(', '.join(list(nodes.keys()))), file=sys.stderr)
+print("Using nodes {}:".format(list(nodes.keys())), file=sys.stderr)
 
 # Check command keys for triggers and command sent, throttle those commands to
 # not exceed the cmd_time_sec
