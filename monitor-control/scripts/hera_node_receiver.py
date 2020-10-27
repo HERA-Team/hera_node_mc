@@ -25,7 +25,7 @@ def noneify(v, noneval=-99.0):
 hostname = socket.gethostname()
 script_redis_key = "status:script:{}:{}".format(hostname, __file__)
 
-heartbeat = 60.0
+heartbeat = 60
 
 # Define rcvPort for socket creation
 rcvPort = 8889

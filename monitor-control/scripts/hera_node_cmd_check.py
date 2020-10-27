@@ -36,7 +36,7 @@ r = redis.StrictRedis(host="redishost")
 cmd_check_sec = float(args.cmd_check_sec)
 cmd_time_sec = float(args.cmd_time_sec)
 node_refresh_sec = float(args.node_refresh_sec)
-heartbeat = float(args.heartbeat)
+heartbeat = int(args.heartbeat)
 throttle = float(args.throttle)
 
 # Define a dict of udpSender objects to send commands to Arduinos.

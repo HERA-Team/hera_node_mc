@@ -31,7 +31,7 @@ args = parser.parse_args()
 r = redis.StrictRedis(host=args.redishost)
 
 poke_time_sec = float(args.poke_time_sec)
-heartbeat = float(args.heartbeat)
+heartbeat = int(args.heartbeat)
 
 # Define a dict of udpSender objects to send commands to Arduinos.
 # If nodes to check and throttle are specified, use those values.
