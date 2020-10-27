@@ -1,3 +1,4 @@
+#! /usr/bin/env python
 """
 Pokes Arduinos to ensure Arduino's connectivity to the server.
 It pokes either specified nodes with the -n argument or
