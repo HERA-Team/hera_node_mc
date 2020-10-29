@@ -3,7 +3,7 @@ import os
 import warnings
 
 
-class hosts_ethers:
+class HostsEthers:
     def __init__(self, filename):
         self.filename = filename
         with open(filename, 'r') as fp:
@@ -19,7 +19,7 @@ class hosts_ethers:
             return
         with open(self.filename, 'w') as fp:
             for line in self.full_file:
-                print("{}".format(line), file=fp))
+                print("{}".format(line), file=fp)
 
     def archive_file(self, path_to_archive='.', date_tag="%y%m%d-%H%M"):
         """
