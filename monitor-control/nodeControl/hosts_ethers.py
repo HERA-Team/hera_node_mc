@@ -38,7 +38,7 @@ class HostsEthers:
             fn = "{}_{}".format(fn, datetime.strftime(datetime.now()))
         os.copy(self.filename, os.path.join(path_to_archive, fn))
 
-    def read_hosts_ethers_file(self):
+    def parse_file(self):
         """
         Read in the hosts or ethers file and send an e-mail on error.
 
@@ -52,7 +52,7 @@ class HostsEthers:
         self.by_id = {}
         self.by_alias = {}
         for line in self.full_file:
-            if line[0] == "#" or len(line) < 10:
+            if len(line) < 10 or line[0] == '#':
                 continue
             data = line.split()
             if data[0] in self.by_id.keys():
