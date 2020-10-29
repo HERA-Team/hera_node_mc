@@ -57,15 +57,9 @@ class hosts_ethers:
             if data[0] in self.by_id.keys():
                 msg = '{} is duplicated in {} file on {}'.format(data[0], self.filename)
                 warnings.warn(msg)
-                return {'Warning': True,
-                        'Subject': 'WARNING: Duplicate entry in {}'.format(self.filename),
-                        'Message': msg}, {}
             self.by_id[data[0]] = data[1:]
             for d in data[1:]:
                 if d in self.by_id.keys():
                     msg = '{} is duplicated in {} file on {}'.format(data[0], self.filename)
                     warnings.warn(msg)
-                    return {'Warning': True,
-                            'Subject': 'WARNING: Duplicate entry in {}'.format(self.filename),
-                            'Message': msg}, {}
                 self.by_alias[d] = data[0]
