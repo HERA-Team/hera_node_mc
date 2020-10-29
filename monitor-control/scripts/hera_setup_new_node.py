@@ -7,16 +7,34 @@ import json
 import redis
 import socket
 
+# These are dumped from hera_mc on October 27, 2020
+RDmap = {'NCMP2': 'RD31', 'NCM02': 'RD46', 'NCM06': 'RD20', 'NCM10': 'RD43', 'NCM13': 'RD18',
+         'NCM15': 'RD04', 'NCM03': 'RD42', 'NCM07': 'RD15', 'NCM11': 'RD11', 'NCM04': 'RD41',
+         'NCM01': 'RD45', 'NCM16': 'RD07', 'NCM05': 'RD06', 'NCM08': 'RD19', 'NCM12': 'RD17',
+         'NCM09': 'RD40', 'NCM21': 'RD05', 'NCM22': 'RD09', 'NCM14': 'RD13', 'NCM20': 'RD14',
+         'NCM18': 'RD16', 'NCM17': 'RD47', 'NCM19': 'RD48', 'NCMP1': 'RD02'
+         }
+
+WRmap = {'NCMP2': 'WRA000028', 'NCM03': 'WRA000084', 'NCM06': 'WRA000093', 'NCM07': 'WRA000091',
+         'NCM10': 'WRA000097', 'NCM11': 'WRA000079', 'NCM13': 'WRA000096', 'NCM15': 'WRA000085',
+         'NCM04': 'WR-unknown', 'NCM01': 'WRA000086', 'NCM16': 'WRA000090', 'NCM05': 'WRA000089',
+         'NCM08': 'WRA000094', 'NCM12': 'WRA000080', 'NCM02': 'WRA000083', 'NCM09': 'WRA000006',
+         'NCM18': 'WRA000101', 'NCM22': 'WRA000102', 'NCM20': 'WRC000151', 'NCM17': 'WRC000152',
+         'NCM21': 'WRC000153', 'NCM19': 'WRC000154', 'NCMP1': 'WR-len4p0'
+         }
+
+
 ap = argparse.ArgumentParser()
-ap.add_argument('snap0', help="SNAP serial number. E.g. 42", type=int)
-ap.add_argument('snap1', help="SNAP serial number. E.g. 43", type=int)
-ap.add_argument('snap2', help="SNAP serial number. E.g. 54", type=int)
-ap.add_argument('snap3', help="SNAP serial number. E.g. 7", type=int)
-ap.add_argument('node_num', help="Node number. E.g. 10", type=int)
-ap.add_argument('--hosts_file', help="__Shouldn't need to change__  Name of hosts file.",
-                default="/etc/hosts")
+ap.add_argument('node_num', help="Node number (int)", type=int)
+ap.add_argument('ncm', help="Node-control-module (NCM) number (int)", type=int)
+ap.add_argument('snap0', help="SNAP serial number (int)", type=int)
+ap.add_argument('snap1', help="SNAP serial number (int)", type=int)
+ap.add_argument('snap2', help="SNAP serial number (int)", type=int)
+ap.add_argument('snap3', help="SNAP serial number (int)", type=int)
 ap.add_argument('--snap_rev', help="__Shouldn't need to change__  Rev letter of SNAP (csv-list).  "
                 "If one supplied, it applies to all.", default='C')
+ap.add_argument('--hosts_file', help="__Shouldn't need to change__  Name of hosts file.",
+                default="/etc/hosts")
 ap.add_argument('--dont_reset_dnsmasq', dest='reset_dnsmasq', help="Don't reset the dnsmasq",
                 action='store_false')
 args = ap.parse_args()
