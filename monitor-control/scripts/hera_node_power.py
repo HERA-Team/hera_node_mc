@@ -27,7 +27,7 @@ parser.add_argument('--all', action='store_true', help='Turn on/off all snaps, p
 parser.add_argument('--serverAddress', help='Name or redis server', default='redishost')
 parser.add_argument('--throttle', help='Throttle time in sec', type=float, default=0.5)
 parser.add_argument('--wait', dest='wait_time_in_sec', help="Seconds to wait to check if"
-                    "successful change (use 0 to disable check)", default=8, type=int)
+                    "successful change (use 0 to disable check)", default=5, type=int)
 args = parser.parse_args()
 
 if args.node.lower() == 'all':
@@ -86,9 +86,10 @@ else:
 
     if args.wait_time_in_sec > 0:
         time.sleep(args.wait_time_in_sec)
-        print("<<<Currently skipping keystates check>>>")
-        stale_nodes = n.check_power_status(args.wait_time_in_sec*2, keystates)
+        stale_nodes, wrong_states = n.check_power_status(args.wait_time_in_sec*2, keystates)
         if len(stale_nodes):
-            print("These nodes weren't successful:  {}".format(stale_nodes))
-        else:
-            print("All nodes updated.")
+            print("These nodes aren't updating:  {}".format(stale_nodes))
+        for nd in nodes2use:
+            if len(wrong_states[nd]):
+                print("Command not successful:  Node {} -> {} {}"
+                      .format(nd, wrong_states[nd], args.command))

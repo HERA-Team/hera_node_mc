@@ -246,10 +246,16 @@ class NodeControl():
         """
         pwr = self.get_power_status()
         stale_nodes = []
+        wrong_states = {}
         for node, status in pwr.items():
+            wrong_states[node] = []
             if stale_data(status['age'], stale, False):
                 stale_nodes.append(node)
-        return stale_nodes
+            else:
+                for key, cmd in keystates.items():
+                    if status[key] != (cmd == 'on'):
+                        wrong_states[node].append(key)
+        return stale_nodes, wrong_states
 
     def get_wr_status(self):
         """
