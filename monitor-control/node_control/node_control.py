@@ -3,6 +3,8 @@ import redis
 import dateutil.parser
 import json
 import sys
+import time
+import datetime
 from . import udp_sender
 
 
@@ -165,11 +167,14 @@ class NodeControl():
             "timestamp": dateutil.parser.parse
         }
         sensors = {}
+        now = datetime.datetime.now()
         for node, stats in self._get_raw_node_hash("status:node:*").items():
-            sensors[node] = {}
+            sensors[node] = {'age': None}
             for key, convfunc in conv_methods.items():
                 try:
                     sensors[node][key] = convfunc(stats[key])
+                    if key == 'timestamp':
+                        sensors[node]['age'] = now - sensors[node][key]
                 except:  # noqa
                     sensors[node][key] = None
         return sensors
@@ -193,11 +198,13 @@ class NodeControl():
           'power_snap_relay' (Power of master SNAP relay)
         """
         power = {}
+        now = datetime.datetime.now()
         for node, statii in self._get_raw_node_hash("status:node:*").items():
-            power[node] = {}
+            power[node] = {'age': None}
             for key in list(statii.keys()):
                 if key == 'timestamp':
                     power[node][key] = dateutil.parser.parse(statii["timestamp"])
+                    power[node]['age'] = now - power[node][key]
                 elif key.startswith("power"):
                     power[node][key] = str2bool(statii[key])
         return power
@@ -336,6 +343,8 @@ class NodeControl():
                 self.r.hset("commands:node:%d" % node, "power_snap_relay_cmd", command)
             if sender.control_type == 'direct':
                 sender.power_snap_relay(command)
+        time.sleep(5)
+        pwr = self.get_power_status
 
     def power_snap(self, snap_n, command):
         """
