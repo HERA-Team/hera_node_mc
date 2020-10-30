@@ -40,9 +40,10 @@ class HostsEthers:
         for diff in differences:
             print("{:40s}     {}".format(diff[0], diff[1]))
 
-        with open(self.filename, 'w') as fp:
-            for line in self.file_contents_by_line:
-                print("{}".format(line), file=fp)
+        print("SKIPPING FILE WRITE")
+        # with open(self.filename, 'w') as fp:
+        #     for line in self.file_contents_by_line:
+        #         print("{}".format(line), file=fp)
 
     def update_id(self, id, val):
         """
