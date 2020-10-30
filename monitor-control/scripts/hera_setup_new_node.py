@@ -39,7 +39,7 @@ args = ap.parse_args()
 hostname = socket.gethostname()
 if hostname == 'hera-mobile':  # RFI testing machine, so want to write the current node.
     with open('CurrentNode.txt', 'w') as fp:
-        fp.write(args.node_num)
+        fp.write(str(args.node_num))
 
 # Read files and get macs and ips
 hosts = hosts_ethers.HostsEthers('/etc/hosts')
