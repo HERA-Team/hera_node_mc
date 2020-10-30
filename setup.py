@@ -15,7 +15,7 @@ with open(os.path.join(here, 'monitor-control', 'node_control', '__version__.py'
     fh.write('__version__ = "%s"' % ver)
 
 setup(
-    name='nodeControl',
+    name='node_control',
     version=ver,
     description='A node monitor and control interface',
     license='BSD',
