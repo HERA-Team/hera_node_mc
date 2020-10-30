@@ -12,6 +12,7 @@ class HostsEthers:
         self.original_contents_by_line = []
         for line in self.file_contents_by_line:
             self.original_contents_by_line.append(line)
+        self.parse_file()
 
     def rewrite_file(self):
         """
