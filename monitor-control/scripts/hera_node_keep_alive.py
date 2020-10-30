@@ -8,7 +8,7 @@ set by the I2C digital I/O cards plugged into PCBs.
 from __future__ import print_function
 import time
 import redis
-from nodeControl import nodeControl, __package__, __version__
+from node_control import node_control, __package__, __version__
 import os
 import sys
 import argparse
@@ -33,7 +33,7 @@ r = redis.StrictRedis(host=args.redishost)
 # Define a dict of udpSender objects to send commands to Arduinos.
 # If nodes to check and throttle are specified, use those values.
 # If not, poke all the nodes that have Redis status:node:x keys.
-nodes = nodeControl.refresh_node_list({}, r)
+nodes = node_control.refresh_node_list({}, r)
 print("Using nodes {}:".format(list(nodes.keys())), file=sys.stderr)
 
 # Sends poke signal to Arduinos inside the nodes
@@ -41,7 +41,7 @@ try:
     while True:
         r.set(script_redis_key, "alive", ex=args.heartbeat)
         start_poke_time = time.time()
-        nodes = nodeControl.refresh_node_list(nodes, r)
+        nodes = node_control.refresh_node_list(nodes, r)
         r.hmset("version:{}:{}".format(__package__, os.path.basename(__file__)), {
             "version": __version__, "timestamp": datetime.datetime.now().isoformat(),
         })

@@ -2,7 +2,7 @@
 from __future__ import print_function
 import sys
 import argparse
-from nodeControl import nodeControl
+from node_control import node_control
 
 parser = argparse.ArgumentParser(description='This script outputs the current node status',
                                  formatter_class=argparse.ArgumentDefaultsHelpFormatter)
@@ -21,7 +21,7 @@ else:
 
 print("Attempting to connect to the node control redis database on 'redishost'...", end=' ')
 sys.stdout.flush()
-node = nodeControl.NodeControl(nodes2use, serverAddress=args.serverAddress)
+node = node_control.NodeControl(nodes2use, serverAddress=args.serverAddress)
 print("OK")
 
 node_status = node.check_exists()

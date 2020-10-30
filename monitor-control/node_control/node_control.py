@@ -3,7 +3,7 @@ import redis
 import dateutil.parser
 import json
 import sys
-from . import udpSender
+from . import udp_sender
 
 
 def str2bool(x):
@@ -39,10 +39,10 @@ def refresh_node_list(curr_nodes, redis_conn):
             if ip == curr_nodes[node_id].arduinoAddress:
                 new_node_list[node_id] = curr_nodes[node_id]
             else:
-                new_node_list[node_id] = udpSender.UdpSender(ip)
+                new_node_list[node_id] = udp_sender.UdpSender(ip)
                 print("Updating IP address of node {} to {}".format(node_id, ip), file=sys.stderr)
         else:
-            new_node_list[node_id] = udpSender.UdpSender(ip)
+            new_node_list[node_id] = udp_sender.UdpSender(ip)
             print("Adding node {} with ip {}".format(node_id, ip), file=sys.stderr)
             # If this is a new node, default all the command triggers to idle
             init_trig(node_id, redis_conn)
@@ -110,8 +110,8 @@ class NodeControl():
             ip = self.r.hget(key, 'ip').decode()
             if ip is None:
                 continue
-            self.senders[node_id] = udpSender.UdpSender(ip, throttle=self.throttle,
-                                                        force_remote=self.force_redis_only)
+            self.senders[node_id] = udp_sender.UdpSender(ip, throttle=self.throttle,
+                                                         force_remote=self.force_redis_only)
         self.found_nodes = sorted(self.senders.keys())
         if not len(self.found_nodes):
             self.node_string = 'No nodes found'

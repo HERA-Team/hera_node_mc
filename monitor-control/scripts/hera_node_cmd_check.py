@@ -9,7 +9,7 @@ between commands. Checks for command triggers inside the commands:status:node ke
 from __future__ import print_function
 import redis
 import argparse
-from nodeControl import nodeControl, __package__, __version__
+from node_control import node_control, __package__, __version__
 import time
 import sys
 import os
@@ -40,7 +40,7 @@ r = redis.StrictRedis(host="redishost")
 # Define a dict of udpSender objects to send commands to Arduinos.
 # If nodes to check and throttle are specified, use those values.
 # If not, use all the nodes that have Redis entries.
-nodes = nodeControl.refresh_node_list({}, r)
+nodes = node_control.refresh_node_list({}, r)
 last_node_refresh_time = time.time()
 print("Using nodes {}:".format(list(nodes.keys())), file=sys.stderr)
 
@@ -117,7 +117,7 @@ try:
                 r.hset(command_node, 'reset', 'False')
 
             if (time.time() > last_node_refresh_time + args.node_refresh_sec):
-                nodes = nodeControl.refresh_node_list(nodes, r)
+                nodes = node_control.refresh_node_list(nodes, r)
                 last_node_refresh_time = time.time()
             time.sleep(args.cmd_check_sec)
 

@@ -1,7 +1,7 @@
 #! /usr/bin/env python
 from __future__ import print_function
 import argparse
-from nodeControl import nodeControl
+from node_control import node_control
 
 parser = argparse.ArgumentParser(description='Turn on SNAP relay, SNAPs, FEM and PAM',
                                  formatter_class=argparse.ArgumentDefaultsHelpFormatter)
@@ -32,7 +32,7 @@ if args.node.lower() == 'all':
 else:
     nodes2use = [int(x) for x in args.node.split(',')]
 
-n = nodeControl.NodeControl(nodes2use, serverAddress=args.serverAddress, throttle=args.throttle)
+n = node_control.NodeControl(nodes2use, serverAddress=args.serverAddress, throttle=args.throttle)
 
 if args.command == 'node_reset':
     print("Reset abruptly resets the arduino")

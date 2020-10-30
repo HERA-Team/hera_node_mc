@@ -10,7 +10,7 @@ import redis
 import socket
 import sys
 import os
-from nodeControl import __version__, __package__
+from node_control import __version__, __package__
 
 
 def noneify(v, noneval=-99.0):
