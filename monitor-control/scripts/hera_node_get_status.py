@@ -66,7 +66,6 @@ print("\nNode values")
 print("-----------")
 for nd, sens in sensors.items():
     print("Node {}   updated at {}".format(nd, sens['timestamp']))
-    print(sens['age'], args.stale)
     node_control.stale_data(sens['age'], args.stale)
     for key, val in sorted(sens.items()):
         if key in ['timestamp', 'age']:
