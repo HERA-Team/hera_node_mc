@@ -66,23 +66,23 @@ else:
 
     if args.command == 'on' and (args.snap_relay or any_snap):
         n.power_snap_relay('on')
-        keystates['power_snap_relay': 'on']
+        keystates['power_snap_relay'] = 'on'
 
     for snap_n in snaps_to_set:
         n.power_snap(snap_n, args.command)
-        keystates['power_snap_{}'.format(snap_n), args.command]
+        keystates['power_snap_{}'.format(snap_n)] = args.command
 
     if args.pam:
         n.power_pam(args.command)
-        keystates['power_pam', args.command]
+        keystates['power_pam'] = args.command
 
     if args.fem:
         n.power_fem(args.command)
-        keystates['power_fem', args.command]
+        keystates['power_fem'] = args.command
 
     if args.command == 'off' and (args.snap_relay or all_snap):
         n.power_snap_relay('off')
-        keystates['power_snap_relay': 'off']
+        keystates['power_snap_relay'] = 'off'
 
     if args.wait_time_in_sec > 0:
         time.sleep(args.wait_time_in_sec)
