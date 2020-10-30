@@ -30,8 +30,10 @@ ap.add_argument('snap0', help="SNAP serial number (int)", type=int)
 ap.add_argument('snap1', help="SNAP serial number (int)", type=int)
 ap.add_argument('snap2', help="SNAP serial number (int)", type=int)
 ap.add_argument('snap3', help="SNAP serial number (int)", type=int)
-ap.add_argument('--snap_rev', help="__Shouldn't need to change__  Rev letter of SNAP (csv-list).  "
-                "If one supplied, it applies to all.", default='C')
+ap.add_argument('--snap-rev', help="__Shouldn't need to change__  Rev letter of SNAP (csv-list).  "
+                "If one supplied, it applies to all.", dest='snap_rev', default='C')
+ap.add_argument('--check-only', help='Flag to only check and not rewrite hosts/ethers',
+                dest='check_only', action='store_true')
 ap.add_argument('--dont-reset-dnsmasq', dest='reset_dnsmasq', help="Don't reset the dnsmasq",
                 action='store_false')
 args = ap.parse_args()
@@ -68,7 +70,7 @@ if hostname in ['hera-node-head', 'hera-mobile']:
 
     # Set up white rabbit
     wr = {'node': 'heraNode{}wr'.format(args.node_num)}
-    wr['sn'] = 'wr{}'.format(WRmap[ncm][2:])
+    wr['sn'] = WRmap[ncm]
     wr['mac'] = ethers.by_alias[wr['sn']]
     wr['ip'] = hosts.by_alias[wr['sn']]
     hosts.update_id(wr['ip'], '{}\t{}'.format(wr['sn'], wr['node']))
@@ -80,7 +82,7 @@ if hostname in ['hera-node-head', 'hera-mobile']:
     r.hset(rkey, 'mac', rd['mac'])
     r.hset(rkey, 'node_ID', args.node_num)
 
-hosts.rewrite_file()
+hosts.rewrite_file(check_only=args.check_only)
 if args.reset_dnsmasq:
     os.system('sudo /etc/init.d/dnsmasq stop')
     os.system('sudo rm /var/lib/misc/dnsmasq.leases')

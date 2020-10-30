@@ -14,7 +14,7 @@ class HostsEthers:
             self.original_contents_by_line.append(line)
         self.parse_file()
 
-    def rewrite_file(self):
+    def rewrite_file(self, check_only=False):
         """
         Writes the contents of list "file_contents_by_line" to the filename, showing
         differences.  It does not handle removed lines gracefully at all (but no
@@ -41,10 +41,12 @@ class HostsEthers:
         for diff in differences:
             print("{:40s}     {}".format(diff[0], diff[1]))
 
-        print("SKIPPING FILE WRITE")
-        # with open(self.filename, 'w') as fp:
-        #     for line in self.file_contents_by_line:
-        #         print("{}".format(line), file=fp)
+        if check_only:
+            print("Not writing file - checking only.")
+        else:
+            with open(self.filename, 'w') as fp:
+                for line in self.file_contents_by_line:
+                    print("{}".format(line), file=fp)
 
     def update_id(self, id, val):
         """

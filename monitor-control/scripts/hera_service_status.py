@@ -31,10 +31,11 @@ for key in r.keys():
 for this_service, stat in expected_services.items():
     print(this_service)
     if len(stat['version']):
-        print('\tversion: ', stat['version'])
+        print('\ttimestamp: ', stat['version'][1]['timestamp'])
+        print('\tversion: ', stat['version'][1]['version'])
     else:
         print('\tversion: N/A')
     if len(stat['status']):
-        print('\tstatus: ', stat['status'])
+        print('\tstatus: ', stat['status'][1])
     else:
         print('\tstatus: not alive')
