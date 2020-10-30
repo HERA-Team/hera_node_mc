@@ -1,6 +1,7 @@
 #! /usr/bin/env python
 from __future__ import print_function
 import argparse
+import time
 from node_control import node_control
 
 parser = argparse.ArgumentParser(description='Turn on SNAP relay, SNAPs, FEM and PAM',
@@ -25,6 +26,8 @@ parser.add_argument('-f', '--fem', action='store_true', help='Turn on/off the FE
 parser.add_argument('--all', action='store_true', help='Turn on/off all snaps, pam and fem')
 parser.add_argument('--serverAddress', help='Name or redis server', default='redishost')
 parser.add_argument('--throttle', help='Throttle time in sec', type=float, default=0.5)
+parser.add_argument('--wait', dest='wait_time_in_sec', help="Seconds to wait to check if"
+                    "successful change (use 0 to disable check)", default=8, type=int)
 args = parser.parse_args()
 
 if args.node.lower() == 'all':
@@ -44,6 +47,7 @@ elif args.command.startswith('redis'):
         n.set_redis_control(rcmd)
     n.init_redis()
 else:
+    keystates = {}
     if args.all:
         args.snaps = True
         args.snap_relay = True
@@ -62,15 +66,29 @@ else:
 
     if args.command == 'on' and (args.snap_relay or any_snap):
         n.power_snap_relay('on')
+        keystates['power_snap_relay': 'on']
 
     for snap_n in snaps_to_set:
         n.power_snap(snap_n, args.command)
+        keystates['power_snap_{}'.format(snap_n), args.command]
 
     if args.pam:
         n.power_pam(args.command)
+        keystates['power_pam', args.command]
 
     if args.fem:
         n.power_fem(args.command)
+        keystates['power_fem', args.command]
 
     if args.command == 'off' and (args.snap_relay or all_snap):
         n.power_snap_relay('off')
+        keystates['power_snap_relay': 'off']
+
+    if args.wait_time_in_sec > 0:
+        time.sleep(args.wait_time_in_sec)
+        print("<<<Currently skipping keystates check>>>")
+        stale_nodes = n.check_power_status(args.wait_time_in_sec*2, keystates)
+        if len(stale_nodes):
+            print("These nodes weren't successful:  {}".format(stale_nodes))
+        else:
+            print("All nodes updated.")

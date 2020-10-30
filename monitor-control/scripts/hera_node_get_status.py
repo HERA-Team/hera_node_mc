@@ -12,6 +12,8 @@ parser.add_argument('node', nargs='?', help="Specify the node ID numbers (csv li
 parser.add_argument('--wr', action='store_true', help="Flag to add white rabbit status")
 parser.add_argument('--exists', action='store_true', help='Check node existence')
 parser.add_argument('--serverAddress', help='Name or redis server', default='redishost')
+parser.add_argument('--stale', help='Number of seconds for stale data warning',
+                    type=float, default=10.0)
 args = parser.parse_args()
 
 if args.node.lower() == 'all':
@@ -54,6 +56,7 @@ print("\nNode power states")
 print("-----------------")
 for nd, pwr in powers.items():
     print("Node {}   updated at {}".format(nd, pwr['timestamp']))
+    node_control.stale_data(pwr['age'], args.stale)
     for key, val in sorted(pwr.items()):
         if key == 'timestamp':
             continue
@@ -63,6 +66,7 @@ print("\nNode values")
 print("-----------")
 for nd, sens in sensors.items():
     print("Node {}   updated at {}".format(nd, sens['timestamp']))
+    node_control.stale_data(sens['age'], args.stale)
     for key, val in sorted(sens.items()):
         if key == 'timestamp':
             continue

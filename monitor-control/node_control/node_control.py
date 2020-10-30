@@ -3,7 +3,6 @@ import redis
 import dateutil.parser
 import json
 import sys
-import time
 import datetime
 from . import udp_sender
 
@@ -14,6 +13,36 @@ def str2bool(x):
     :return: bool(x == '1')
     """
     return x == "1"
+
+
+def stale_data(age, stale=10.0, show_warning=True):
+    """
+    Print warning if data are too stale.
+
+    Parameters
+    ----------
+    age : timedelta, int, float or None
+        Age in seconds or timedelta
+    state : float
+        Stale timeframe in seconds
+    show_warning : bool
+        Flag to actually show the warning.
+
+    Returns
+    -------
+    True if stale, None if None else False
+    """
+    if age is None:
+        if not show_warning:
+            print("***Warning: no age found.")
+        return None
+    if isinstance(datetime.timedelta):
+        age = age.days*(24.0 * 3600.0) + age.seconds + age.microseconds/1E6
+    if age > stale:
+        if not show_warning:
+            print("***Warning:  data are {} seconds old".format(int(age)))
+        return True
+    return False
 
 
 def init_trig(node_ID, redis_conn):
@@ -209,6 +238,19 @@ class NodeControl():
                     power[node][key] = str2bool(statii[key])
         return power
 
+    def check_power_status(self, stale=10.0, keystates={}):
+        """
+        Checks the age of node status and returns stale ones.
+
+        <Note:  add specific checks of the states using the keystates if provided>
+        """
+        pwr = self.get_power_status()
+        stale_nodes = []
+        for node, status in pwr.items():
+            if stale_data(status['age'], stale, False):
+                stale_nodes.append(node)
+        return stale_nodes
+
     def get_wr_status(self):
         """
         Get the current status of this node's White Rabbit endpoint (assumed to have hostname
@@ -343,8 +385,6 @@ class NodeControl():
                 self.r.hset("commands:node:%d" % node, "power_snap_relay_cmd", command)
             if sender.control_type == 'direct':
                 sender.power_snap_relay(command)
-        time.sleep(5)
-        pwr = self.get_power_status
 
     def power_snap(self, snap_n, command):
         """
