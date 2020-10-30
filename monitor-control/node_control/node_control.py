@@ -36,7 +36,7 @@ def stale_data(age, stale=10.0, show_warning=True):
         if not show_warning:
             print("***Warning: no age found.")
         return None
-    if isinstance(datetime.timedelta):
+    if isinstance(age, datetime.timedelta):
         age = age.days*(24.0 * 3600.0) + age.seconds + age.microseconds/1E6
     if age > stale:
         if not show_warning:
