@@ -1,9 +1,11 @@
 from setuptools import setup
 import os
+import socket
+import subprocess
 
-ver = '0.2.0'
+
+ver = '0.3.0'
 try:
-    import subprocess
     ver = (ver + '-' + subprocess.check_output(['git', 'describe', '--abbrev=8',
            '--always', '--dirty', '--tags']).strip().decode())
 except:  # noqa
@@ -13,6 +15,25 @@ except:  # noqa
 here = os.path.abspath(os.path.dirname(__file__))
 with open(os.path.join(here, 'monitor-control', 'node_control', '__version__.py'), 'w') as fh:
     fh.write('__version__ = "%s"' % ver)
+
+hostname = socket.gethostname()
+
+scripts = []
+if hostname in ['hera-node-head', 'hera-mobile']:
+    scripts = [
+                'monitor-control/scripts/hera_node_data_dump.py',
+                'monitor-control/scripts/hera_node_get_status.py',
+                'monitor-control/scripts/hera_node_cmd_check.py',
+                'monitor-control/scripts/hera_node_keep_alive.py',
+                'monitor-control/scripts/hera_node_receiver.py',
+                'monitor-control/scripts/hera_node_serial_dump.py',
+                'monitor-control/scripts/hera_node_serial.py',
+                'monitor-control/scripts/hera_node_power.py',
+                'monitor-control/scripts/hera_service_status.py',
+                'monitor-control/scripts/hera_setup_new_node.py'
+              ]
+elif hostname == 'hera-snap-head':
+    scripts = ['monitor-control/scripts/hera_setup_new_node.py']
 
 setup(
     name='node_control',
@@ -26,18 +47,7 @@ setup(
     package_dir={'node_control': 'monitor-control/node_control'},
     packages=['node_control'],
     # scripts = [glob.glob('monitor-control/scripts/*'),glob.glob('backend/scripts/*')],
-    scripts=[
-                'monitor-control/scripts/hera_node_data_dump.py',
-                'monitor-control/scripts/hera_node_get_status.py',
-                'monitor-control/scripts/hera_node_cmd_check.py',
-                'monitor-control/scripts/hera_node_keep_alive.py',
-                'monitor-control/scripts/hera_node_receiver.py',
-                'monitor-control/scripts/hera_node_serial_dump.py',
-                'monitor-control/scripts/hera_node_serial.py',
-                'monitor-control/scripts/hera_node_power.py',
-                'monitor-control/scripts/hera_service_status.py',
-                'monitor-control/scripts/hera_setup_new_node.py'
-            ]
+    scripts=scripts
 )
 
 if ver.endswith("dirty"):
