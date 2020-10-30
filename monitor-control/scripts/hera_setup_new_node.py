@@ -36,7 +36,6 @@ ap.add_argument('--dont-reset-dnsmasq', dest='reset_dnsmasq', help="Don't reset 
                 action='store_false')
 args = ap.parse_args()
 
-ncm = 'NCM{:02d}'.format(args.ncm)
 hostname = socket.gethostname()
 if hostname == 'hera-mobile':  # RFI testing machine, so want to write the current node.
     with open('CurrentNode.txt', 'w') as fp:
@@ -46,41 +45,42 @@ if hostname == 'hera-mobile':  # RFI testing machine, so want to write the curre
 hosts = hosts_ethers.HostsEthers('/etc/hosts')
 ethers = hosts_ethers.HostsEthers('/etc/ethers')
 
-# Set up SNAPs
-snap_rev = args.snap_rev.upper().split(",")
-if len(snap_rev) == 1:
-    snap_rev = snap_rev * 4
-snaps = [{} * 4]
-for i in range(4):
-    snaps[i]['node'] = 'heraNode{}Snap{}'.format(args.node_num, i)
-    snaps[i]['sn'] = 'SNP{}{:06d}'.format(snap_rev[i], getattr(args, 'snap{}'.format(i)))
-    snaps[i]['mac'] = ethers[snaps[i]['sn']]
-    snaps[i]['ip'] = hosts[snaps[i]['sn']]
-    hosts.update_id(snaps[i]['ip'], '{}\t{}'.format(snaps[i]['sn'], snaps[i]['node']))
+if hostname in ['hera-snap-head', 'hera-mobile']:
+    # Set up SNAPs
+    snap_rev = args.snap_rev.upper().split(",")
+    if len(snap_rev) == 1:
+        snap_rev = snap_rev * 4
+    snaps = [{} * 4]
+    for i in range(4):
+        snaps[i]['node'] = 'heraNode{}Snap{}'.format(args.node_num, i)
+        snaps[i]['sn'] = 'SNP{}{:06d}'.format(snap_rev[i], getattr(args, 'snap{}'.format(i)))
+        snaps[i]['mac'] = ethers[snaps[i]['sn']]
+        snaps[i]['ip'] = hosts[snaps[i]['sn']]
+        hosts.update_id(snaps[i]['ip'], '{}\t{}'.format(snaps[i]['sn'], snaps[i]['node']))
+if hostname in ['hera-node-head', 'hera-mobile']:
+    ncm = 'NCM{:02d}'.format(args.ncm)
+    # Set up arduino
+    rd = {'node': 'heraNode{}'.format(args.node_num)}
+    rd['sn'] = 'arduino{}'.format(RDmap[ncm][2:])
+    rd['mac'] = ethers[rd['sn']]
+    rd['ip'] = hosts[rd['sn']]
+    hosts.update_id(rd['ip'], '{}\t{}'.format(rd['sn'], rd['node']))
 
-# Set up arduino
-rd = {'node': 'heraNode{}'.format(args.node_num)}
-rd['sn'] = 'arduino{}'.format(RDmap[ncm][2:])
-rd['mac'] = ethers[rd['sn']]
-rd['ip'] = hosts[rd['sn']]
-hosts.update_id(rd['ip'], '{}\t{}'.format(rd['sn'], rd['node']))
+    # Set up white rabbit
+    wr = {'node': 'heraNode{}wr'.format(args.node_num)}
+    wr['sn'] = 'wr{}'.format(WRmap[ncm][2:])
+    wr['mac'] = ethers[wr['sn']]
+    wr['ip'] = hosts[wr['sn']]
+    hosts.update_id(wr['ip'], '{}\t{}'.format(wr['sn'], wr['node']))
 
-# Set up white rabbit
-wr = {'node': 'heraNode{}wr'.format(args.node_num)}
-wr['sn'] = 'wr{}'.format(WRmap[ncm][2:])}
-wr['mac'] = ethers[wr['sn']]
-wr['ip'] = hosts[wr['sn']]
-hosts.update_id(wr['ip'], '{}\t{}'.format(wr['sn'], wr['node']))
+    connection_pool = redis.ConnectionPool(host='redishost', decode_responses=True)
+    r = redis.StrictRedis(connection_pool=connection_pool, charset='utf-8')
+    rkey = 'status:node:{}'.format(int(args.node_num))
+    r.hset(rkey, 'ip', rd['ip'])
+    r.hset(rkey, 'mac', rd['mac'])
+    r.hset(rkey, 'node_ID', args.node_num)
 
 hosts.rewrite_file()
-
-connection_pool = redis.ConnectionPool(host='redishost', decode_responses=True)
-r = redis.StrictRedis(connection_pool=connection_pool, charset='utf-8')
-rkey = 'status:node:{}'.format(int(args.node_num))
-r.hset(rkey, 'ip', rd['ip'])
-r.hset(rkey, 'mac', rd['mac'])
-r.hset(rkey, 'node_ID', args.node_num)
-
 if args.reset_dnsmasq:
     os.system('sudo /etc/init.d/dnsmasq stop')
     os.system('sudo rm /var/lib/misc/dnsmasq.leases')
