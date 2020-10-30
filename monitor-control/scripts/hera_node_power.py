@@ -86,10 +86,11 @@ else:
 
     if args.wait_time_in_sec > 0:
         time.sleep(args.wait_time_in_sec)
-        stale_nodes, wrong_states = n.check_power_status(args.wait_time_in_sec*2, keystates)
-        if len(stale_nodes):
-            print("These nodes aren't updating:  {}".format(stale_nodes))
-        for nd in nodes2use:
-            if len(wrong_states[nd]):
-                print("Command not successful:  Node {} -> {} {}"
-                      .format(nd, wrong_states[nd], args.command))
+        n.check_power_status(args.wait_time_in_sec*2, keystates)
+        if len(n.stale_nodes):
+            print("These nodes aren't updating:  {}".format(n.stale_nodes))
+        print("These nodes are updating:  {}".format(list(n.active_nodes.keys())))
+        for nd in n.active_nodes.keys():
+            if len(n.wrong_states[nd]):
+                print("\tCommand not successful:  Node {} -> {} {}"
+                      .format(nd, n.wrong_states[nd], args.command))

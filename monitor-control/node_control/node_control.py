@@ -242,20 +242,35 @@ class NodeControl():
         """
         Checks the age of node status and returns stale ones.
 
-        <Note:  add specific checks of the states using the keystates if provided>
+        Parameters
+        ----------
+        stale : float
+            Time in seconds for something to be considered stale.
+        keystates : dict
+            Dictionary of requests/command
+
+        Attributes
+        ----------
+        stale_nodes : list
+            List of nodes that came back stale.
+        active_nodes : dict
+            Active nodes with status
+        wrong_states : dict
+            Incorrect states relative to commanded in keystates
         """
         pwr = self.get_power_status()
-        stale_nodes = []
-        wrong_states = {}
+        self.stale_nodes = []
+        self.active_nodes = {}
+        self.wrong_states = {}
         for node, status in pwr.items():
-            wrong_states[node] = []
+            self.wrong_states[node] = []
             if stale_data(status['age'], stale, False):
-                stale_nodes.append(node)
+                self.stale_nodes.append(node)
             else:
+                self.active_nodes[node] = status
                 for key, cmd in keystates.items():
                     if status[key] != (cmd == 'on'):
-                        wrong_states[node].append(key)
-        return stale_nodes, wrong_states
+                        self.wrong_states[node].append(key)
 
     def get_wr_status(self):
         """
