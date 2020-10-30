@@ -53,24 +53,24 @@ if len(snap_rev) == 1:
 snaps = [{} * 4]
 for i in range(4):
     snaps[i]['node'] = 'heraNode{}Snap{}'.format(args.node_num, i)
-    snaps[i]['snap'] = 'SNP{}{:06d}'.format(snap_rev[i], getattr(args, 'snap{}'.format(i)))
-    snaps[i]['mac'] = ethers[snaps[i]['snap']]
-    snaps[i]['ip'] = hosts[snaps[i]['snap']]
-    hosts.update_id(snaps[i]['ip'], '{}\t{}'.format(snaps[i]['snap'], snaps[i]['node']))
+    snaps[i]['sn'] = 'SNP{}{:06d}'.format(snap_rev[i], getattr(args, 'snap{}'.format(i)))
+    snaps[i]['mac'] = ethers[snaps[i]['sn']]
+    snaps[i]['ip'] = hosts[snaps[i]['sn']]
+    hosts.update_id(snaps[i]['ip'], '{}\t{}'.format(snaps[i]['sn'], snaps[i]['node']))
 
 # Set up arduino
-rd = {'rd': 'arduino{}'.format(RDmap[ncm][2:])}
-rd['mac'] = ethers[rd['rd']]
-rd['ip'] = hosts[rd['rd']]
-rd['node'] = 'heraNode{}'.format(args.node_num)
-hosts.update_id(rd['ip'], '{}\t{}'.format(rd['rd'], rd['node']))
+rd = {'node': 'heraNode{}'.format(args.node_num)}
+rd['sn'] = 'arduino{}'.format(RDmap[ncm][2:])
+rd['mac'] = ethers[rd['sn']]
+rd['ip'] = hosts[rd['sn']]
+hosts.update_id(rd['ip'], '{}\t{}'.format(rd['sn'], rd['node']))
 
 # Set up white rabbit
-wr = {'wr': 'wr{}'.format(WRmap[ncm][2:])}
-wr['mac'] = ethers[wr['wr']]
-wr['ip'] = hosts[wr['wr']]
-wr['node'] = 'heraNode{}wr'.format(args.node_num)
-hosts.update_id(wr['ip'], '{}\t{}'.format(wr['wr'], wr['node']))
+wr = {'node': 'heraNode{}wr'.format(args.node_num)}
+wr['sn'] = 'wr{}'.format(WRmap[ncm][2:])}
+wr['mac'] = ethers[wr['sn']]
+wr['ip'] = hosts[wr['sn']]
+hosts.update_id(wr['ip'], '{}\t{}'.format(wr['sn'], wr['node']))
 
 hosts.rewrite_file()
 
