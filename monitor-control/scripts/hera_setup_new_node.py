@@ -50,7 +50,7 @@ if hostname in ['hera-snap-head', 'hera-mobile']:
     snap_rev = args.snap_rev.upper().split(",")
     if len(snap_rev) == 1:
         snap_rev = snap_rev * 4
-    snaps = [{} * 4]
+    snaps = [{}, {}, {}, {}]
     for i in range(4):
         snaps[i]['node'] = 'heraNode{}Snap{}'.format(args.node_num, i)
         snaps[i]['sn'] = 'SNP{}{:06d}'.format(snap_rev[i], getattr(args, 'snap{}'.format(i)))
