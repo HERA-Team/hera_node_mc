@@ -21,13 +21,15 @@ parser.add_argument('-0', '--snap0', action='store_true', help='Turn on/off SNAP
 parser.add_argument('-1', '--snap1', action='store_true', help='Turn on/off SNAP 1')
 parser.add_argument('-2', '--snap2', action='store_true', help='Turn on/off SNAP 2')
 parser.add_argument('-3', '--snap3', action='store_true', help='Turn on/off SNAP 3')
-parser.add_argument('-p', '--pam', action='store_true', help='Turn on/off the PAM')
-parser.add_argument('-f', '--fem', action='store_true', help='Turn on/off the FEM')
-parser.add_argument('--all', action='store_true', help='Turn on/off all snaps, pam and fem')
+parser.add_argument('-p', '--pam', action='store_true', help='Turn on/off the PAMs')
+parser.add_argument('-f', '--fem', action='store_true', help='Turn on/off the FEMs')
+parser.add_argument('--all', action='store_true', help='Turn on/off all snaps, pams and fems')
 parser.add_argument('--serverAddress', help='Name or redis server', default='redishost')
-parser.add_argument('--throttle', help='Throttle time in sec', type=float, default=0.5)
-parser.add_argument('--wait', dest='wait_time_in_sec', help="Seconds to wait to check if"
-                    "successful change (use 0 to disable check)", default=5, type=int)
+parser.add_argument('--throttle', help='Throttle time in sec for udp_sender',
+                    type=float, default=0.5)
+parser.add_argument('--wait', dest='wait_time_in_sec', help="Seconds to wait to check results "
+                    "(use 0 to disable check)", default=2.0, type=float)
+
 args = parser.parse_args()
 
 if args.node.lower() == 'all':
@@ -84,13 +86,19 @@ else:
         n.power_snap_relay('off')
         keystates['power_snap_relay'] = 'off'
 
-    if args.wait_time_in_sec > 0:
+    if args.wait_time_in_sec > 0.0:
         time.sleep(args.wait_time_in_sec)
-        n.check_power_status(args.wait_time_in_sec*2, keystates)
+        stale_time = 1.1 * (args.wait_time_in_sec +
+                            len(n.found_nodes) * len(keystates) * args.throttle)
+        n.check_power_status(stale_time, keystates)
         if len(n.stale_nodes):
             print("These nodes aren't updating:  {}".format(n.stale_nodes))
-        print("These nodes are updating:  {}".format(list(n.active_nodes.keys())))
-        for nd in n.active_nodes.keys():
-            if len(n.wrong_states[nd]):
-                print("\tCommand not successful:  Node {} -> {} {}"
-                      .format(nd, n.wrong_states[nd], args.command))
+        updated = sorted(n.active_nodes.keys())
+        if len(updated):
+            print("These nodes are updating:  {}".format(updated))
+            for nd in updated:
+                if len(n.wrong_states[nd]):
+                    print("\tCommand not successful:  Node {} -> {} {}"
+                          .format(nd, n.wrong_states[nd], args.command))
+        else:
+            print("No nodes updated.")
