@@ -2,7 +2,7 @@
 """
 Checks Redis for commands sent by the monitor-control user.
 Makes sure commands are spaced out properly to prevent rapid power cycling and
-turning everything on at once. Uses throttle:node:x flag to enforce a 2 second delay
+turning everything on at once. Uses throttle:node:x flag to enforce a delay
 between commands. Checks for command triggers inside the commands:status:node key.
 """
 
