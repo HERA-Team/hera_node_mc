@@ -11,7 +11,7 @@ expected_services = {'hera_node_keep_alive': {'status': [], 'version': []},
 
 for key in r.keys():
     dkey = key.decode()
-    if key.decode().startswith('status:script'):
+    if dkey.startswith('status:script'):
         for this_service in expected_services.keys():
             if this_service in dkey:
                 expected_services[this_service]['status'] = [dkey, r.get(key)]
@@ -19,7 +19,7 @@ for key in r.keys():
         else:
             print("Other service")
             print('\t', dkey, r.get(key))
-    if key.decode().startswith('version'):
+    elif dkey.startswith('version'):
         for this_service in expected_services.keys():
             if this_service in dkey:
                 expected_services[this_service]['version'] = [dkey, r.hgetall(key)]
