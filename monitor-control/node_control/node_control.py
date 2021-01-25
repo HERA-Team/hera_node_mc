@@ -141,8 +141,9 @@ class NodeControl():
             ip = self.r.hget(key, 'ip').decode()
             if ip is None:
                 continue
-            self.senders[node_id] = udp_sender.UdpSender(ip, throttle=self.throttle,
-                                                         force_remote=self.force_redis_only)
+            elif self.force_redis_only:
+                ip = 'remote'
+            self.senders[node_id] = udp_sender.UdpSender(ip, throttle=self.throttle)
         self.found_nodes = sorted(self.senders.keys())
         if not len(self.found_nodes):
             self.node_string = 'No nodes found'
