@@ -32,11 +32,13 @@ ap.add_argument('snap2', help="SNAP serial number (int)", type=int)
 ap.add_argument('snap3', help="SNAP serial number (int)", type=int)
 ap.add_argument('--snap-rev', help="__Shouldn't need to change__  Rev letter of SNAP (csv-list).  "
                 "If one supplied, it applies to all.", dest='snap_rev', default='C')
-ap.add_argument('--check-only', help='Flag to only check and not rewrite hosts/ethers',
-                dest='check_only', action='store_true')
+ap.add_argument('--check-only', help='Flag to only check and not rewrite hosts/ethers nor restart '
+                'dnsmasq', dest='check_only', action='store_true')
 ap.add_argument('--dont-reset-dnsmasq', dest='reset_dnsmasq', help="Don't reset the dnsmasq",
                 action='store_false')
 args = ap.parse_args()
+if args.check_only:
+    args.reset_dnsmasq = False
 
 hostname = socket.gethostname()
 if hostname == 'hera-mobile':  # RFI testing machine, so want to write the current node.
