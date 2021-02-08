@@ -2,7 +2,6 @@ from __future__ import print_function
 import redis
 import dateutil.parser
 import json
-import sys
 import datetime
 from . import udp_sender
 
@@ -58,26 +57,27 @@ def init_trig(node_ID, redis_conn):
     redis_conn.hset('throttle:node:{:d}'.format(node_ID), 'last_command_sec', '0')
 
 
-def refresh_node_list(curr_nodes, redis_conn):
-    new_node_list = {}
-    for key in redis_conn.scan_iter("status:node:*"):
-        try:
-            node_id = int(redis_conn.hget(key, 'node_ID').decode())
-        except ValueError:
-            continue
-        ip = redis_conn.hget(key, 'ip').decode()
-        if node_id in list(curr_nodes.keys()):
-            if ip == curr_nodes[node_id].arduinoAddress:
-                new_node_list[node_id] = curr_nodes[node_id]
-            else:
-                new_node_list[node_id] = udp_sender.UdpSender(ip)
-                print("Updating IP address of node {} to {}".format(node_id, ip), file=sys.stderr)
-        else:
-            new_node_list[node_id] = udp_sender.UdpSender(ip)
-            print("Adding node {} with ip {}".format(node_id, ip), file=sys.stderr)
-            # If this is a new node, default all the command triggers to idle
-            init_trig(node_id, redis_conn)
-    return new_node_list
+# I don't think I need/use this...
+# def refresh_node_list(curr_nodes, redis_conn):
+#     new_node_list = {}
+#     for key in redis_conn.scan_iter("status:node:*"):
+#         try:
+#             node_id = int(redis_conn.hget(key, 'node_ID').decode())
+#         except ValueError:
+#             continue
+#         ip = redis_conn.hget(key, 'ip').decode()
+#         if node_id in list(curr_nodes.keys()):
+#             if ip == curr_nodes[node_id].arduinoAddress:
+#                 new_node_list[node_id] = curr_nodes[node_id]
+#             else:
+#                 new_node_list[node_id] = udp_sender.UdpSender(ip)
+#                 print("Updating IP address of node {} to {}".format(node_id, ip), file=sys.stderr)
+#         else:
+#             new_node_list[node_id] = udp_sender.UdpSender(ip)
+#             print("Adding node {} with ip {}".format(node_id, ip), file=sys.stderr)
+#             # If this is a new node, default all the command triggers to idle
+#             init_trig(node_id, redis_conn)
+#     return new_node_list
 
 
 class NodeControl():
