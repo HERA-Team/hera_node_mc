@@ -14,32 +14,36 @@ direct_control_hostnames = ['hera-mobile', 'hera-node-head']
 class UdpSender():
     """
     This class is used for sending UDP commands to Arduino directly.
-    Has ability to turn on/off FEM, PAM, relay and SNAPs. Could also reset the
-    Arduino bootloader or poke.
+    Has ability to turn on/off FEM, PAM, relay and SNAPs. Could also
+    reset the Arduino bootloader or poke.
 
-    If remote control (not allowed hostname or arduinoAddress='remote' or other error),
-    nothing is done.
+    If it can't find an arduino, the attribute node_is_active is set
+    to False.
     """
 
-    def __init__(self, arduinoAddress, throttle=0.5):
+    def __init__(self, arduinoAddress, throttle=0.5, active_verbosity=True):
         """
         Takes in the arduino IP address and sends commands directly, using udp.
-        You have to be on the hera-digi-vm server to use it, otherwise use
-        the nodeControl class to send commands via Redis.
+        You have to be on the hera-digi-vm server to use it.
 
         Parameters
         ----------
-        arduinoAddress : str
-            IP address of desired arduino or 'remote' to force remote
+        arduinoAddress : str or None
+            IP address of desired arduino.  If not valid IP or None, mark as inactive.
         throttle : float
             Delay time in seconds
+        active_verbosity : bool
+            If True, will print out a message that the node is inactive
+            upon any action if node_is_active is False.
         """
-        self.throttle = throttle
         self.arduinoAddress = arduinoAddress
-        if arduinoAddress == 'remote':  # Force remote
-            self.control_type = 'remote'
+        self.throttle = throttle
+        self.active_verbosity = active_verbosity
+
+        if arduinoAddress is None or '.' not in arduinoAddress:
+            self.node_is_active = False
         elif socket.gethostname() in direct_control_hostnames:
-            self.control_type = 'direct'
+            self.node_is_active = True
             # define socket address for binding; necessary for receiving data from Arduino
             self.localSocket = (serverAddress, sendPort)
 
@@ -49,27 +53,27 @@ class UdpSender():
                 # Make sure that specify that we want to reuse the socket address
                 self.client_socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
             except socket.error as msg:
-                print('Failed to create socket - set to remote. Error Code : {}  Message {}'
+                print('Failed to create socket - set to not active. Error Code : {}  Message {}'
                       .format(str(msg[0]), str(msg[1])))
-                self.control_type == 'remote'
+                self.node_is_active = False
 
             # Bind socket to local host and port
             if self.control_type == 'direct':
                 try:
                     self.client_socket.bind(self.localSocket)
                 except socket.error as msg:
-                    print('Bind failed - set to remote. Error Code : {}  Message {}'
+                    print('Bind failed - set to not active. Error Code : {}  Message {}'
                           .format(str(msg[0]), msg[1]))
-                    self.control_type = 'remote'
+                    self.node_is_active = False
         else:
-            self.control_type = 'remote'
+            self.node_is_active = False
 
     def poke(self):
         """
         Sends poke commands to the Arduino. Used by hera_node_keep_alive script
         to send keep Arduinos from resetting.
         """
-        if not self._command_OK('poke', allowed=['poke']):
+        if not self._command_OK('poke', ['poke'], 'poke'):
             return
         arduinoSocket = (self.arduinoAddress, sendPort)
         self.client_socket.sendto(b'poke', arduinoSocket)
@@ -80,8 +84,7 @@ class UdpSender():
         Controls the power to SNAP relay, must be turned on first before gaining
         control over individual SNAPs.
         """
-        command = command.lower()
-        if not self._command_OK(command, allowed=['on', 'off']):
+        if not self._command_OK(command.lower(), ['on', 'off'], 'snap relay'):
             return
 
         # define arduino socket to send requests
@@ -96,8 +99,7 @@ class UdpSender():
         Takes in a string value of 'on' or 'off'.
         Controls the power to FEM.
         """
-        command = command.lower()
-        if not self._command_OK(command, allowed=['on', 'off']):
+        if not self._command_OK(command.lower(), ['on', 'off'], 'fem'):
             return
 
         # define arduino socket to send requests
@@ -112,8 +114,7 @@ class UdpSender():
         Takes in a string value of 'on' or 'off'.
         Controls the power to PAM.
         """
-        command = command.lower()
-        if not self._command_OK(command, ['on', 'off']):
+        if not self._command_OK(command.lower(), ['on', 'off'], 'pam'):
             return
 
         # define arduino socket to send requests
@@ -125,13 +126,12 @@ class UdpSender():
 
     def power_snap(self, snap_n, command):
         """
-        Takes in the arduino IP address string and a command "on"/"off".
+        Takes in a command "on"/"off".
         Controls the power to SNAP snap_n.
         """
-        if not self._command_OK(snap_n, allowed=[0, 1, 2, 3]):
+        if not self._command_OK(int(snap_n), [0, 1, 2, 3], 'snap_n'):
             return
-        command = command.lower()
-        if not self._command_OK(command, allowed=['on', 'off']):
+        if not self._command_OK(command.lower(), ['on', 'off'], 'snap'):
             return
 
         # define arduino socket to send requests
@@ -145,7 +145,7 @@ class UdpSender():
         """
         Resets the Arduino bootloader.
         """
-        if not self._command_OK('reset', allowed=['reset']):
+        if not self._command_OK('reset', ['reset'], 'reset'):
             return
         # define arduino socket to send requests
         arduinoSocket = (self.arduinoAddress, sendPort)
@@ -154,11 +154,12 @@ class UdpSender():
         # Set delay before receiving more data
         time.sleep(self.throttle)
 
-    def _command_OK(self, command, allowed):
-        if self.control_type == 'remote':
-            print("Remote control - nothing happening here.")
-            return False
-        if command in allowed:
+    def _command_OK(self, command, allowed, call_cmd):
+        if self.node_is_active and command in allowed:
             return True
-        print("{} is not allowed ({}) - ignored.".format(command, allowed))
+        if self.active_verbosity:
+            if not self.node_is_active:
+                print(f"Node not active ({call_cmd})")
+            else:
+                print(f"{call_cmd}: {command} not in {allowed}")
         return False

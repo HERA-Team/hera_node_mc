@@ -3,6 +3,7 @@ import redis
 import dateutil.parser
 import json
 import datetime
+import time
 from . import udp_sender
 
 
@@ -44,42 +45,6 @@ def stale_data(age, stale=10.0, show_warning=True):
     return False
 
 
-def init_trig(node_ID, redis_conn):
-    command_node = 'commands:node:{}'.format(node_ID)
-    redis_conn.hset(command_node, 'power_snap_relay_ctrl_trig', 'False')
-    redis_conn.hset(command_node, 'power_snap_0_ctrl_trig', 'False')
-    redis_conn.hset(command_node, 'power_snap_1_ctrl_trig', 'False')
-    redis_conn.hset(command_node, 'power_snap_2_ctrl_trig', 'False')
-    redis_conn.hset(command_node, 'power_snap_3_ctrl_trig', 'False')
-    redis_conn.hset(command_node, 'power_fem_ctrl_trig', 'False')
-    redis_conn.hset(command_node, 'power_pam_ctrl_trig', 'False')
-    redis_conn.hset(command_node, 'reset', 'False')
-    redis_conn.hset('throttle:node:{:d}'.format(node_ID), 'last_command_sec', '0')
-
-
-# I don't think I need/use this...
-# def refresh_node_list(curr_nodes, redis_conn):
-#     new_node_list = {}
-#     for key in redis_conn.scan_iter("status:node:*"):
-#         try:
-#             node_id = int(redis_conn.hget(key, 'node_ID').decode())
-#         except ValueError:
-#             continue
-#         ip = redis_conn.hget(key, 'ip').decode()
-#         if node_id in list(curr_nodes.keys()):
-#             if ip == curr_nodes[node_id].arduinoAddress:
-#                 new_node_list[node_id] = curr_nodes[node_id]
-#             else:
-#                 new_node_list[node_id] = udp_sender.UdpSender(ip)
-#                 print("Updating IP address of node {} to {}".format(node_id, ip), file=sys.stderr)
-#         else:
-#             new_node_list[node_id] = udp_sender.UdpSender(ip)
-#             print("Adding node {} with ip {}".format(node_id, ip), file=sys.stderr)
-#             # If this is a new node, default all the command triggers to idle
-#             init_trig(node_id, redis_conn)
-#     return new_node_list
-
-
 class NodeControl():
     """
     This class is used to control power to PAM, FEM, and SNAP boards and get node status information
@@ -88,7 +53,7 @@ class NodeControl():
     It also provides a status for the White Rabbit
     """
 
-    def __init__(self, nodes, serverAddress="redishost", throttle=0.5, force_redis_only=False):
+    def __init__(self, nodes, serverAddress="redishost", throttle=0.5):
         """
         Create a NodeControl class instance to control a single node via the redis datastore
         hosted at `serverAddress`.
@@ -103,15 +68,11 @@ class NodeControl():
             monitoring redis server
         throttle : float
             Delay in seconds between calls to turn on power
-        force_redis_only : bool
-            Force only using redis (won't send directly even if allowed, ignore redis commands:node)
         """
         self.nodes = nodes
         self.throttle = throttle
-        self.force_redis_only = force_redis_only
         self.r = redis.StrictRedis(serverAddress)
         self.get_node_senders()
-        self.redis_control = self.get_redis_control()
 
     def get_node_senders(self):
         """
@@ -141,8 +102,6 @@ class NodeControl():
             ip = self.r.hget(key, 'ip').decode()
             if ip is None:
                 continue
-            elif self.force_redis_only:
-                ip = 'remote'
             self.senders[node_id] = udp_sender.UdpSender(ip, throttle=self.throttle)
         self.found_nodes = sorted(self.senders.keys())
         if not len(self.found_nodes):
@@ -208,6 +167,38 @@ class NodeControl():
                 except:  # noqa
                     sensors[node][key] = None
         return sensors
+
+    def get_power_command_list(self):
+        """
+        Get the current node power commands.
+
+        Returns a dict keyed on node and one of [time, part, command].
+
+        Valid power command keys are:
+            power_snap_relay_cmd
+            power_snap_0_cmd
+            power_snap_1_cmd
+            power_snap_2_cmd
+            power_snap_3_cmd
+            power_fem_cmd
+            power_pam_cmd
+            reset
+        Format of values for all is command|time(unix)
+        """
+        power = {}
+        for node, statii in self._get_raw_node_hash("command:node:*").items():
+            power[node] = {}
+            for key in list(statii.keys()):
+                if 'relay' in key:
+                    power[node]['snap_relay'] = statii[key].split('|')
+                elif 'snap' in key:
+                    data = key.split('_')
+                    power[node][f"snap{data[2]}"] = statii[key].split('|')
+                elif key == 'reset':
+                    data[node]['reset'] = 'reset'
+                else:
+                    data[node][key.split('_')[1]] = statii[key].split('|')
+        return power
 
     def get_power_status(self):
         """
@@ -400,84 +391,58 @@ class NodeControl():
         Controls the power to SNAP relay. The SNAP relay
         has to be turn on before sending commands to individual SNAPs.
         """
+        tstamp = time.time()
         print("Turning {} snap relay for {}".format(command, self.node_string))
         for node, sender in self.senders.items():
-            if self.redis_control:
-                self.r.hset("commands:node:%d" % node, "power_snap_relay_ctrl_trig", "True")
-                self.r.hset("commands:node:%d" % node, "power_snap_relay_cmd", command)
-            if sender.control_type == 'direct':
-                sender.power_snap_relay(command)
+            cmdstamp = f"{command}|{tstamp}"
+            self.r.hset(f"commands:node:{node}", "power_snap_relay_cmd", cmdstamp)
+            sender.power_snap_relay(command)
 
     def power_snap(self, snap_n, command):
         """
         Takes in a string value of 'on' or 'off' for snap_n
         """
+        tstamp = time.time()
         print("Turning {} snap{} for {}".format(command, snap_n, self.node_string))
         for node, sender in self.senders.items():
-            if self.redis_control:
-                self.r.hset("commands:node:{}".format(node),
-                            "power_snap_{}_ctrl_trig".format(snap_n), "True")
-                self.r.hset("commands:node:{}".format(node),
-                            "power_snap_{}_cmd".format(snap_n), command)
-            if sender.control_type == 'direct':
-                sender.power_snap(snap_n, command)
+            cmdstamp = f"{command}|{tstamp}"
+            self.r.hset(f"commands:node:{node}", f"power_snap_{snap_n}_cmd", cmdstamp)
+            sender.power_snap(snap_n, command)
 
     def power_fem(self, command):
         """
         Takes in a string value of 'on' or 'off'.
         Controls the power to FEM.
         """
+        tstamp = time.time()
         print("Turning {} fem for {}".format(command, self.node_string))
         for node, sender in self.senders.items():
-            if self.redis_control:
-                self.r.hset("commands:node:%d" % node, "power_fem_ctrl_trig", "True")
-                self.r.hset("commands:node:%d" % node, "power_fem_cmd", command)
-            if sender.control_type == 'direct':
-                sender.power_fem(command)
+            cmdstamp = f"{command}|{tstamp}"
+            self.r.hset(f"commands:node:{node}", "power_fem_cmd", cmdstamp)
+            sender.power_fem(command)
 
     def power_pam(self, command):
         """
         Takes in a string value of 'on' or 'off'.
         Controls the power to PAM.
         """
+        tstamp = time.time()
         print("Turning {} pam for {}".format(command, self.node_string))
         for node, sender in self.senders.items():
-            if self.redis_control:
-                self.r.hset("commands:node:{}".format(node), "power_pam_ctrl_trig", "True")
-                self.r.hset("commands:node:{}".format(node), "power_pam_cmd", command)
-            if sender.control_type == 'direct':
-                sender.power_pam(command)
+            cmdstamp = f"{command}|{tstamp}"
+            self.r.hset("commands:node:{}".format(node), "power_pam_cmd", cmdstamp)
+            sender.power_pam(command)
 
     def reset(self):
         """
         Sends the reset command to Arduino which restarts the bootloader.
         """
+        tstamp = time.time()
         print("Resetting nodes {}".format(self.node_string))
         for node, sender in self.senders.items():
-            if self.redis_control:
-                self.r.hset("commands:node:%d" % node, "reset", "True")
-            if sender.control_type == 'direct':
-                sender.reset()
-
-    def set_redis_control(self, allow):
-        print("Setting redis control to {}".format(allow))
-        if allow == 'Disable':
-            self.r.set('commands:node', 'Disable')
-        else:
-            self.r.set('commands:node', 'Enable')
-
-    def get_redis_control(self):
-        if self.force_redis_only:
-            return True
-        current_control = self.r.get('commands:node')
-        if current_control is None:
-            return True
-        return False if current_control.decode() == 'Disable' else True
-
-    def init_redis(self):
-        print("Initializing node power flags to False for nodes {}".format(self.node_string))
-        for node in self.nodes:
-            init_trig(node, self.r)
+            cmdstamp = f"reset|{tstamp}"
+            self.r.hset(f"commands:node:{node}", "reset", cmdstamp)
+            sender.reset()
 
     def check_exists(self):
         """
