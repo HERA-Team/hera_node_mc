@@ -391,7 +391,7 @@ class NodeControl():
         Controls the power to SNAP relay. The SNAP relay
         has to be turn on before sending commands to individual SNAPs.
         """
-        tstamp = time.time()
+        tstamp = int(time.time())
         print("Turning {} snap relay for {}".format(command, self.node_string))
         for node, sender in self.senders.items():
             cmdstamp = f"{command}|{tstamp}"
@@ -402,7 +402,7 @@ class NodeControl():
         """
         Takes in a string value of 'on' or 'off' for snap_n
         """
-        tstamp = time.time()
+        tstamp = int(time.time())
         print("Turning {} snap{} for {}".format(command, snap_n, self.node_string))
         for node, sender in self.senders.items():
             cmdstamp = f"{command}|{tstamp}"
@@ -414,7 +414,7 @@ class NodeControl():
         Takes in a string value of 'on' or 'off'.
         Controls the power to FEM.
         """
-        tstamp = time.time()
+        tstamp = int(time.time())
         print("Turning {} fem for {}".format(command, self.node_string))
         for node, sender in self.senders.items():
             cmdstamp = f"{command}|{tstamp}"
@@ -426,7 +426,7 @@ class NodeControl():
         Takes in a string value of 'on' or 'off'.
         Controls the power to PAM.
         """
-        tstamp = time.time()
+        tstamp = int(time.time())
         print("Turning {} pam for {}".format(command, self.node_string))
         for node, sender in self.senders.items():
             cmdstamp = f"{command}|{tstamp}"
@@ -437,7 +437,7 @@ class NodeControl():
         """
         Sends the reset command to Arduino which restarts the bootloader.
         """
-        tstamp = time.time()
+        tstamp = int(time.time())
         print("Resetting nodes {}".format(self.node_string))
         for node, sender in self.senders.items():
             cmdstamp = f"reset|{tstamp}"
