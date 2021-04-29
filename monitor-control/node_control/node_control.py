@@ -100,10 +100,10 @@ class NodeControl():
             if node_id not in self.nodes:
                 continue
             ip = self.r.hget(key, 'ip').decode()
-            if ip is None:
-                continue
             self.senders[node_id] = udp_sender.UdpSender(ip, throttle=self.throttle)
-        self.found_nodes = sorted(self.senders.keys())
+        for node_id in self.senders.keys():
+            if self.senders[node_id].node_is_active:
+                self.found_nodes.append(node_id)
         if not len(self.found_nodes):
             self.node_string = 'No nodes found'
         else:
