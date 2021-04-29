@@ -182,6 +182,7 @@ class NodeControl():
             power_snap_3_cmd
             power_fem_cmd
             power_pam_cmd
+            power_reset (?)
             reset
         Format of values for all is command|time(unix)
         """
@@ -190,14 +191,14 @@ class NodeControl():
             power[node] = {}
             for key in list(statii.keys()):
                 if 'relay' in key:
-                    power[node]['snap_relay'] = statii[key].split('|')
+                    this_key = ['snap_relay']
                 elif 'snap' in key:
-                    data = key.split('_')
-                    power[node][f"snap{data[2]}"] = statii[key].split('|')
-                elif key == 'reset':
-                    data[node]['reset'] = 'reset'
+                    this_key = f"snap{key.split('_')[2]}"
+                elif 'reset' in key:
+                    this_key = key
                 else:
-                    data[node][key.split('_')[1]] = statii[key].split('|')
+                    this_key = key.split('_')[1]
+                power[node][this_key] = statii[key].split('|')
         return power
 
     def get_power_status(self):
