@@ -76,7 +76,7 @@ class NodeControl():
         ----------
         nodes : list of int or None
             ID numbers of the nodes with which this instance of NodeControl will interact.
-            If None or 'all', it will check them all (0-29).
+            If None, it will check them all (0-29).
         serverAddress : str
             The hostname, or dotted quad IP address, of the machine running the node control and
             monitoring redis server
@@ -96,10 +96,10 @@ class NodeControl():
         sc_node : str
             String to print connected nodes (created)
         """
-        if nodes is None or nodes.lower() == 'all':
+        if nodes is None:
             self.request_nodes = list(range(30))
         else:
-            self.request_nodes = [int(x) for x in nodes.split(',')]
+            self.request_nodes = nodes
         connection_pool = redis.ConnectionPool(host=serverAddress, decode_responses=True)
         self.r = redis.StrictRedis(connection_pool=connection_pool, charset='utf-8')
         self.nodes_in_redis = []

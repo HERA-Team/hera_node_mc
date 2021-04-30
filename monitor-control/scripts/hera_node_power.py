@@ -7,9 +7,9 @@ from node_control import node_control
 parser = argparse.ArgumentParser(description='Turn on SNAP relay, SNAPs, FEM and PAM',
                                  formatter_class=argparse.ArgumentDefaultsHelpFormatter)
 
-parser.add_argument('command', help="Specify 'on', 'off'. "
-                    "Also can: 'node_reset', 'redis_init', 'redis_enable', 'redis_disable'",
-                    choices=['on', 'off', 'reset', 'redis_init', 'redis_enable', 'redis_disable'])
+parser.add_argument('command', help="Specify 'on', 'off', or 'reset'.  "
+                    "reset doesn't use any other arguments.",
+                    choices=['on', 'off', 'reset'])
 parser.add_argument('node', help="Specify the list of nodes (csv list of int) or 'all'", nargs='?',
                     default='all')
 parser.add_argument('-r', '--snap-relay', dest='snap_relay', action='store_true',
@@ -27,6 +27,8 @@ parser.add_argument('--all', action='store_true', help='Turn on/off all snaps, p
 parser.add_argument('--serverAddress', help='Name or redis server', default='redishost')
 parser.add_argument('--throttle', help='Throttle time in sec for udp_sender',
                     type=float, default=0.5)
+parser.add_argument('--count', help="Number of entries to assume active in redis.",
+                    default=2, type=int)
 parser.add_argument('--wait', dest='wait_time_in_sec', help="Seconds to wait to check results "
                     "(use 0 to disable check)", default=2.0, type=float)
 
@@ -37,17 +39,12 @@ if args.node.lower() == 'all':
 else:
     nodes2use = [int(x) for x in args.node.split(',')]
 
-n = node_control.NodeControl(nodes2use, serverAddress=args.serverAddress, throttle=args.throttle)
+n = node_control.NodeControl(nodes2use, serverAddress=args.serverAddress, count=args.count)
+n.get_node_senders(args.throttle)
 
 if args.command == 'node_reset':
-    print("Reset abruptly resets the arduino")
+    print("Reset abruptly resets the arduinos")
     n.reset()
-elif args.command.startswith('redis'):
-    print("Set 'command:node' in redis to enable/disable redis control and init")
-    rcmd = args.command.split("_")[1].capitalize()
-    if rcmd in ['Enable', 'Disable']:
-        n.set_redis_control(rcmd)
-    n.init_redis()
 else:
     keystates = {}
     if args.all:
