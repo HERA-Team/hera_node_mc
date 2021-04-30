@@ -6,8 +6,7 @@ connection_pool = redis.ConnectionPool(host='redishost', decode_responses=True)
 r = redis.StrictRedis(connection_pool=connection_pool, charset='utf-8')
 
 expected_services = {'hera_node_keep_alive': {'status': [], 'version': []},
-                     'hera_node_receiver': {'status': [], 'version': []},
-                     'hera_node_cmd_check': {'status': [], 'version': []}}
+                     'hera_node_receiver': {'status': [], 'version': []}}
 
 for key in r.keys():
     dkey = key.decode()

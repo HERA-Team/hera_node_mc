@@ -27,10 +27,8 @@ parser.add_argument('--all', action='store_true', help='Turn on/off all snaps, p
 parser.add_argument('--serverAddress', help='Name or redis server', default='redishost')
 parser.add_argument('--throttle', help='Throttle time in sec for udp_sender',
                     type=float, default=0.1)
-parser.add_argument('--count', help="Number of entries to assume active in redis.",
-                    default=2, type=int)
 parser.add_argument('--wait', dest='wait_time_in_sec', help="Seconds to wait to check results "
-                    "(use 0 to disable check)", default=61.0, type=float)  # service updates at 60s
+                    "(use 0 to disable check)", default=5.0, type=float)
 
 args = parser.parse_args()
 
@@ -39,7 +37,7 @@ if args.node.lower() == 'all':
 else:
     nodes2use = [int(x) for x in args.node.split(',')]
 
-n = node_control.NodeControl(nodes2use, serverAddress=args.serverAddress, count=args.count)
+n = node_control.NodeControl(nodes2use, serverAddress=args.serverAddress, count=None)
 n.get_node_senders(args.throttle)
 
 if args.command == 'node_reset':

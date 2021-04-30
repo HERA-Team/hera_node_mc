@@ -4,7 +4,7 @@ import dateutil.parser
 import json
 import datetime
 import time
-from . import udp_sender
+from . import udp_sender, status_node
 
 
 def str2bool(x):
@@ -45,7 +45,7 @@ def stale_data(age, stale=10.0, show_warning=True):
     return False
 
 
-def get_redis_nodes(serverAddress='redishost', count=2):
+def get_redis_nodes(serverAddress='redishost', count=None):
     nc = NodeControl(None, serverAddress, count)
     return nc.nodes_in_redis
 
@@ -68,7 +68,7 @@ class NodeControl():
     sr_stat = 'status:node:'
     sr_cmd = 'commands:node:'
 
-    def __init__(self, nodes, serverAddress="redishost", count=2):
+    def __init__(self, nodes, serverAddress="redishost", count=None):
         """
         Create a NodeControl class instance to query/control nodes.
 
@@ -80,8 +80,9 @@ class NodeControl():
         serverAddress : str
             The hostname, or dotted quad IP address, of the machine running the node control and
             monitoring redis server
-        count : int
+        count : int or None
             Number of status fields to make a node count as actually used.
+            If None, reads from status_nodes
 
         Attributes
         ----------
@@ -95,6 +96,8 @@ class NodeControl():
             List of connected_nodes in nodes_in_redis (created)
         sc_node : str
             String to print connected nodes (created)
+        status_node_keys : list
+            List of the status:node keys
         """
         if nodes is None:
             self.request_nodes = list(range(30))
@@ -106,21 +109,25 @@ class NodeControl():
         self.get_nodes_in_redis(count)
         self.connected_nodes = []
         self.sc_node = ''
+        self.status_node_keys = list(status_node.status_node(None, None).keys())
 
-    def get_nodes_in_redis(self, count=2):
+    def get_nodes_in_redis(self, count=None):
         """
         Get redis nodes list for those in request_nodes.
 
         Parameters
         ----------
-        count : int
+        count : int or None
             Number of status fields to make a node count as actually used.
+            If None, get from status_node_keys
 
         Attributes
         ----------
         nodes_in_redis : list
             List of all request_nodes in redis with >count status fields
         """
+        if count is None:
+            count = len(self.status_node_keys)
         for node in self.request_nodes:
             if len(self.r.hgetall(f"{self.sr_stat}{node}")) >= count:
                 self.nodes_in_redis.append(node)
@@ -225,7 +232,6 @@ class NodeControl():
             power_snap_3_cmd
             power_fem_cmd
             power_pam_cmd
-            power_reset (?)
             reset
         Format of values for all is command|time(unix)
         """

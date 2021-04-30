@@ -26,13 +26,12 @@ parser.add_argument('--poke_time_sec', type=float,
                     help="Extra time to wait between pokes", default=2.0)
 parser.add_argument('-r', '--redishost', type=str, default='redishost',
                     help='IP or hostname string of host running the monitor redis server.')
-parser.add_argument('--count', type=int, help="Number of status terms to be active.", default=2)
 args = parser.parse_args()
 
 r = redis.StrictRedis(host=args.redishost)
 r.hmset("version:{}:{}".format(__package__, os.path.basename(__file__)), {
         "version": __version__, "timestamp": datetime.datetime.now().isoformat()})
-node_ctrl = node_control.NodeControl(None, args.redishost, args.count)
+node_ctrl = node_control.NodeControl(None, args.redishost, count=None)
 
 heartbeat = 60
 
@@ -40,7 +39,7 @@ heartbeat = 60
 try:
     while True:
         r.set(script_redis_key, "alive", ex=heartbeat)
-        node_ctrl.get_nodes_in_redis(args.count)
+        node_ctrl.get_nodes_in_redis(count=None)
         node_ctrl.get_node_senders(throttle=0.02)
         for node_id in node_ctrl.connected_nodes:
             node_ctrl.senders[node_id].poke()
