@@ -17,11 +17,11 @@ class UdpSender():
     Has ability to turn on/off FEM, PAM, relay and SNAPs. Could also
     reset the Arduino bootloader or poke.
 
-    If it can't find an arduino, the attribute node_is_active is set
+    If it can't find an arduino, the attribute node_is_connected is set
     to False.
     """
 
-    def __init__(self, arduinoAddress, throttle=0.5, active_verbosity=True):
+    def __init__(self, arduinoAddress, throttle=0.5, connected_verbosity=True):
         """
         Takes in the arduino IP address and sends commands directly, using udp.
         You have to be on the hera-digi-vm server to use it.
@@ -29,21 +29,21 @@ class UdpSender():
         Parameters
         ----------
         arduinoAddress : str or None
-            IP address of desired arduino.  If not valid IP or None, mark as inactive.
+            IP address of desired arduino.  If not valid IP or None, mark as not connected.
         throttle : float
             Delay time in seconds
-        active_verbosity : bool
-            If True, will print out a message that the node is inactive
-            upon any action if node_is_active is False.
+        connected_verbosity : bool
+            If True, will print out a message that the node is not connected.
+            upon any action if node_is_connected is False.
         """
         self.arduinoAddress = arduinoAddress
         self.throttle = throttle
-        self.active_verbosity = active_verbosity
+        self.connected_verbosity = connected_verbosity
 
         if arduinoAddress is None or '.' not in arduinoAddress:
-            self.node_is_active = False
+            self.node_is_connected = False
         elif socket.gethostname() in direct_control_hostnames:
-            self.node_is_active = True
+            self.node_is_connected = True
             # define socket address for binding; necessary for receiving data from Arduino
             self.localSocket = (serverAddress, sendPort)
 
@@ -53,20 +53,20 @@ class UdpSender():
                 # Make sure that specify that we want to reuse the socket address
                 self.client_socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
             except socket.error as msg:
-                print('Failed to create socket - set to not active. Error Code : {}  Message {}'
+                print('Failed to create socket - set to not connected. Error Code : {}  Message {}'
                       .format(str(msg[0]), str(msg[1])))
-                self.node_is_active = False
+                self.node_is_connected = False
 
             # Bind socket to local host and port
             if self.control_type == 'direct':
                 try:
                     self.client_socket.bind(self.localSocket)
                 except socket.error as msg:
-                    print('Bind failed - set to not active. Error Code : {}  Message {}'
+                    print('Bind failed - set to not connected. Error Code : {}  Message {}'
                           .format(str(msg[0]), msg[1]))
-                    self.node_is_active = False
+                    self.node_is_connected = False
         else:
-            self.node_is_active = False
+            self.node_is_connected = False
 
     def poke(self):
         """
@@ -155,11 +155,11 @@ class UdpSender():
         time.sleep(self.throttle)
 
     def _command_OK(self, command, allowed, call_cmd):
-        if self.node_is_active and command in allowed:
+        if self.node_is_connected and command in allowed:
             return True
-        if self.active_verbosity:
-            if not self.node_is_active:
-                print(f"Node not active ({call_cmd})")
+        if self.connected_verbosity:
+            if not self.node_is_connected:
+                print(f"Node not connected ({call_cmd})")
             else:
                 print(f"{call_cmd}: {command} not in {allowed}")
         return False

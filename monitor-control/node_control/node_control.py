@@ -45,70 +45,114 @@ def stale_data(age, stale=10.0, show_warning=True):
     return False
 
 
+def get_valid_nodes(serverAddress='redishost'):
+    nc = NodeControl(None, serverAddress)
+    return nc.nodes_in_redis
+
+
 class NodeControl():
     """
-    This class is used to control power to PAM, FEM, and SNAP boards and get node status information
-    through a Redis database running on the correlator head node.
+    This class is used to control power to PAM, FEM, and SNAP boards and
+    get node status information through a Redis database.
 
     It also provides a status for the White Rabbit
+
+    Attributes
+    ----------
+    sr_stat : str
+        status hash prefix for redis
+    sr_cmd : str
+        command hash prefix for redis
     """
 
-    def __init__(self, nodes, serverAddress="redishost", throttle=0.5):
+    sr_stat = 'status:node:'
+    sr_cmd = 'commands:node:'
+
+    def __init__(self, nodes, serverAddress="redishost", count=2):
         """
-        Create a NodeControl class instance to control a single node via the redis datastore
-        hosted at `serverAddress`.
+        Create a NodeControl class instance to query/control nodes.
 
         Parameters
         ----------
-        node : list of int or None
+        nodes : list of int or None
             ID numbers of the nodes with which this instance of NodeControl will interact.
-            If None, it will check them all.
+            If None or 'all', it will check them all (0-29).
         serverAddress : str
             The hostname, or dotted quad IP address, of the machine running the node control and
             monitoring redis server
-        throttle : float
-            Delay in seconds between calls to turn on power
-        """
-        self.nodes = nodes
-        self.throttle = throttle
-        self.r = redis.StrictRedis(serverAddress)
-        self.get_node_senders()
+        count : int
+            Number of status fields to make a node count as actually used.
 
-    def get_node_senders(self):
+        Attributes
+        ----------
+        request_nodes : list
+            List of requested nodes (supplied)
+        r : redis class
+            Redis class to use
+        nodes_in_redis : list
+            List of all request_nodes in redis (created and called)
+        connected_nodes : list
+            List of connected_nodes in nodes_in_redis (created)
+        sc_node : str
+            String to print connected nodes (created)
         """
-        Get udp node class for requested nodes that are also in redis.
+        if nodes is None or nodes.lower() == 'all':
+            self.request_nodes = list(range(30))
+        else:
+            self.request_nodes = [int(x) for x in nodes.split(',')]
+        connection_pool = redis.ConnectionPool(host=serverAddress, decode_responses=True)
+        self.r = redis.StrictRedis(connection_pool=connection_pool, charset='utf-8')
+        self.nodes_in_redis = []
+        self.get_nodes_in_redis(count)
+        self.connected_nodes = []
+        self.sc_node = ''
+
+    def get_nodes_in_redis(self, count=2):
+        """
+        Get redis nodes list for those in request_nodes.
+
+        Parameters
+        ----------
+        count : int
+            Number of status fields to make a node count as actually used.
+
+        Attributes
+        ----------
+        nodes_in_redis : list
+            List of all request_nodes in redis with >count status fields
+        """
+        for node in self.request_nodes:
+            if len(self.r.hgetall(f"{self.sr_stat}{node}")) >= count:
+                self.nodes_in_redis.append(node)
+
+    def get_node_senders(self, throttle=0.5):
+        """
+        Get udp node class for requested nodes that are in redis.
+
+        Every node in redis gets a sender class, differ by sender.node_is_connected flag.
 
         Attributes
         ----------
         senders : dict
-            Sender classes keyed on node_id (int)
-        nodes_in_redis : list
-            List of all nodes in redis
-        found_nodes : list
-            List of all found nodes (request+redis+arduino)
-        node_string : str
-            Nice string to use to print found nodes
+            Sender classes keyed on node_id (int) - one for every nodes_in_redis
+        connected_nodes : list
+            List of all udp connected request_nodes
         """
-        self.nodes_in_redis = []
+        self.connected_nodes = []
         self.senders = {}
-        for key in self.r.scan_iter("status:node:*"):
-            try:
-                node_id = int(self.r.hget(key, 'node_ID').decode())
-            except ValueError:
-                continue
-            self.nodes_in_redis.append(node_id)
-            if node_id not in self.nodes:
-                continue
-            ip = self.r.hget(key, 'ip').decode()
-            self.senders[node_id] = udp_sender.UdpSender(ip, throttle=self.throttle)
-        for node_id in self.senders.keys():
-            if self.senders[node_id].node_is_active:
-                self.found_nodes.append(node_id)
-        if not len(self.found_nodes):
-            self.node_string = 'No nodes found'
-        else:
-            plural = 'nodes' if len(self.found_nodes) > 1 else 'node'
-            self.node_string = "{} {}".format(plural, ', '.join([str(x) for x in self.found_nodes]))
+        for node in self.nodes_in_redis:
+            hkey = f"{self.sr_stat}{node}"
+            ip = self.r.hget(hkey, 'ip')
+            self.senders[node] = udp_sender.UdpSender(ip, throttle=self.throttle)
+            if self.senders[node].node_is_connected:
+                self.connected_nodes.append(node)
+                self.r.hset(hkey, 'udp_status', 'connected')
+            else:
+                self.r.hset(hkey, 'udp_status', 'not_connected')
+        if len(self.connected_nodes) == 1:
+            self.sc_node = f"Node {self.connected_nodes[0]}"
+        elif len(self.connected_nodes) > 1:
+            self.sc_node = f"Nodes {', '.join(self.connected_nodes)}"
 
     def _get_raw_node_hash(self, this_key):
         """
@@ -120,10 +164,9 @@ class NodeControl():
         :returns: Whatever key-value pairs exist for this node's hash
         """
         rawstat = {}
-        for node in self.found_nodes:
-            nkey = this_key.replace('*', '{}'.format(node))
-            rawstat[node] = {key.decode(): val.decode()
-                             for key, val in self.r.hgetall(nkey).items()}
+        for node in self.nodes_in_redis:
+            nkey = this_key.replace('*', f'{node}')
+            rawstat[node] = self.r.hgetall(nkey)
         return rawstat
 
     def get_sensors(self):
@@ -157,7 +200,7 @@ class NodeControl():
         }
         sensors = {}
         now = datetime.datetime.now()
-        for node, stats in self._get_raw_node_hash("status:node:*").items():
+        for node, stats in self._get_raw_node_hash(f"{self.sr_stat}*").items():
             sensors[node] = {'age': None}
             for key, convfunc in conv_methods.items():
                 try:
@@ -187,7 +230,7 @@ class NodeControl():
         Format of values for all is command|time(unix)
         """
         power = {}
-        for node, statii in self._get_raw_node_hash("command:node:*").items():
+        for node, statii in self._get_raw_node_hash(f"{self.sr_cmd}*").items():
             power[node] = {}
             for key in list(statii.keys()):
                 if 'relay' in key:
@@ -221,7 +264,7 @@ class NodeControl():
         """
         power = {}
         now = datetime.datetime.now()
-        for node, statii in self._get_raw_node_hash("status:node:*").items():
+        for node, statii in self._get_raw_node_hash(f"{self.sr_stat}*").items():
             power[node] = {'age': None}
             for key in list(statii.keys()):
                 if key == 'timestamp':
@@ -392,67 +435,70 @@ class NodeControl():
         Controls the power to SNAP relay. The SNAP relay
         has to be turn on before sending commands to individual SNAPs.
         """
+        if not len(self.connected_nodes):
+            print("No nodes connected.")
+            return
         tstamp = int(time.time())
-        print("Turning {} snap relay for {}".format(command, self.node_string))
-        for node, sender in self.senders.items():
+        print("Turning {} snap relay for {}".format(command, self.sc_node))
+        for node in self.connected_nodes:
             cmdstamp = f"{command}|{tstamp}"
-            self.r.hset(f"commands:node:{node}", "power_snap_relay_cmd", cmdstamp)
-            sender.power_snap_relay(command)
+            self.r.hset(f"{self.sr_cmd}{node}", "power_snap_relay_cmd", cmdstamp)
+            self.senders[node].power_snap_relay(command)
 
     def power_snap(self, snap_n, command):
         """
         Takes in a string value of 'on' or 'off' for snap_n
         """
+        if not len(self.connected_nodes):
+            print("No nodes connected.")
+            return
         tstamp = int(time.time())
-        print("Turning {} snap{} for {}".format(command, snap_n, self.node_string))
-        for node, sender in self.senders.items():
+        print("Turning {} snap{} for {}".format(command, snap_n, self.sc_node))
+        for node in self.connected_nodes:
             cmdstamp = f"{command}|{tstamp}"
-            self.r.hset(f"commands:node:{node}", f"power_snap_{snap_n}_cmd", cmdstamp)
-            sender.power_snap(snap_n, command)
+            self.r.hset(f"{self.sr_cmd}{node}", f"power_snap_{snap_n}_cmd", cmdstamp)
+            self.senders[node].power_snap(snap_n, command)
 
     def power_fem(self, command):
         """
         Takes in a string value of 'on' or 'off'.
         Controls the power to FEM.
         """
+        if not len(self.connected_nodes):
+            print("No nodes connected.")
+            return
         tstamp = int(time.time())
-        print("Turning {} fem for {}".format(command, self.node_string))
-        for node, sender in self.senders.items():
+        print("Turning {} fem for {}".format(command, self.sc_node))
+        for node in self.connected_nodes:
             cmdstamp = f"{command}|{tstamp}"
-            self.r.hset(f"commands:node:{node}", "power_fem_cmd", cmdstamp)
-            sender.power_fem(command)
+            self.r.hset(f"{self.sr_cmd}{node}", "power_fem_cmd", cmdstamp)
+            self.senders[node].power_fem(command)
 
     def power_pam(self, command):
         """
         Takes in a string value of 'on' or 'off'.
         Controls the power to PAM.
         """
+        if not len(self.connected_nodes):
+            print("No nodes connected.")
+            return
         tstamp = int(time.time())
-        print("Turning {} pam for {}".format(command, self.node_string))
-        for node, sender in self.senders.items():
+        print("Turning {} pam for {}".format(command, self.sc_node))
+        for node in self.connected_nodes:
             cmdstamp = f"{command}|{tstamp}"
-            self.r.hset("commands:node:{}".format(node), "power_pam_cmd", cmdstamp)
-            sender.power_pam(command)
+            self.r.hset(f"{self.sr_cmd}{node}", "power_pam_cmd", cmdstamp)
+            self.senders[node].power_pam(command)
 
     def reset(self):
         """
         Sends the reset command to Arduino which restarts the bootloader.
         """
+        if not len(self.connected_nodes):
+            print("No nodes connected.")
+            return
         tstamp = int(time.time())
-        print("Resetting nodes {}".format(self.node_string))
-        for node, sender in self.senders.items():
+        print("Resetting nodes {}".format(self.sc_node))
+        for node in self.connected_nodes:
             cmdstamp = f"reset|{tstamp}"
-            self.r.hset(f"commands:node:{node}", "reset", cmdstamp)
-            sender.reset()
-
-    def check_exists(self):
-        """
-        Check that the node exists.
-        Return dict
-        """
-        ex = {}
-        for node in self.nodes:
-            ex[node] = node in self.senders.keys()
-        if True not in ex.values():
-            ex = {}
-        return ex
+            self.r.hset(f"{self.sr_cmd}{node}", "reset", cmdstamp)
+            self.senders[node].reset()
