@@ -85,7 +85,7 @@ else:
         time.sleep(args.wait_time_in_sec)
         stale_time = 1.1 * (args.wait_time_in_sec +
                             len(n.active_nodes) * len(keystates) * args.throttle)
-        n.check_power_status(stale_time, keystates)
+        n.check_stale_power_status(stale_time, keystates)
         if len(n.stale_nodes):
             print("These nodes aren't updating:  {}".format(n.stale_nodes))
         updated = sorted(n.active_nodes.keys())

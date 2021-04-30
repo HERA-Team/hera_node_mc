@@ -15,7 +15,7 @@ def str2bool(x):
     return x == "1"
 
 
-def stale_data(age, stale=10.0, show_warning=True):
+def stale_data(age, stale=60.0, show_warning=True):
     """
     Print warning if data are too stale.
 
@@ -180,7 +180,7 @@ class NodeControl():
         """
         Get the current node sensor values.
 
-        Returns a dict where `timestamp` is a python `datetime` object describing when the
+        Returns a dict where `timestamp` is a python `time` float describing when the
         sensor values were last updated in redis, and `sensors` is a dictionary of sensor values.
         If a sensor value is not available (e.g. because it cannot be reached) it will be `None`
 
@@ -203,10 +203,10 @@ class NodeControl():
             "ip": str,
             "mac": str,
             "cpu_uptime_ms": int,
-            "timestamp": dateutil.parser.parse
+            "timestamp": float
         }
         sensors = {}
-        now = datetime.datetime.now()
+        now = time.time()
         for node, stats in self._get_raw_node_hash(f"{self.sr_stat}*").items():
             sensors[node] = {'age': None}
             for key, convfunc in conv_methods.items():
@@ -254,7 +254,7 @@ class NodeControl():
         """
         Get the current node power relay states.
 
-        Returns a dict where `timestamp` is a python `datetime` object
+        Returns a dict where `timestamp` is a python `time` float
         describing when the values were last updated in redis, and `statii` is a dictionary
         of booleans for the various power switches the node can control. For each entry in this
         dictionary, `True` indicates power is on, `False` indicates power is off.
@@ -269,18 +269,17 @@ class NodeControl():
           'power_snap_relay' (Power of master SNAP relay)
         """
         power = {}
-        now = datetime.datetime.now()
+        now = time.time()
         for node, statii in self._get_raw_node_hash(f"{self.sr_stat}*").items():
             power[node] = {'age': None}
             for key in list(statii.keys()):
                 if key == 'timestamp':
-                    power[node][key] = dateutil.parser.parse(statii["timestamp"])
                     power[node]['age'] = now - power[node][key]
                 elif key.startswith("power"):
                     power[node][key] = str2bool(statii[key])
         return power
 
-    def check_power_status(self, stale=10.0, keystates={}):
+    def check_stale_power_status(self, stale=30.0, keystates={}):
         """
         Checks the age of node status and returns stale ones.
 
