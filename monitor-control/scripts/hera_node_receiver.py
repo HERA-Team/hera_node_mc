@@ -5,6 +5,7 @@ information and pushes it up to Redis with status:node:x hash key.
 """
 from __future__ import print_function
 import datetime
+import time
 import struct
 import redis
 import socket
@@ -40,7 +41,9 @@ unpacked_mac = ["" for x in range(6)]
 
 # Instantiate redis object connected to redis server running on localhost
 r = redis.StrictRedis(host=redisAddress, port=redisPort)
-
+r.hmset("version:{}:{}".format(__package__, os.path.basename(__file__)),
+        {"version": __version__,
+         "timestamp": datetime.datetime.now().isoformat()})
 
 # Create a UDP socket
 try:
@@ -109,13 +112,9 @@ try:
                      'power_snap_2': unpacked_snapv2_2,
                      'power_snap_3': unpacked_snapv2_3,
                      'cpu_uptime_ms': unpacked_cpu_uptime,
-                     'timestamp': str(datetime.datetime.now()),
+                     'timestamp': time.time()
                      }
-        r.hmset('status:node:{}'.format(node), data_dict)
-        # Write the version of this software to redis
-        r.hmset("version:{}:{}".format(__package__, os.path.basename(__file__)),
-                {"version": __version__,
-                 "timestamp": datetime.datetime.now().isoformat()})
+        r.hmset(f'status:node:{node}', data_dict)
 except KeyboardInterrupt:
     print('Interrupted', file=sys.stderr)
     sys.exit(0)

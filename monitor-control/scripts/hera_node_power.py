@@ -26,11 +26,11 @@ parser.add_argument('-f', '--fem', action='store_true', help='Turn on/off the FE
 parser.add_argument('--all', action='store_true', help='Turn on/off all snaps, pams and fems')
 parser.add_argument('--serverAddress', help='Name or redis server', default='redishost')
 parser.add_argument('--throttle', help='Throttle time in sec for udp_sender',
-                    type=float, default=0.5)
+                    type=float, default=0.1)
 parser.add_argument('--count', help="Number of entries to assume active in redis.",
                     default=2, type=int)
 parser.add_argument('--wait', dest='wait_time_in_sec', help="Seconds to wait to check results "
-                    "(use 0 to disable check)", default=2.0, type=float)
+                    "(use 0 to disable check)", default=61.0, type=float)  # service updates at 60s
 
 args = parser.parse_args()
 
@@ -48,8 +48,8 @@ if args.command == 'node_reset':
 else:
     keystates = {}
     if args.all:
-        args.snaps = True
         args.snap_relay = True
+        args.snaps = True
         args.pam = True
         args.fem = True
 
@@ -83,10 +83,10 @@ else:
         n.power_snap_relay('off')
         keystates['power_snap_relay'] = 'off'
 
-    if args.wait_time_in_sec > 0.0:
+    if args.wait_time_in_sec > 0.001:
         time.sleep(args.wait_time_in_sec)
         stale_time = 1.1 * (args.wait_time_in_sec +
-                            len(n.found_nodes) * len(keystates) * args.throttle)
+                            len(n.active_nodes) * len(keystates) * args.throttle)
         n.check_power_status(stale_time, keystates)
         if len(n.stale_nodes):
             print("These nodes aren't updating:  {}".format(n.stale_nodes))
@@ -98,4 +98,4 @@ else:
                     print("\tCommand not successful:  Node {} -> {} {}"
                           .format(nd, n.wrong_states[nd], args.command))
         else:
-            print("No nodes updated.")
+            print("No nodes checked.")

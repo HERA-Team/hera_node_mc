@@ -20,39 +20,32 @@ hostname = socket.gethostname()
 script_redis_key = "status:script:{}:{}".format(hostname, __file__)
 
 parser = argparse.ArgumentParser(description='Send keepalive pokes to all nodes with '
-                                 'a status entry in redis',
+                                 'a status entry in redis and connected',
                                  formatter_class=argparse.ArgumentDefaultsHelpFormatter)
-parser.add_argument('--poke_time_sec', type=float, help="Time to wait between pokes", default=1.0)
-parser.add_argument('--heartbeat', type=int, help="Time to keep alive flag", default=60)
+parser.add_argument('--poke_time_sec', type=float,
+                    help="Extra time to wait between pokes", default=2.0)
 parser.add_argument('-r', '--redishost', type=str, default='redishost',
                     help='IP or hostname string of host running the monitor redis server.')
+parser.add_argument('--count', type=int, help="Number of status terms to be active.", default=2)
 args = parser.parse_args()
 
 r = redis.StrictRedis(host=args.redishost)
+r.hmset("version:{}:{}".format(__package__, os.path.basename(__file__)), {
+        "version": __version__, "timestamp": datetime.datetime.now().isoformat()})
+node_ctrl = node_control.NodeControl(None, args.redishost, args.count)
 
-# Define a dict of udpSender objects to send commands to Arduinos.
-# If nodes to check and throttle are specified, use those values.
-# If not, poke all the nodes that have Redis status:node:x keys.
-nodes = node_control.refresh_node_list({}, r)
-print("Using nodes {}:".format(list(nodes.keys())), file=sys.stderr)
+heartbeat = 60
 
 # Sends poke signal to Arduinos inside the nodes
 try:
     while True:
-        r.set(script_redis_key, "alive", ex=args.heartbeat)
-        start_poke_time = time.time()
-        nodes = node_control.refresh_node_list(nodes, r)
-        r.hmset("version:{}:{}".format(__package__, os.path.basename(__file__)), {
-            "version": __version__, "timestamp": datetime.datetime.now().isoformat(),
-        })
-        for node_id, node in nodes.items():
-            # print("Poking node %d"%node)
-            node.poke()
-            r.hset('throttle:node:{}'.format(node_id), 'last_poke_sec', time.time())
-        end_poke_time = time.time()
-        time_to_poke = end_poke_time - start_poke_time
-        if time_to_poke < args.poke_time_sec:
-            time.sleep(args.poke_time_sec - time_to_poke)
+        r.set(script_redis_key, "alive", ex=heartbeat)
+        node_ctrl.get_nodes_in_redis(args.count)
+        node_ctrl.get_node_senders(throttle=0.02)
+        for node_id in node_ctrl.connected_nodes:
+            node_ctrl.senders[node_id].poke()
+            r.hset(f'throttle:node:{node_id}', 'last_poke_sec', time.time())
+        time.sleep(args.poke_time_sec)  # actual time is this + poke time (~1s)
 except KeyboardInterrupt:
     print('Interrupted', file=sys.stderr)
     sys.exit(0)

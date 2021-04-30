@@ -45,8 +45,8 @@ def stale_data(age, stale=10.0, show_warning=True):
     return False
 
 
-def get_valid_nodes(serverAddress='redishost'):
-    nc = NodeControl(None, serverAddress)
+def get_redis_nodes(serverAddress='redishost', count=2):
+    nc = NodeControl(None, serverAddress, count)
     return nc.nodes_in_redis
 
 
@@ -125,7 +125,7 @@ class NodeControl():
             if len(self.r.hgetall(f"{self.sr_stat}{node}")) >= count:
                 self.nodes_in_redis.append(node)
 
-    def get_node_senders(self, throttle=0.5):
+    def get_node_senders(self, throttle=0.1):
         """
         Get udp node class for requested nodes that are in redis.
 
