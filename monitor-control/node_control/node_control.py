@@ -74,9 +74,9 @@ class NodeControl():
 
         Parameters
         ----------
-        nodes : list of int or None
+        nodes : int, list of int or None
             ID numbers of the nodes with which this instance of NodeControl will interact.
-            If None, it will check them all (0-29).
+            If None, it will check them all (0-29).  If not list, it will make a list.
         serverAddress : str
             The hostname, or dotted quad IP address, of the machine running the node control and
             monitoring redis server
@@ -91,16 +91,18 @@ class NodeControl():
         r : redis class
             Redis class to use
         nodes_in_redis : list
-            List of all request_nodes in redis (created and called)
+            List of all request_nodes in redis
         connected_nodes : list
-            List of connected_nodes in nodes_in_redis (created)
+            List of connected_nodes in nodes_in_redis
         sc_node : str
-            String to print connected nodes (created)
+            String to print connected nodes
         status_node_keys : list
             List of the status:node keys
         """
         if nodes is None:
             self.request_nodes = list(range(30))
+        elif not isinstance(nodes, list):
+            self.request_nodes = [nodes]
         else:
             self.request_nodes = nodes
         connection_pool = redis.ConnectionPool(host=serverAddress, decode_responses=True)
@@ -144,6 +146,8 @@ class NodeControl():
             Sender classes keyed on node_id (int) - one for every nodes_in_redis
         connected_nodes : list
             List of all udp connected request_nodes
+        sc_node : str
+            String to print connected nodes
         """
         self.connected_nodes = []
         self.senders = {}
@@ -178,7 +182,7 @@ class NodeControl():
 
     def get_sensors(self):
         """
-        Get the current node sensor values.
+        Get the current node sensor values from redis.
 
         Returns a dict where `timestamp` is a python `time` float describing when the
         sensor values were last updated in redis, and `sensors` is a dictionary of sensor values.
@@ -220,9 +224,9 @@ class NodeControl():
 
     def get_power_command_list(self):
         """
-        Get the current node power commands.
+        Get the current node power commands from redis.
 
-        Returns a dict keyed on node and one of [time, part, command].
+        Returns a dict keyed on node|part|timestamp/age/command
 
         Valid power command keys are:
             power_snap_relay_cmd
@@ -233,26 +237,30 @@ class NodeControl():
             power_fem_cmd
             power_pam_cmd
             reset
-        Format of values for all is command|time(unix)
+        Format of values for all is on/off/reset|time(unix)
         """
         power = {}
+        now = time.time()
         for node, statii in self._get_raw_node_hash(f"{self.sr_cmd}*").items():
             power[node] = {}
             for key in list(statii.keys()):
                 if 'relay' in key:
-                    this_key = ['snap_relay']
+                    this_key = 'snap_relay'
                 elif 'snap' in key:
                     this_key = f"snap{key.split('_')[2]}"
                 elif 'reset' in key:
-                    this_key = key
+                    this_key = 'reset'
                 else:
                     this_key = key.split('_')[1]
-                power[node][this_key] = statii[key].split('|')
+                stad = statii[key].split('|')
+                power[node][this_key] = {'timestamp': float(stad[1]),
+                                         'age': now - float(stad[1]),
+                                         'command': stad[0]}
         return power
 
     def get_power_status(self):
         """
-        Get the current node power relay states.
+        Get the current node power relay states from redis.
 
         Returns a dict where `timestamp` is a python `time` float
         describing when the values were last updated in redis, and `statii` is a dictionary
@@ -274,7 +282,7 @@ class NodeControl():
             power[node] = {'age': None}
             for key in list(statii.keys()):
                 if key == 'timestamp':
-                    power[node]['age'] = now - power[node][key]
+                    power[node]['age'] = now - float(statii[key])
                 elif key.startswith("power"):
                     power[node][key] = str2bool(statii[key])
         return power
@@ -316,7 +324,7 @@ class NodeControl():
     def get_wr_status(self):
         """
         Get the current status of this node's White Rabbit endpoint (assumed to have hostname
-        `heraNode<node-number>wr`.
+        `heraNode<node-number>wr`) from redis.
 
         If no stats exist for this White Rabbit endpoint, returns `None`.
 
@@ -436,9 +444,15 @@ class NodeControl():
 
     def power_snap_relay(self, command):
         """
-        Takes in a string value of 'on' or 'off'.
-        Controls the power to SNAP relay. The SNAP relay
-        has to be turn on before sending commands to individual SNAPs.
+        Controls the node snap relay via arduino.
+
+        The SNAP relay has to be turn on before sending commands to individual SNAPs.
+        It logs the command to redis as status:node:N->power_snap_relay_cmd.
+
+        Parameter
+        ---------
+        command : str
+            on or off
         """
         if not len(self.connected_nodes):
             print("No nodes connected.")
@@ -452,7 +466,16 @@ class NodeControl():
 
     def power_snap(self, snap_n, command):
         """
-        Takes in a string value of 'on' or 'off' for snap_n
+        Controls the power to snaps via arduino.
+
+        It logs the command to redis as status:node:N->power_snap_N_cmd.
+
+        Parameters
+        ----------
+        snap_n : int (or str representation of int)
+            Number of snap to address.
+        command : str
+            on or off
         """
         if not len(self.connected_nodes):
             print("No nodes connected.")
@@ -466,8 +489,14 @@ class NodeControl():
 
     def power_fem(self, command):
         """
-        Takes in a string value of 'on' or 'off'.
-        Controls the power to FEM.
+        Controls the power to FEM via arduino.
+
+        It logs the command to redis as status:node:N->power_fem_cmd.
+
+        Parameter
+        ---------
+        command : str
+            on or off
         """
         if not len(self.connected_nodes):
             print("No nodes connected.")
@@ -481,8 +510,14 @@ class NodeControl():
 
     def power_pam(self, command):
         """
-        Takes in a string value of 'on' or 'off'.
-        Controls the power to PAM.
+        Controls the power to PAM via arduino.
+
+        It logs the command to redis as status:node:N->power_pam_cmd.
+
+        Parameter
+        ---------
+        command : str
+            on or off
         """
         if not len(self.connected_nodes):
             print("No nodes connected.")
@@ -497,6 +532,8 @@ class NodeControl():
     def reset(self):
         """
         Sends the reset command to Arduino which restarts the bootloader.
+
+        It logs the command to redis as status:node:N->reset
         """
         if not len(self.connected_nodes):
             print("No nodes connected.")
