@@ -41,12 +41,12 @@ def stale_data(age, stale=60.0, show_warning=True):
     if age > stale:
         if age > 86400:
             dyage = age / 86400.0
-            w_msg = f"{dyage:.1f} days"
+            w_msg = "{:.1f} days".format(dyage)
         elif age > 3600:
             hrage = age / 3600.0
-            w_msg = f"{hrage:.1f} hours"
+            w_msg = "{:.1f} hours".format(hrage)
         else:
-            w_msg = f"{int(age)} seconds"
+            w_msg = "{} seconds".format(int(age))
         if show_warning:
             print(f"***Warning:  data are {w_msg} old")
         return True
