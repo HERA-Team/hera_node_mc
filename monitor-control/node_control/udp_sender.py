@@ -58,7 +58,7 @@ class UdpSender():
                 self.node_is_connected = False
 
             # Bind socket to local host and port
-            if self.control_type == 'direct':
+            if self.node_is_connected:
                 try:
                     self.client_socket.bind(self.localSocket)
                 except socket.error as msg:
