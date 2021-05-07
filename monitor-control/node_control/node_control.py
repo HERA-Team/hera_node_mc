@@ -184,7 +184,7 @@ class NodeControl():
         """
         rawstat = {}
         for node in self.nodes_in_redis:
-            nkey = this_key.replace('*', f'{node}')
+            nkey = this_key.replace('*', str(node))
             rawstat[node] = self.r.hgetall(nkey)
         return rawstat
 
