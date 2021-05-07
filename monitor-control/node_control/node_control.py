@@ -162,7 +162,7 @@ class NodeControl():
         for node in self.nodes_in_redis:
             hkey = "{}{}".format(self.sr_stat, node)
             ip = self.r.hget(hkey, 'ip')
-            self.senders[node] = udp_sender.UdpSender(ip, throttle=self.throttle)
+            self.senders[node] = udp_sender.UdpSender(ip, throttle=throttle)
             if self.senders[node].node_is_connected:
                 self.connected_nodes.append(node)
                 self.r.hset(hkey, 'udp_status', 'connected')
