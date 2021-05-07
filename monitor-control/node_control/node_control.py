@@ -48,7 +48,7 @@ def stale_data(age, stale=60.0, show_warning=True):
         else:
             w_msg = "{} seconds".format(int(age))
         if show_warning:
-            print(f"***Warning:  data are {w_msg} old")
+            print("***Warning:  data are {} old".format(w_msg))
         return True
     return False
 
