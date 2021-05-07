@@ -39,6 +39,10 @@ else:
 
 n = node_control.NodeControl(nodes2use, serverAddress=args.serverAddress, count=None)
 n.get_node_senders(args.throttle)
+if not len(n.connected_nodes):
+    import sys
+    print("No nodes are connected.")
+    sys.exit()
 
 if args.command == 'node_reset':
     print("Reset abruptly resets the arduinos")
@@ -84,7 +88,7 @@ else:
     if args.wait_time_in_sec > 0.001:
         time.sleep(args.wait_time_in_sec)
         stale_time = 1.1 * (args.wait_time_in_sec +
-                            len(n.active_nodes) * len(keystates) * args.throttle)
+                            len(n.connected_nodes) * len(keystates) * args.throttle)
         n.check_stale_power_status(stale_time, keystates)
         if len(n.stale_nodes):
             print("These nodes aren't updating:  {}".format(n.stale_nodes))
