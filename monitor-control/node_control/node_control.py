@@ -35,7 +35,7 @@ def stale_data(age, stale=60.0, show_warning=True):
     if age is None:
         if show_warning:
             print("***Warning: no age found.")
-        return None
+        return False
     if isinstance(age, datetime.timedelta):
         age = age.days*(24.0 * 3600.0) + age.seconds + age.microseconds/1E6
     if age > stale:
@@ -225,7 +225,10 @@ class NodeControl():
                 try:
                     sensors[node][key] = convfunc(stats[key])
                     if key == 'timestamp':
-                        sensors[node]['age'] = now - sensors[node][key]
+                        try:
+                            sensors[node]['age'] = now - sensors[node][key]
+                        except ValueError:
+                            pass
                 except:  # noqa
                     sensors[node][key] = None
         return sensors
@@ -290,7 +293,10 @@ class NodeControl():
             power[node] = {'age': None}
             for key in list(statii.keys()):
                 if key == 'timestamp':
-                    power[node]['age'] = now - float(statii[key])
+                    try:
+                        power[node]['age'] = now - float(statii[key])
+                    except ValueError:
+                        pass
                 elif key.startswith("power"):
                     power[node][key] = str2bool(statii[key])
         return power
