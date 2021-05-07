@@ -92,9 +92,9 @@ else:
         n.check_stale_power_status(stale_time, keystates)
         if len(n.stale_nodes):
             print("These nodes aren't updating:  {}".format(n.stale_nodes))
-        updated = sorted(n.active_nodes.keys())
+        updated = sorted(n.connected_nodes.keys())
         if len(updated):
-            print("These nodes are updating:  {}".format(updated))
+            print("These nodes are connected:  {}".format(updated))
             for nd in updated:
                 if len(n.wrong_states[nd]):
                     print("\tCommand not successful:  Node {} -> {} {}"
