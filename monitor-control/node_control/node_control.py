@@ -116,10 +116,10 @@ class NodeControl():
         connection_pool = redis.ConnectionPool(host=serverAddress, decode_responses=True)
         self.r = redis.StrictRedis(connection_pool=connection_pool, charset='utf-8')
         self.nodes_in_redis = []
-        self.get_nodes_in_redis(count)
         self.connected_nodes = []
         self.sc_node = ''
         self.status_node_keys = list(status_node.status_node(None, None).keys())
+        self.get_nodes_in_redis(count)
 
     def get_nodes_in_redis(self, count=None):
         """

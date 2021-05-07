@@ -33,6 +33,8 @@ if hostname in ['hera-node-head', 'hera-mobile']:
               ]
 elif hostname == 'hera-snap-head':
     scripts = ['monitor-control/scripts/hera_setup_new_node.py']
+else:
+    scripts = ['monitor-control/scripts/hera_node_get_status.py']
 
 setup(
     name='node_control',
