@@ -39,8 +39,16 @@ def stale_data(age, stale=60.0, show_warning=True):
     if isinstance(age, datetime.timedelta):
         age = age.days*(24.0 * 3600.0) + age.seconds + age.microseconds/1E6
     if age > stale:
+        if age > 86400:
+            dyage = age / 86400.0
+            w_msg = f"{dyage:.1f} days"
+        elif age > 3600:
+            hrage = age / 3600.0
+            w_msg = f"{hrage:.1f} hours"
+        else:
+            w_msg = f"{int(age)} seconds"
         if show_warning:
-            print("***Warning:  data are {} seconds old".format(int(age)))
+            print(f"***Warning:  data are {w_msg} old")
         return True
     return False
 
