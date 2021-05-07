@@ -159,7 +159,7 @@ class UdpSender():
             return True
         if self.connected_verbosity:
             if not self.node_is_connected:
-                print(f"Node not connected ({call_cmd})")
+                print("Node not connected ({})".format(call_cmd))
             else:
-                print(f"{call_cmd}: {command} not in {allowed}")
+                print("{}: {} not in {}".format(call_cmd, command, allowed))
         return False
