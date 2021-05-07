@@ -23,7 +23,6 @@ if hostname in ['hera-node-head', 'hera-mobile']:
     scripts = [
                 'monitor-control/scripts/hera_node_data_dump.py',
                 'monitor-control/scripts/hera_node_get_status.py',
-                'monitor-control/scripts/hera_node_cmd_check.py',
                 'monitor-control/scripts/hera_node_keep_alive.py',
                 'monitor-control/scripts/hera_node_receiver.py',
                 'monitor-control/scripts/hera_node_serial_dump.py',
