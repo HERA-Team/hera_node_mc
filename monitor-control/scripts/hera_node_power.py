@@ -29,6 +29,8 @@ parser.add_argument('--throttle', help='Throttle time in sec for udp_sender',
                     type=float, default=0.1)
 parser.add_argument('--wait', dest='wait_time_in_sec', help="Seconds to wait to check results "
                     "(use 0 to disable check)", default=5.0, type=float)
+parser.add_argument('--force-direct', dest='force_direct', help="Flag to ignore hostname.",
+                    action='store_true')
 
 args = parser.parse_args()
 
@@ -38,7 +40,7 @@ else:
     nodes2use = [int(x) for x in args.node.split(',')]
 
 n = node_control.NodeControl(nodes2use, serverAddress=args.serverAddress, count=None)
-n.get_node_senders(args.throttle)
+n.get_node_senders(throttle=args.throttle, force_direct=args.force_direct)
 if not len(n.connected_nodes):
     import sys
     print("No nodes are connected.")

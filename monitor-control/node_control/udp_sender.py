@@ -21,7 +21,8 @@ class UdpSender():
     to False.
     """
 
-    def __init__(self, arduinoAddress, throttle=0.5, connected_verbosity=True):
+    def __init__(self, arduinoAddress, throttle=0.5, connected_verbosity=True,
+                 force_direct=False):
         """
         Takes in the arduino IP address and sends commands directly, using udp.
         You have to be on the hera-digi-vm server or hera-node-head to use it.
@@ -35,6 +36,8 @@ class UdpSender():
         connected_verbosity : bool
             If True, will print out a message that the node is not connected.
             upon any action if node_is_connected is False.
+        force_direct : bool
+            If True, will ignore hostname list for direct control.
         """
         self.arduinoAddress = arduinoAddress
         self.throttle = throttle
@@ -42,11 +45,10 @@ class UdpSender():
 
         if arduinoAddress is None or '.' not in arduinoAddress:
             self.node_is_connected = False
-        elif socket.gethostname() in direct_control_hostnames:
+        elif socket.gethostname() in direct_control_hostnames or force_direct:
             self.node_is_connected = True
             # define socket address for binding; necessary for receiving data from Arduino
             self.localSocket = (serverAddress, sendPort)
-
             # Create a UDP socket
             try:
                 self.client_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)

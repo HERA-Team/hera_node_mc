@@ -4,7 +4,7 @@ import socket
 import subprocess
 
 
-ver = '0.3.0'
+ver = '1.0.0'
 try:
     ver = (ver + '-' + subprocess.check_output(['git', 'describe', '--abbrev=8',
            '--always', '--dirty', '--tags']).strip().decode())
@@ -19,7 +19,7 @@ with open(os.path.join(here, 'monitor-control', 'node_control', '__version__.py'
 hostname = socket.gethostname()
 
 scripts = []
-if hostname in ['hera-node-head', 'hera-mobile']:
+if hostname in ['hera-node-head', 'hera-mobile', 'DAVIDs-MBP']:
     scripts = [
                 'monitor-control/scripts/hera_node_data_dump.py',
                 'monitor-control/scripts/hera_node_get_status.py',

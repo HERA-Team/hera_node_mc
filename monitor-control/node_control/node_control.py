@@ -67,14 +67,14 @@ class NodeControl():
 
     Attributes
     ----------
-    sr_stat : str
+    NC_STAT : str
         status hash prefix for redis
-    sr_cmd : str
+    NC_CMD : str
         command hash prefix for redis
     """
 
-    sr_stat = 'status:node:'
-    sr_cmd = 'commands:node:'
+    NC_STAT = 'status:node:'
+    NC_CMD = 'commands:node:'
 
     def __init__(self, nodes, serverAddress="redishost", count=None):
         """
@@ -139,10 +139,10 @@ class NodeControl():
         if count is None:
             count = len(self.status_node_keys)
         for node in self.request_nodes:
-            if len(self.r.hgetall("{}{}".format(self.sr_stat, node))) >= count:
+            if len(self.r.hgetall("{}{}".format(self.NC_STAT, node))) >= count:
                 self.nodes_in_redis.append(node)
 
-    def get_node_senders(self, throttle=0.1):
+    def get_node_senders(self, throttle=0.1, force_direct=False):
         """
         Get udp node class for requested nodes that are in redis.
 
@@ -156,13 +156,16 @@ class NodeControl():
             List of all udp connected request_nodes
         sc_node : str
             String to print connected nodes
+        force_direct : bool
+            If True, will ignore hostnames for direct control
         """
         self.connected_nodes = []
         self.senders = {}
         for node in self.nodes_in_redis:
-            hkey = "{}{}".format(self.sr_stat, node)
+            hkey = "{}{}".format(self.NC_STAT, node)
             ip = self.r.hget(hkey, 'ip')
-            self.senders[node] = udp_sender.UdpSender(ip, throttle=throttle)
+            self.senders[node] = udp_sender.UdpSender(ip, throttle=throttle,
+                                                      force_direct=force_direct)
             if self.senders[node].node_is_connected:
                 self.connected_nodes.append(node)
                 self.r.hset(hkey, 'udp_status', 'connected')
@@ -219,7 +222,7 @@ class NodeControl():
         }
         sensors = {}
         now = time.time()
-        for node, stats in self._get_raw_node_hash("{}*".format(self.sr_stat)).items():
+        for node, stats in self._get_raw_node_hash("{}*".format(self.NC_STAT)).items():
             sensors[node] = {'age': None}
             for key, convfunc in conv_methods.items():
                 try:
@@ -252,7 +255,7 @@ class NodeControl():
         """
         power = {}
         now = time.time()
-        for node, statii in self._get_raw_node_hash("{}*".format(self.sr_cmd)).items():
+        for node, statii in self._get_raw_node_hash("{}*".format(self.NC_CMD)).items():
             power[node] = {}
             for key in list(statii.keys()):
                 if 'relay' in key:
@@ -289,7 +292,7 @@ class NodeControl():
         """
         power = {}
         now = time.time()
-        for node, statii in self._get_raw_node_hash("{}*".format(self.sr_stat)).items():
+        for node, statii in self._get_raw_node_hash("{}*".format(self.NC_STAT)).items():
             power[node] = {'age': None}
             for key in list(statii.keys()):
                 if key == 'timestamp':
@@ -475,7 +478,7 @@ class NodeControl():
         print("Turning {} snap relay for {}".format(command, self.sc_node))
         for node in self.connected_nodes:
             cmdstamp = "{}|{}".format(command, tstamp)
-            self.r.hset("{}{}".format(self.sr_cmd, node), "power_snap_relay_cmd", cmdstamp)
+            self.r.hset("{}{}".format(self.NC_CMD, node), "power_snap_relay_cmd", cmdstamp)
             self.senders[node].power_snap_relay(command)
 
     def power_snap(self, snap_n, command):
@@ -498,7 +501,7 @@ class NodeControl():
         print("Turning {} snap{} for {}".format(command, snap_n, self.sc_node))
         for node in self.connected_nodes:
             cmdstamp = "{}|{}".format(command, tstamp)
-            self.r.hset("{}{}".format(self.sr_cmd, node),
+            self.r.hset("{}{}".format(self.NC_CMD, node),
                         "power_snap_{}_cmd".format(snap_n), cmdstamp)
             self.senders[node].power_snap(snap_n, command)
 
@@ -520,7 +523,7 @@ class NodeControl():
         print("Turning {} fem for {}".format(command, self.sc_node))
         for node in self.connected_nodes:
             cmdstamp = "{}|{}".format(command, tstamp)
-            self.r.hset("{}{}".format(self.sr_cmd, node), "power_fem_cmd", cmdstamp)
+            self.r.hset("{}{}".format(self.NC_CMD, node), "power_fem_cmd", cmdstamp)
             self.senders[node].power_fem(command)
 
     def power_pam(self, command):
@@ -541,7 +544,7 @@ class NodeControl():
         print("Turning {} pam for {}".format(command, self.sc_node))
         for node in self.connected_nodes:
             cmdstamp = "{}|{}".format(command, tstamp)
-            self.r.hset("{}{}".format(self.sr_cmd, node), "power_pam_cmd", cmdstamp)
+            self.r.hset("{}{}".format(self.NC_CMD, node), "power_pam_cmd", cmdstamp)
             self.senders[node].power_pam(command)
 
     def reset(self):
@@ -557,5 +560,5 @@ class NodeControl():
         print("Resetting nodes {}".format(self.sc_node))
         for node in self.connected_nodes:
             cmdstamp = "reset|{}".format(tstamp)
-            self.r.hset("{}{}".format(self.sr_cmd, node), "reset", cmdstamp)
+            self.r.hset("{}{}".format(self.NC_CMD, node), "reset", cmdstamp)
             self.senders[node].reset()

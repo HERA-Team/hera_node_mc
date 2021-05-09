@@ -1,7 +1,7 @@
 #! /usr/bin/env python
 """
 Receives UDP packets from all active Arduinos containing sensor data and status
-information and pushes it up to Redis with status:node:x hash key.
+information and pushes it up to Redis with status:node:x hash key. <status_node>
 """
 import time
 import struct
