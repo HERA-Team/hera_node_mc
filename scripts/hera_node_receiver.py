@@ -4,12 +4,8 @@ Receives UDP packets from all active Arduinos containing sensor data and status
 information and pushes it up to Redis with status:node:x hash key. <hera_node_receiver>
 """
 from __future__ import print_function
-import datetime
-import redis
-import socket
 import sys
-import os
-from node_control import __version__, __package__, status_node, udp_sndrcv
+from node_control import __version__, __package__, status_node, send_receive, node_control
 
 
 def noneify(v, noneval=-99.0):
@@ -22,18 +18,16 @@ def noneify(v, noneval=-99.0):
         return v
 
 
-hostname = socket.gethostname()
-script_redis_key = "status:script:{}:{}".format(hostname, __file__)
+script_redis_key = "status:script:{}:{}".format(send_receive.this_host, __file__)
 heartbeat = 60
 
 # Instantiate redis object connected to redis server running on localhost
-r = redis.StrictRedis(host='redishost')
-r.hmset("version:{}:{}".format(__package__, os.path.basename(__file__)),
-        {"version": __version__,
-         "timestamp": datetime.datetime.now().isoformat()})
+r = node_control.get_redis_client('redishost')
+rkey, rval = node_control.get_service_redis_entry(__file__, __package__, __version__)
+r.hmset(rkey, rval)
 
 # Make udp object
-rcvr = udp_sndrcv.UdpSenderReceiver(udp_sndrcv.serverAddress, sndrcv='receive')
+rcvr = send_receive.UdpSenderReceiver(send_receive.serverAddress, sndrcv='receive')
 
 try:
     while True:

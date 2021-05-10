@@ -3,11 +3,12 @@ import time
 import socket
 
 
-# Define sendPort/rcvPort for socket creation
+# Define UDP sendPort/rcvPort for socket creation
 sendPort = 8888
 rcvPort = 8889
 serverAddress = '0.0.0.0'
-# Define hosts that can directly control the arduinos
+
+# Define hosts that can directly control the arduinos and this host
 direct_control_hostnames = ['hera-mobile', 'hera-node-head']
 this_host = socket.gethostname()
 
@@ -52,9 +53,9 @@ class UdpSenderReceiver():
 
         if arduinoAddress is None or '.' not in arduinoAddress:
             self.node_is_connected = False
-        elif socket.gethostname() in direct_control_hostnames or force_direct:
+        elif this_host in direct_control_hostnames or force_direct:
             self.node_is_connected = True
-            # define socket address for binding; necessary for receiving data from Arduino
+            # define socket address for binding; necessary for communicating with Arduino
             if self.direction == 'send':
                 self.localSocket = (serverAddress, sendPort)
             elif self.direction == 'receive':
