@@ -24,18 +24,18 @@ parser.add_argument('--heartbeat', type=int, default=60, help='redis heartbeat t
 args = parser.parse_args()
 
 
-node_ctrl = node_control.node_control.NodeControl('all', args.redishost)
-node_ctrl.log_service_in_redis(__file__)
+nc = node_control.node_control.NodeControl('all', args.redishost)
+nc.log_service_in_redis(__file__)
 
 # Sends poke signal to Arduinos inside the nodes
 try:
     while True:
-        node_ctrl.r.set(node_ctrl.status_scriptname, "alive", ex=args.heartbeat)
-        node_ctrl.get_nodes_in_redis(count=None)
-        node_ctrl.get_node_senders(throttle=0.02, force_direct=args.force_direct)
-        for node_id in node_ctrl.connected_nodes:
-            node_ctrl.senders[node_id].poke()
-            node_ctrl.r.hset('throttle:node:{}'.format(node_id), 'last_poke_sec', time.time())
+        nc.r.set(nc.status_scriptname, "alive", ex=args.heartbeat)
+        nc.get_nodes_in_redis(count=None)
+        nc.get_node_senders(throttle=0.02, force_direct=args.force_direct)
+        for node_id in nc.connected_nodes:
+            nc.senders[node_id].poke()
+            nc.r.hset('throttle:node:{}'.format(node_id), 'last_poke_sec', time.time())
         time.sleep(args.poke_time_sec)  # actual time is this + poke time (~1s)
 except KeyboardInterrupt:
     print('Interrupted', file=sys.stderr)

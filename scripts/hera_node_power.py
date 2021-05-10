@@ -41,16 +41,16 @@ if args.node.lower() == 'all':
 else:
     nodes2use = [int(x) for x in args.node.split(',')]
 
-n = node_control.NodeControl(nodes2use, serverAddress=args.serverAddress, count=None)
-n.get_node_senders(throttle=args.throttle, force_direct=args.force_direct)
-if not len(n.connected_nodes):
+nc = node_control.NodeControl(nodes2use, serverAddress=args.serverAddress, count=None)
+nc.get_node_senders(throttle=args.throttle, force_direct=args.force_direct)
+if not len(nc.connected_nodes):
     import sys
     print("No nodes are connected.")
     sys.exit()
 
 if args.command == 'node_reset':
     print("Abruptly reseting the arduinos!")
-    n.reset()
+    nc.reset()
 else:
     keystates = {}
     if args.allhw:
@@ -70,38 +70,38 @@ else:
     all_snap = len(snaps_to_set) == 4
 
     if args.command == 'on' and (args.snap_relay or any_snap):
-        n.power_snap_relay('on')
+        nc.power_snap_relay('on')
         keystates['power_snap_relay'] = 'on'
 
     for snap_n in snaps_to_set:
-        n.power_snap(snap_n, args.command)
+        nc.power_snap(snap_n, args.command)
         keystates['power_snap_{}'.format(snap_n)] = args.command
 
     if args.pam:
-        n.power_pam(args.command)
+        nc.power_pam(args.command)
         keystates['power_pam'] = args.command
 
     if args.fem:
-        n.power_fem(args.command)
+        nc.power_fem(args.command)
         keystates['power_fem'] = args.command
 
     if args.command == 'off' and (args.snap_relay or all_snap):
-        n.power_snap_relay('off')
+        nc.power_snap_relay('off')
         keystates['power_snap_relay'] = 'off'
 
     if args.wait_time_in_sec > 0.001:
         time.sleep(args.wait_time_in_sec)
         stale_time = 1.1 * (args.wait_time_in_sec +
-                            len(n.connected_nodes) * len(keystates) * args.throttle)
-        n.check_stale_power_status(stale_time, keystates)
-        if len(n.stale_nodes):
-            print("These nodes aren't updating:  {}".format(n.stale_nodes))
-        updated = sorted(n.connected_nodes)
+                            len(nc.connected_nodes) * len(keystates) * args.throttle)
+        nc.check_stale_power_status(stale_time, keystates)
+        if len(nc.stale_nodes):
+            print("These nodes aren't updating:  {}".format(nc.stale_nodes))
+        updated = sorted(nc.connected_nodes)
         if len(updated):
             print("These nodes are connected:  {}".format(updated))
             for nd in updated:
-                if len(n.wrong_states[nd]):
+                if len(nc.wrong_states[nd]):
                     print("\tCommand not successful:  Node {} -> {} {}"
-                          .format(nd, n.wrong_states[nd], args.command))
+                          .format(nd, nc.wrong_states[nd], args.command))
         else:
             print("No nodes checked.")
