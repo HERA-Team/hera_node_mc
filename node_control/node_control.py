@@ -4,7 +4,7 @@ import dateutil.parser
 import json
 import datetime
 import time
-from . import udp_sender, status_node
+from . import udp_sndrcv, status_node
 
 
 def str2bool(x):
@@ -164,8 +164,9 @@ class NodeControl():
         for node in self.nodes_in_redis:
             hkey = "{}{}".format(self.NC_STAT, node)
             ip = self.r.hget(hkey, 'ip')
-            self.senders[node] = udp_sender.UdpSender(ip, throttle=throttle,
-                                                      force_direct=force_direct)
+            self.senders[node] = udp_sndrcv.UdpSenderReceiver(ip, throttle=throttle,
+                                                              sndrcv='send',
+                                                              force_direct=force_direct)
             if self.senders[node].node_is_connected:
                 self.connected_nodes.append(node)
                 self.r.hset(hkey, 'udp_status', 'connected')

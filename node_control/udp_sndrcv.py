@@ -3,15 +3,15 @@ import time
 import socket
 
 
-# Define sendPort for socket creation
+# Define sendPort/rcvPort for socket creation
 sendPort = 8888
-# Define IP address on which to send commands
+rcvPort = 8889
 serverAddress = '0.0.0.0'
 # Define hosts that can directly control the arduinos
 direct_control_hostnames = ['hera-mobile', 'hera-node-head']
 
 
-class UdpSender():
+class UdpSenderReceiver():
     """
     This class is used for sending UDP commands to Arduino directly.
     Has ability to turn on/off FEM, PAM, relay and SNAPs. Could also
@@ -21,7 +21,10 @@ class UdpSender():
     to False.
     """
 
-    def __init__(self, arduinoAddress, throttle=0.5, connected_verbosity=True,
+    def __init__(self, arduinoAddress,
+                 throttle=0.5,
+                 sndrcv='send',
+                 connected_verbosity=True,
                  force_direct=False):
         """
         Takes in the arduino IP address and sends commands directly, using udp.
@@ -33,6 +36,8 @@ class UdpSender():
             IP address of desired arduino.  If not valid IP or None, mark as not connected.
         throttle : float
             Delay time in seconds
+        sndrcv : str
+            Choose between send or receive
         connected_verbosity : bool
             If True, will print out a message that the node is not connected.
             upon any action if node_is_connected is False.
@@ -48,7 +53,12 @@ class UdpSender():
         elif socket.gethostname() in direct_control_hostnames or force_direct:
             self.node_is_connected = True
             # define socket address for binding; necessary for receiving data from Arduino
-            self.localSocket = (serverAddress, sendPort)
+            if sndrcv == 'send':
+                self.localSocket = (serverAddress, sendPort)
+            elif sndrcv == 'receive':
+                self.localSocket = (serverAddress, rcvPort)
+            else:
+                raise ValueError('Must be send or receive, you provided {}.'.format(sndrcv))
             # Create a UDP socket
             try:
                 self.client_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
