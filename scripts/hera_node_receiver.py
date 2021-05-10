@@ -8,8 +8,8 @@ import sys
 import node_control
 
 
-node_ctrl = node_control.node_control.NodeControl(-1, 'redishost')
-node_ctrl.log_service_in_redis(__file__)
+nc = node_control.node_control.NodeControl(-1, 'redishost')
+nc.log_service_in_redis(__file__)
 heartbeat = 60
 
 # Make udp object
@@ -17,11 +17,11 @@ rcvr = node_control.send_receive.UdpSenderReceiver('receive')
 
 try:
     while True:
-        node_ctrl.r.set(node_ctrl.status_scriptname, "alive", ex=heartbeat)
+        nc.r.set(nc.status_scriptname, "alive", ex=heartbeat)
         # Receive data continuously from the server (Arduino in this case)
         data, addr = rcvr.client_socket.recvfrom(1024)
         data_dict = node_control.status_node.status_node(data, addr)
-        node_ctrl.r.hmset("{}{}".format(NC.NC_STAT, data_dict['node_ID']), data_dict)
+        nc.r.hmset("{}{}".format(nc.NC_STAT, data_dict['node_ID']), data_dict)
 except KeyboardInterrupt:
     print('Interrupted', file=sys.stderr)
     sys.exit(0)

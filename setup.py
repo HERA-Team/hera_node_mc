@@ -2,6 +2,7 @@ from setuptools import setup
 import os
 import socket
 import subprocess
+import glob
 
 
 ver = '1.0.0'
@@ -20,17 +21,7 @@ hostname = socket.gethostname()
 
 scripts = []
 if hostname in ['hera-node-head', 'hera-mobile', 'DAVIDs-MBP']:
-    scripts = [
-                'scripts/hera_node_data_dump.py',
-                'scripts/hera_node_get_status.py',
-                'scripts/hera_node_keep_alive.py',
-                'scripts/hera_node_receiver.py',
-                'scripts/hera_node_serial_dump.py',
-                'scripts/hera_node_serial.py',
-                'scripts/hera_node_power.py',
-                'scripts/hera_service_status.py',
-                'scripts/hera_setup_new_node.py'
-              ]
+    scripts = glob.glob('scripts/*')
 elif hostname == 'hera-snap-head':
     scripts = ['scripts/hera_setup_new_node.py']
 else:
