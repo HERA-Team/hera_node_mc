@@ -16,14 +16,16 @@ parser.add_argument('-r', '--snap-relay', dest='snap_relay', action='store_true'
                     help="Turn on/off the snap-relay "
                     "(redundant if turning on _any_ snap or off _all_ snaps in one call; "
                     "needed when turning off the last snap if done separately)")
-parser.add_argument('-s', '--snaps', action='store_true', help='Turn on/off all the snaps')
+parser.add_argument('-s', '--snaps', action='store_true',
+                    help='Turn on/off all the snaps.  Equivalent to -0 -1 -2 -3')
 parser.add_argument('-0', '--snap0', action='store_true', help='Turn on/off SNAP 0')
 parser.add_argument('-1', '--snap1', action='store_true', help='Turn on/off SNAP 1')
 parser.add_argument('-2', '--snap2', action='store_true', help='Turn on/off SNAP 2')
 parser.add_argument('-3', '--snap3', action='store_true', help='Turn on/off SNAP 3')
 parser.add_argument('-p', '--pam', action='store_true', help='Turn on/off the PAMs')
 parser.add_argument('-f', '--fem', action='store_true', help='Turn on/off the FEMs')
-parser.add_argument('--all', action='store_true', help='Turn on/off all snaps, pams and fems')
+parser.add_argument('--allhw', action='store_true',
+                    help='Turn on/off snaps, pams and fems.  Equivalent to -s -p -f')
 parser.add_argument('--serverAddress', help='Name or redis server', default='redishost')
 parser.add_argument('--throttle', help='Throttle time in sec for udp_sender',
                     type=float, default=0.1)
@@ -47,11 +49,11 @@ if not len(n.connected_nodes):
     sys.exit()
 
 if args.command == 'node_reset':
-    print("Reset abruptly resets the arduinos")
+    print("Abruptly reseting the arduinos!")
     n.reset()
 else:
     keystates = {}
-    if args.all:
+    if args.allhw:
         args.snap_relay = True
         args.snaps = True
         args.pam = True

@@ -22,7 +22,7 @@ else:
 
 print("Attempting to connect to the node control redis database on 'redishost'...")
 sys.stdout.flush()
-nc = node_control.NodeControl(nodes2use, serverAddress=args.serverAddress)
+nc = node_control.NodeControl(nodes2use, serverAddress=args.serverAddress, count=1)
 
 if len(nc.nodes_in_redis):
     nodes_present = nc.nodes_in_redis

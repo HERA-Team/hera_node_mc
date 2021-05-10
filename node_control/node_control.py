@@ -5,7 +5,7 @@ import json
 import datetime
 import time
 from os import path as osp
-from . import send_receive, status_node
+from . import send_receive, status_node, __version__
 
 
 def str2bool(x):
@@ -19,13 +19,6 @@ def str2bool(x):
 def get_redis_client(serverAddress='redishost'):
     connection_pool = redis.ConnectionPool(host=serverAddress, decode_responses=True)
     return redis.StrictRedis(connection_pool=connection_pool, charset='utf-8')
-
-
-def get_service_redis_entry(sfil, spkg, sver):
-    rkey = "version:{}:{}".format(spkg, osp.basename(sfil))
-    rval = {"version": sver,
-            "timestamp": datetime.datetime.now().isoformat()}
-    return rkey, rval
 
 
 def stale_data(age, stale=60.0, show_warning=True):
@@ -120,7 +113,7 @@ class NodeControl():
         status_node_keys : list
             List of the status:node keys
         """
-        if nodes is None:
+        if nodes is None or nodes.lower() == 'all':
             self.request_nodes = list(range(30))
         elif not isinstance(nodes, list):
             self.request_nodes = [nodes]
@@ -132,6 +125,13 @@ class NodeControl():
         self.sc_node = ''
         self.status_node_keys = list(status_node.status_node(None, None).keys())
         self.get_nodes_in_redis(count)
+
+    def log_service_in_redis(self, this_file):
+        rkey = "version:{}:{}".format(__package__, osp.basename(this_file))
+        rval = {"version": __version__,
+                "timestamp": datetime.datetime.now().isoformat()}
+        self.r.hmset(rkey, rval)
+        self.status_scriptname = "status:script:{}:{}".format(send_receive.this_host, this_file)
 
     def get_nodes_in_redis(self, count=None):
         """
