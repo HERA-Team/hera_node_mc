@@ -4,7 +4,7 @@ import socket
 import subprocess
 
 
-ver = '1.0.0'
+ver = '1.0.1'
 try:
     ver = (ver + '-' + subprocess.check_output(['git', 'describe', '--abbrev=8',
            '--always', '--dirty', '--tags']).strip().decode())
