@@ -21,7 +21,7 @@ try:
         # Receive data continuously from the server (Arduino in this case)
         data, addr = rcvr.client_socket.recvfrom(1024)
         data_dict = node_control.status_node.status_node(data, addr)
-        node_ctrl.r.hmset("status:node:{}".format(data_dict['node_ID']), data_dict)
+        node_ctrl.r.hmset("{}{}".format(NC.NC_STAT, data_dict['node_ID']), data_dict)
 except KeyboardInterrupt:
     print('Interrupted', file=sys.stderr)
     sys.exit(0)
