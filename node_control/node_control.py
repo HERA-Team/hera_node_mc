@@ -4,6 +4,7 @@ import dateutil.parser
 import json
 import datetime
 import time
+from os import path as osp
 from . import udp_sndrcv, status_node
 
 
@@ -13,6 +14,18 @@ def str2bool(x):
     :return: bool(x == '1')
     """
     return x == "1"
+
+
+def get_redis_client(serverAddress='redishost'):
+    connection_pool = redis.ConnectionPool(host=serverAddress, decode_responses=True)
+    return redis.StrictRedis(connection_pool=connection_pool, charset='utf-8')
+
+
+def get_service_redis_entry(sfil, spkg, sver):
+    rkey = "version:{}:{}".format(spkg, osp.basename(sfil))
+    rval = {"version": sver,
+            "timestamp": datetime.datetime.now().isoformat()}
+    return rkey, rval
 
 
 def stale_data(age, stale=60.0, show_warning=True):
@@ -113,8 +126,7 @@ class NodeControl():
             self.request_nodes = [nodes]
         else:
             self.request_nodes = nodes
-        connection_pool = redis.ConnectionPool(host=serverAddress, decode_responses=True)
-        self.r = redis.StrictRedis(connection_pool=connection_pool, charset='utf-8')
+        self.r = get_redis_client(serverAddress)
         self.nodes_in_redis = []
         self.connected_nodes = []
         self.sc_node = ''

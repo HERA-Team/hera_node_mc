@@ -24,20 +24,17 @@ def noneify(v, noneval=-99.0):
 
 hostname = socket.gethostname()
 script_redis_key = "status:script:{}:{}".format(hostname, __file__)
-
 heartbeat = 60
 
-# Define rcvPort for socket creation
-serverAddress = '0.0.0.0'
-redisAddress = 'redishost'
-# define socket for binding; necessary for receiving data from Arduino
-
 # Instantiate redis object connected to redis server running on localhost
-r = redis.StrictRedis(host=redisAddress)
+r = redis.StrictRedis(host='redishost')
 r.hmset("version:{}:{}".format(__package__, os.path.basename(__file__)),
         {"version": __version__,
          "timestamp": datetime.datetime.now().isoformat()})
-rcvr = udp_sndrcv.UdpSenderReceiver(serverAddress, sndrcv='receive')
+
+# Make udp object
+rcvr = udp_sndrcv.UdpSenderReceiver(udp_sndrcv.serverAddress, sndrcv='receive')
+
 try:
     while True:
         r.set(script_redis_key, "alive", ex=heartbeat)

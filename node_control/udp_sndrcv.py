@@ -9,6 +9,7 @@ rcvPort = 8889
 serverAddress = '0.0.0.0'
 # Define hosts that can directly control the arduinos
 direct_control_hostnames = ['hera-mobile', 'hera-node-head']
+this_host = socket.gethostname()
 
 
 class UdpSenderReceiver():
@@ -47,15 +48,16 @@ class UdpSenderReceiver():
         self.arduinoAddress = arduinoAddress
         self.throttle = throttle
         self.connected_verbosity = connected_verbosity
+        self.direction = sndrcv
 
         if arduinoAddress is None or '.' not in arduinoAddress:
             self.node_is_connected = False
         elif socket.gethostname() in direct_control_hostnames or force_direct:
             self.node_is_connected = True
             # define socket address for binding; necessary for receiving data from Arduino
-            if sndrcv == 'send':
+            if self.direction == 'send':
                 self.localSocket = (serverAddress, sendPort)
-            elif sndrcv == 'receive':
+            elif self.direction == 'receive':
                 self.localSocket = (serverAddress, rcvPort)
             else:
                 raise ValueError('Must be send or receive, you provided {}.'.format(sndrcv))
