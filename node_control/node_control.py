@@ -117,7 +117,7 @@ class NodeControl():
         status_node_keys : list
             List of the status:node keys
         """
-        if nodes is None or nodes.lower() == 'all':
+        if nodes is None or nodes == 'all':
             self.request_nodes = list(range(MAX_NODES))
         elif not isinstance(nodes, list):
             if int(nodes) < 0:
