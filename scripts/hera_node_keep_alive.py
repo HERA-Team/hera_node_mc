@@ -24,7 +24,7 @@ parser.add_argument('--heartbeat', type=int, default=60, help='redis heartbeat t
 args = parser.parse_args()
 
 
-node_ctrl = node_control.node_control.NodeControl(None, args.redishost, count=None)
+node_ctrl = node_control.node_control.NodeControl('all', args.redishost)
 node_ctrl.log_service_in_redis(__file__)
 
 # Sends poke signal to Arduinos inside the nodes

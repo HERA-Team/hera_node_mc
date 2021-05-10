@@ -8,6 +8,9 @@ from os import path as osp
 from . import send_receive, status_node, __version__
 
 
+MAX_NODES = 30
+
+
 def str2bool(x):
     """
     Convert the string `x` to a boolean.
@@ -91,6 +94,7 @@ class NodeControl():
         nodes : int, list of int or None
             ID numbers of the nodes with which this instance of NodeControl will interact.
             If None, it will check them all (0-29).  If not list, it will make a list.
+            If a negative number, it will skip looking in redis.
         serverAddress : str
             The hostname, or dotted quad IP address, of the machine running the node control and
             monitoring redis server
@@ -114,9 +118,12 @@ class NodeControl():
             List of the status:node keys
         """
         if nodes is None or nodes.lower() == 'all':
-            self.request_nodes = list(range(30))
+            self.request_nodes = list(range(MAX_NODES))
         elif not isinstance(nodes, list):
-            self.request_nodes = [nodes]
+            if int(nodes) < 0:
+                self.request_nodes = None
+            else:
+                self.request_nodes = [nodes]
         else:
             self.request_nodes = nodes
         self.r = get_redis_client(serverAddress)
@@ -148,6 +155,8 @@ class NodeControl():
         nodes_in_redis : list
             List of all request_nodes in redis with >count status fields
         """
+        if self.request_nodes is None:
+            return
         if count is None:
             count = len(self.status_node_keys)
         for node in self.request_nodes:
@@ -177,7 +186,6 @@ class NodeControl():
             hkey = "{}{}".format(self.NC_STAT, node)
             ip = self.r.hget(hkey, 'ip')
             self.senders[node] = send_receive.UdpSenderReceiver(ip, throttle=throttle,
-                                                                sndrcv='send',
                                                                 force_direct=force_direct)
             if self.senders[node].node_is_connected:
                 self.connected_nodes.append(node)
