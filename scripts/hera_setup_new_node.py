@@ -44,9 +44,6 @@ if args.check_only:
     args.reset_dnsmasq = False
 
 hostname = socket.gethostname()
-if hostname == 'hera-mobile':  # RFI testing machine, so want to write the current node.
-    with open('CurrentNode.txt', 'w') as fp:
-        fp.write(str(args.node_num))
 
 # Read files and get macs and ips
 hosts = hosts_ethers.HostsEthers('/etc/hosts')
@@ -86,6 +83,21 @@ if hostname in ['hera-node-head', 'hera-mobile']:
     r.hset(rkey, 'ip', rd['ip'])
     r.hset(rkey, 'mac', rd['mac'])
     r.hset(rkey, 'node_ID', args.node_num)
+
+if hostname == 'hera-mobile':  # RFI testing machine, so want to write the current node info
+    with open('CurrentNode.txt', 'w') as fp:
+        print("{}".format(args.node_num), file=fp)
+        print('NCM: {}'.format(args.ncm), file=fp)
+        for i in range(4):
+            print("SNAP:  {}".format(snaps[i]['node']))
+            for k in ['sn', 'mac', 'ip']:
+                print("\t{}:  {}".format(k, snaps[i][i]))
+        print("Arduino:  {}".format(rd['node']))
+        for k in ['sn', 'mac', 'ip']:
+            print("\t{}:  {}".format(k, rd[k]))
+        print("White Rabbit: {}".format(wr['node']))
+        for k in ['sn', 'mac', 'ip']:
+            print("\t{}:  {}".format(k, wr[k]))
 
 hosts.rewrite_file(check_only=args.check_only)
 if args.reset_dnsmasq:

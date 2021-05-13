@@ -317,6 +317,7 @@ class NodeControl():
             power[node] = {'age': None}
             for key in list(statii.keys()):
                 if key == 'timestamp':
+                    power[node]['timestamp'] = float(statii[key])
                     try:
                         power[node]['age'] = now - float(statii[key])
                     except ValueError:
