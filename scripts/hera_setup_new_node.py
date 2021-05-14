@@ -87,17 +87,18 @@ if hostname in ['hera-node-head', 'hera-mobile']:
 if hostname == 'hera-mobile':  # RFI testing machine, so want to write the current node info
     with open('CurrentNode.txt', 'w') as fp:
         print("{}".format(args.node_num), file=fp)
+        print("Node: {}".format(args.node_num), file=fp)
         print('NCM: {}'.format(args.ncm), file=fp)
         for i in range(4):
-            print("SNAP:  {}".format(snaps[i]['node']))
+            print("SNAP: {}".format(snaps[i]['node']), file=fp)
             for k in ['sn', 'mac', 'ip']:
-                print("\t{}:  {}".format(k, snaps[i][i]))
-        print("Arduino:  {}".format(rd['node']))
+                print("\t{}:  {}".format(k, snaps[i][k]), file=fp)
+        print("Arduino: {}".format(rd['node']), file=fp)
         for k in ['sn', 'mac', 'ip']:
-            print("\t{}:  {}".format(k, rd[k]))
-        print("White Rabbit: {}".format(wr['node']))
+            print("\t{}: {}".format(k, rd[k]), file=fp)
+        print("White Rabbit: {}".format(wr['node']), file=fp)
         for k in ['sn', 'mac', 'ip']:
-            print("\t{}:  {}".format(k, wr[k]))
+            print("\t{}: {}".format(k, wr[k]), file=fp)
 
 hosts.rewrite_file(check_only=args.check_only)
 if args.reset_dnsmasq:
