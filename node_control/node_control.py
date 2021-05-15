@@ -195,7 +195,7 @@ class NodeControl():
         if len(self.connected_nodes) == 1:
             self.sc_node = "Node {}".format(self.connected_nodes[0])
         elif len(self.connected_nodes) > 1:
-            self.sc_node = "Nodes {}".format(', '.join(self.connected_nodes))
+            self.sc_node = "Nodes {}".format(', '.join([str(x) for x in self.connected_nodes]))
 
     def _get_raw_node_hash(self, this_key):
         """
