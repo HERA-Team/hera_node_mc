@@ -48,7 +48,7 @@ class HostsEthers:
                 for line in self.file_contents_by_line:
                     print("{}".format(line), file=fp)
 
-    def update_id(self, id, val, append_it=False):
+    def update_id(self, id, val, append_it=False, verbose=False):
         """
         Take an id (mac or ip) and update its value or write new line if id not
         present.  This updates the attributes by_id and by_alias, as well as the
@@ -61,26 +61,31 @@ class HostsEthers:
         val : str
             Value to be associated with that id.
         """
+        self.updated_file = False
         if append_it:
             if isinstance(val, str):
-                print("Appending {} to {}".format(val, self.by_id[id]))
+                if verbose:
+                    print("Appending {} to {}".format(val, self.by_id[id]))
                 self.by_id[id].append(val)
             else:
                 raise ValueError("must append a str")
         else:
             if isinstance(val, str):
                 val = val.split()
-            print("Replacing {} by {}".format(self.by_id[id], val))
+            if verbose:
+                print("Replacing {} by {}".format(self.by_id[id], val))
             self.by_id[id] = val
         for this_alias, this_id in self.by_alias.items():
             if this_id == id:
-                print("Removing alias {} for {}".format(this_alias, id))
+                if verbose:
+                    print("Removing alias {} for {}".format(this_alias, id))
                 del(self.by_alias[this_alias])
         for d in self.by_id[id]:
             self.by_alias[d] = id
         new_contents = []
         for line in self.file_contents_by_line:
             if line.startswith(id):
+                self.updated_file = True
                 line = "{} {}".format(id, ' '.join(self.by_id[id]))
             new_contents.append(line)
         self.file_contents_by_line = new_contents
