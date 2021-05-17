@@ -288,8 +288,14 @@ class NodeControl():
                 else:
                     this_key = key.split('_')[1]
                 stad = statii[key].split('|')
-                power[node][this_key] = {'timestamp': float(stad[1]),
-                                         'age': now - float(stad[1]),
+                try:
+                    this_timestamp = float(stad[1])
+                    this_age = now - this_timestamp
+                except IndexError:
+                    this_timestamp = -99
+                    this_age = -99
+                power[node][this_key] = {'timestamp': this_timestamp,
+                                         'age': this_age,
                                          'command': stad[0]}
         return power
 
@@ -359,6 +365,14 @@ class NodeControl():
                 for key, cmd in keystates.items():
                     if status[key] != (cmd == 'on'):
                         self.wrong_states[node].append(key)
+
+    def verify_state_command(self, hw):
+        """
+        Check the state of hardware - command and status.
+        """
+        cmd = self.get_power_command_list()
+        stat = self.get_power_status()
+        print(cmd, stat)
 
     def get_wr_status(self):
         """
