@@ -60,7 +60,7 @@ if hostname in ['hera-snap-head', 'hera-mobile']:
         snaps[i]['sn'] = 'SNP{}{:06d}'.format(snap_rev[i], getattr(args, 'snap{}'.format(i)))
         snaps[i]['mac'] = ethers.by_alias[snaps[i]['sn']]
         snaps[i]['ip'] = hosts.by_alias[snaps[i]['sn']]
-        hosts.update_id(snaps[i]['ip'], '{}\t{}'.format(snaps[i]['sn'], snaps[i]['node']))
+        hosts.update_id(snaps[i]['ip'], '{}  {}'.format(snaps[i]['sn'], snaps[i]['node']))
 if hostname in ['hera-node-head', 'hera-mobile']:
     ncm = 'NCM{:02d}'.format(args.ncm)
     # Set up arduino
@@ -68,14 +68,14 @@ if hostname in ['hera-node-head', 'hera-mobile']:
     rd['sn'] = 'arduino{}'.format(RDmap[ncm][2:])
     rd['mac'] = ethers.by_alias[rd['sn']]
     rd['ip'] = hosts.by_alias[rd['sn']]
-    hosts.update_id(rd['ip'], '{}\t{}'.format(rd['sn'], rd['node']))
+    hosts.update_id(rd['ip'], '{}  {}'.format(rd['sn'], rd['node']))
 
     # Set up white rabbit
     wr = {'node': 'heraNode{}wr'.format(args.node_num)}
     wr['sn'] = WRmap[ncm]
     wr['mac'] = ethers.by_alias[wr['sn']]
     wr['ip'] = hosts.by_alias[wr['sn']]
-    hosts.update_id(wr['ip'], '{}\t{}'.format(wr['sn'], wr['node']))
+    hosts.update_id(wr['ip'], '{}  {}'.format(wr['sn'], wr['node']))
 
     connection_pool = redis.ConnectionPool(host='redishost', decode_responses=True)
     r = redis.StrictRedis(connection_pool=connection_pool, charset='utf-8')

@@ -48,7 +48,7 @@ class HostsEthers:
                 for line in self.file_contents_by_line:
                     print("{}".format(line), file=fp)
 
-    def update_id(self, id, val):
+    def update_id(self, id, val, append_it=False):
         """
         Take an id (mac or ip) and update its value or write new line if id not
         present.  This updates the attributes by_id and by_alias, as well as the
@@ -61,20 +61,28 @@ class HostsEthers:
         val : str
             Value to be associated with that id.
         """
-        if id in self.by_id.keys():
-            print("Updating {}:   <{}>   -->  <{}>".format(id, self.by_id[id], val))
+        if append_it:
+            if isinstance(val, str):
+                print("Appending {} to {}".format(val, self.by_id[id]))
+                self.by_id[id].append(val)
+            else:
+                raise ValueError("must append a str")
         else:
-            print("Adding:  {}  {}".format(id, val))
-        self.by_id[id] = val
-        for d in val.split():
+            if isinstance(val, str):
+                val = val.split()
+            print("Replacing {} by {}".format(self.by_id[id], val))
+            self.by_id[id] = val
+        for this_alias, this_id in self.by_alias.items():
+            if this_id == id:
+                print("Removing alias {} for {}".format(this_alias, id))
+                del(self.by_alias[this_alias])
+        for d in self.by_id[id]:
             self.by_alias[d] = id
         new_contents = []
         for line in self.file_contents_by_line:
-            data = line.split()
-            if data == id:
-                new_contents.append("{}\t{}".format(id, val))
-            else:
-                new_contents.append(line)
+            if line.startswith(id):
+                line = "{} {}".format(id, ' '.join(self.by_id[id]))
+            new_contents.append(line)
         self.file_contents_by_line = new_contents
 
     def archive_file(self, path_to_archive='.', date_tag="%y%m%d-%H%M"):
@@ -95,7 +103,7 @@ class HostsEthers:
 
     def parse_file(self):
         """
-        Read in the hosts or ethers file and warn on error.
+        Read in the hosts or ethers file and warn on duplicates.
 
         Attributes
         ----------
