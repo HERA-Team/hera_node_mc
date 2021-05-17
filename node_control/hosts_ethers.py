@@ -95,7 +95,7 @@ class HostsEthers:
 
     def parse_file(self):
         """
-        Read in the hosts or ethers file and send an e-mail on error.
+        Read in the hosts or ethers file and warn on error.
 
         Attributes
         ----------
@@ -115,7 +115,7 @@ class HostsEthers:
                 warnings.warn(msg)
             self.by_id[data[0]] = data[1:]
             for d in data[1:]:
-                if d in self.by_id.keys():
-                    msg = '{} is duplicated in {}'.format(data[0], self.filename)
+                if d in self.by_alias.keys():
+                    msg = '{} is duplicated in {}'.format(d, self.filename)
                     warnings.warn(msg)
                 self.by_alias[d] = data[0]
