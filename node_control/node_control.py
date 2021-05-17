@@ -274,11 +274,15 @@ class NodeControl():
             reset
         Format of values for all is on/off/reset|time(unix)
         """
+        valid = ['power_snap_relay_cmd', 'power_snap_0_cmd', 'power_snap_1_cmd', 'power_snap_2_cmd',
+                 'power_snap_3_cmd', 'power_fem_cmd', 'power_pam_cmd', 'reset']
         power = {}
         now = time.time()
         for node, statii in self._get_raw_node_hash("{}*".format(self.NC_CMD)).items():
             power[node] = {}
             for key in list(statii.keys()):
+                if key not in valid:
+                    continue
                 if 'relay' in key:
                     this_key = 'snap_relay'
                 elif 'snap' in key:

@@ -90,6 +90,8 @@ else:
         keystates['power_snap_relay'] = 'off'
 
     if args.wait_time_in_sec > 0.001:
+        if args.wait_time_in_sec > 5:
+            print("Waiting {} seconds to check if successful.".format(args.wait_time_in_sec))
         time.sleep(args.wait_time_in_sec)
         stale_time = 1.1 * (args.wait_time_in_sec +
                             len(nc.connected_nodes) * len(keystates) * args.throttle)
