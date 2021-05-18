@@ -84,6 +84,7 @@ class NodeControl():
 
     NC_STAT = 'status:node:'
     NC_CMD = 'commands:node:'
+    hw = ['snap_relay', 'snap_0', 'snap_1', 'snap_2', 'snap_3', 'fem', 'pam']
 
     def __init__(self, nodes, serverAddress="redishost", count=None):
         """
@@ -274,8 +275,7 @@ class NodeControl():
             reset
         Format of values for all is on/off/reset|time(unix)
         """
-        valid = ['power_snap_relay_cmd', 'power_snap_0_cmd', 'power_snap_1_cmd', 'power_snap_2_cmd',
-                 'power_snap_3_cmd', 'power_fem_cmd', 'power_pam_cmd', 'reset']
+        valid = ["power_{}_cmd".format(x) for x in self.hw] + ['reset']
         power = {}
         now = time.time()
         for node, statii in self._get_raw_node_hash("{}*".format(self.NC_CMD)).items():
@@ -370,13 +370,47 @@ class NodeControl():
                     if status[key] != (cmd == 'on'):
                         self.wrong_states[node].append(key)
 
-    def verify_state_command(self, hw):
+    def verify_state_command(self, verify_hw, verify_cmd):
         """
         Check the state of hardware - command and status.
+
+        Parameters
+        ----------
+        verify_hw : str or list
+            Hardware to verify (full list is self.hw),
+            if 'all', use full list.  Else will split(',') a str
+        verify_cmd : str or list
+            state to verify, if list must match len of verify_hw
+            either on or off
         """
-        cmd = self.get_power_command_list()
-        stat = self.get_power_status()
-        print(cmd, stat)
+        # Prep the lists.
+        if verify_hw == 'all':
+            verify_hw = self.hw
+        elif isinstance(verify_hw, str):
+            verify_hw = verify_hw.split(',')
+        verify_hw = [x.lower() for x in verify_hw]
+        if isinstance(verify_cmd, str):
+            verify_cmd = [verify_cmd] * len(verify_hw)
+        elif isinstance(verify_cmd, list):
+            if len(verify_cmd) != len(verify_hw):
+                raise ValueError("Node control verify hw and cmd don't match")
+        verify_cmd = [x.lower() for x in verify_cmd]
+
+        # Get from redis
+        pcmd = self.get_power_command_list()
+        pstat = self.get_power_status()
+
+        # Verify
+        verification = {}
+        for vhw, vcmd in zip(verify_hw, verify_cmd):
+            verification[vhw] = {}
+            stathw = 'power_{}'.format(vhw)
+            verification[vhw]['time'] = pcmd[vhw]['timestamp'] > pstat['timestamp']
+            verification[vhw]['cmd'] = pcmd[vhw] == vcmd
+            pstatvhw = 'on' if pstat[stathw] else 'off'
+            verification[vhw]['stat'] = pstatvhw == vcmd
+            verification[vhw]['agree'] = pcmd[vhw] == pstatvhw
+        return verification
 
     def get_wr_status(self):
         """
