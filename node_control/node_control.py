@@ -370,14 +370,12 @@ class NodeControl():
                     if status[key] != (cmd == 'on'):
                         self.wrong_states[node].append(key)
 
-    def verify_states(self, node, verify_hw, verify_cmd):
+    def verify_states(self, verify_hw, verify_cmd):
         """
-        Check the state of hardware - command and status.
+        Check the state of hardware in nodes - command and status.
 
         Parameters
         ----------
-        node : int
-            Node to verify.
         verify_hw : str or list
             Hardware to verify (full list is self.hw),
             if 'all', use full list.  Else will split(',') a str
@@ -399,29 +397,29 @@ class NodeControl():
         verify_cmd = [x.lower() for x in verify_cmd]
 
         # Get from redis
-        pcmd = self.get_power_command_list()[node]
-        pstat = self.get_power_status()[node]
+        pcmd = self.get_power_command_list()
+        pstat = self.get_power_status()
 
-        print("NC405:  pcmd:  ",pcmd)
-        print("NC406:  pstat:  ",pstat)
         # Verify
         verification = {}
-        for vhw, vcmd in zip(verify_hw, verify_cmd):
-            verification[vhw] = {}
-            shw = 'power_{}'.format(vhw)
-            chw = vhw.replace('_', '') if 'relay' not in vhw else vhw
-            try:
-                verification[vhw]['time'] = pcmd[chw]['timestamp'] > pstat['timestamp']
-            except KeyError:
-                verification[vhw]['time'] = False
-            try:
-                pcmdvhw = pcmd[chw]['cmd']
-            except KeyError:
-                pcmdvhw = None
-            verification[vhw]['cmd'] = pcmdvhw == vcmd
-            pstatvhw = 'on' if pstat[shw] else 'off'
-            verification[vhw]['stat'] = pstatvhw == vcmd
-            verification[vhw]['agree'] = pcmdvhw == pstatvhw
+        for node in self.nodes_in_redis:
+            verification[node] = {}
+            for vhw, vcmd in zip(verify_hw, verify_cmd):
+                verification[node][vhw] = {}
+                shw = 'power_{}'.format(vhw)
+                chw = vhw.replace('_', '') if 'relay' not in vhw else vhw
+                try:
+                    verification[node][vhw]['time'] = pcmd[chw]['timestamp'] > pstat['timestamp']
+                except KeyError:
+                    verification[node][vhw]['time'] = False
+                try:
+                    pcmdvhw = pcmd[chw]['cmd']
+                except KeyError:
+                    pcmdvhw = None
+                verification[node][vhw]['cmd'] = pcmdvhw == vcmd
+                pstatvhw = 'on' if pstat[shw] else 'off'
+                verification[node][vhw]['stat'] = pstatvhw == vcmd
+                verification[node][vhw]['agree'] = pcmdvhw == pstatvhw
         return verification
 
     def get_wr_status(self):
