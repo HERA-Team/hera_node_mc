@@ -418,7 +418,7 @@ class NodeControl():
                 except KeyError:
                     pcmdvhw = None
                 verification[node][vhw]['cmd'] = pcmdvhw == vcmd
-                pstatvhw = 'on' if pstat[shw] else 'off'
+                pstatvhw = 'on' if pstat[node][shw] else 'off'
                 verification[node][vhw]['stat'] = pstatvhw == vcmd
                 verification[node][vhw]['agree'] = pcmdvhw == pstatvhw
         return verification
