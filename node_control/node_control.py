@@ -412,7 +412,7 @@ class NodeControl():
                     verification[node][vhw]['time'] = (pcmd[node][chw]['timestamp'] <
                                                        pstat[node]['timestamp'])
                     print("NC415:time  ",pcmd[node][chw]['timestamp'],pstat[node]['timestamp'])
-                    print(nhw,vcmd)
+                    print(vhw,vcmd)
                 except KeyError:
                     verification[node][vhw]['time'] = False
                 try:
