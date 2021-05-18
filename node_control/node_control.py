@@ -409,7 +409,7 @@ class NodeControl():
         for vhw, vcmd in zip(verify_hw, verify_cmd):
             verification[vhw] = {}
             shw = 'power_{}'.format(vhw)
-            chw = vhw.replace('_', '')
+            chw = vhw.replace('_', '') if 'relay' not in vhw else vhw
             verification[vhw]['time'] = pcmd[chw]['timestamp'] > pstat['timestamp']
             verification[vhw]['cmd'] = pcmd[chw] == vcmd
             pstatvhw = 'on' if pstat[shw] else 'off'
