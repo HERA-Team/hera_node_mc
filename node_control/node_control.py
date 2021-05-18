@@ -402,6 +402,8 @@ class NodeControl():
         pcmd = self.get_power_command_list()[node]
         pstat = self.get_power_status()[node]
 
+        print("NC405:  pcmd:  ",pcmd)
+        print("NC406:  pstat:  ",pstat)
         # Verify
         verification = {}
         for vhw, vcmd in zip(verify_hw, verify_cmd):
