@@ -553,7 +553,7 @@ class NodeControl():
                 counter = len(self.connected_nodes)
                 verdict = self.verify_states(['snap_relay'], ['on'])
                 for node in self.connected_nodes:
-                    if verdict[node][verify_mode]:
+                    if verdict[node]['snap_relay'][verify_mode]:
                         counter -= 1
                 if not counter:
                     return
