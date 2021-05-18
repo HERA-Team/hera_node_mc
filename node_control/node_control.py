@@ -409,7 +409,7 @@ class NodeControl():
         for vhw, vcmd in zip(verify_hw, verify_cmd):
             verification[vhw] = {}
             shw = 'power_{}'.format(vhw)
-            chw = vhw.remove('_')
+            chw = vhw.replace('_', '')
             verification[vhw]['time'] = pcmd[chw]['timestamp'] > pstat['timestamp']
             verification[vhw]['cmd'] = pcmd[chw] == vcmd
             pstatvhw = 'on' if pstat[shw] else 'off'
