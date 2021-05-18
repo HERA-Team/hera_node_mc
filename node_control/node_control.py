@@ -409,11 +409,12 @@ class NodeControl():
                 shw = 'power_{}'.format(vhw)
                 chw = vhw.replace('_', '') if 'relay' not in vhw else vhw
                 try:
-                    verification[node][vhw]['time'] = pcmd[chw]['timestamp'] > pstat['timestamp']
+                    verification[node][vhw]['time'] = (pcmd[node][chw]['timestamp'] >
+                                                       pstat[node]['timestamp'])
                 except KeyError:
                     verification[node][vhw]['time'] = False
                 try:
-                    pcmdvhw = pcmd[chw]['cmd']
+                    pcmdvhw = pcmd[node][chw]['cmd']
                 except KeyError:
                     pcmdvhw = None
                 verification[node][vhw]['cmd'] = pcmdvhw == vcmd
