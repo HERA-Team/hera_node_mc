@@ -408,12 +408,13 @@ class NodeControl():
         verification = {}
         for vhw, vcmd in zip(verify_hw, verify_cmd):
             verification[vhw] = {}
-            stathw = 'power_{}'.format(vhw)
-            verification[vhw]['time'] = pcmd[vhw]['timestamp'] > pstat['timestamp']
-            verification[vhw]['cmd'] = pcmd[vhw] == vcmd
-            pstatvhw = 'on' if pstat[stathw] else 'off'
+            shw = 'power_{}'.format(vhw)
+            chw = vhw.remove('_')
+            verification[vhw]['time'] = pcmd[chw]['timestamp'] > pstat['timestamp']
+            verification[vhw]['cmd'] = pcmd[chw] == vcmd
+            pstatvhw = 'on' if pstat[shw] else 'off'
             verification[vhw]['stat'] = pstatvhw == vcmd
-            verification[vhw]['agree'] = pcmd[vhw] == pstatvhw
+            verification[vhw]['agree'] = pcmd[chw] == pstatvhw
         return verification
 
     def get_wr_status(self):
