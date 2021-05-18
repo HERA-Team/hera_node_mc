@@ -370,12 +370,14 @@ class NodeControl():
                     if status[key] != (cmd == 'on'):
                         self.wrong_states[node].append(key)
 
-    def verify_state_command(self, verify_hw, verify_cmd):
+    def verify_states(self, node, verify_hw, verify_cmd):
         """
         Check the state of hardware - command and status.
 
         Parameters
         ----------
+        node : int
+            Node to verify.
         verify_hw : str or list
             Hardware to verify (full list is self.hw),
             if 'all', use full list.  Else will split(',') a str
@@ -397,8 +399,8 @@ class NodeControl():
         verify_cmd = [x.lower() for x in verify_cmd]
 
         # Get from redis
-        pcmd = self.get_power_command_list()
-        pstat = self.get_power_status()
+        pcmd = self.get_power_command_list()[node]
+        pstat = self.get_power_status()[node]
 
         # Verify
         verification = {}
