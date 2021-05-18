@@ -88,22 +88,3 @@ else:
     if args.command == 'off' and (args.snap_relay or all_snap):
         nc.power_snap_relay('off')
         keystates['power_snap_relay'] = 'off'
-
-    if args.wait_time_in_sec > 0.001:
-        if args.wait_time_in_sec > 5:
-            print("Waiting {} seconds to check if successful.".format(args.wait_time_in_sec))
-        time.sleep(args.wait_time_in_sec)
-        stale_time = 1.1 * (args.wait_time_in_sec +
-                            len(nc.connected_nodes) * len(keystates) * args.throttle)
-        nc.check_stale_power_status(stale_time, keystates)
-        if len(nc.stale_nodes):
-            print("These nodes aren't updating:  {}".format(nc.stale_nodes))
-        updated = sorted(nc.connected_nodes)
-        if len(updated):
-            print("These nodes are connected:  {}".format(updated))
-            for nd in updated:
-                if len(nc.wrong_states[nd]):
-                    print("\tCommand not successful:  Node {} -> {} {}"
-                          .format(nd, nc.wrong_states[nd], args.command))
-        else:
-            print("No nodes checked.")

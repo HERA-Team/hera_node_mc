@@ -336,40 +336,6 @@ class NodeControl():
                     power[node][key] = str2bool(statii[key])
         return power
 
-    def check_stale_power_status(self, stale=30.0, keystates={}):
-        """
-        Checks the age of node status and returns stale ones.
-
-        Parameters
-        ----------
-        stale : float
-            Time in seconds for something to be considered stale.
-        keystates : dict
-            Dictionary of requests/command
-
-        Attributes
-        ----------
-        stale_nodes : list
-            List of nodes that came back stale.
-        active_nodes : dict
-            Active nodes with status
-        wrong_states : dict
-            Incorrect states relative to commanded in keystates
-        """
-        pwr = self.get_power_status()
-        self.stale_nodes = []
-        self.active_nodes = {}
-        self.wrong_states = {}
-        for node, status in pwr.items():
-            self.wrong_states[node] = []
-            if stale_data(status['age'], stale, False):
-                self.stale_nodes.append(node)
-            else:
-                self.active_nodes[node] = status
-                for key, cmd in keystates.items():
-                    if status[key] != (cmd == 'on'):
-                        self.wrong_states[node].append(key)
-
     def verify_states(self, verify_hw, verify_cmd):
         """
         Check the state of hardware in nodes - command and status.
@@ -382,6 +348,12 @@ class NodeControl():
         verify_cmd : str or list
             state to verify, if list must match len of verify_hw
             either on or off
+
+        Returns
+        -------
+        dict
+            keyed on node, and mode: 'time', 'agree', 'cmd', 'stat', 'all'
+            each one is a bool
         """
         # Prep the lists.
         if verify_hw == 'all':
@@ -391,9 +363,8 @@ class NodeControl():
         verify_hw = [x.lower() for x in verify_hw]
         if isinstance(verify_cmd, str):
             verify_cmd = [verify_cmd] * len(verify_hw)
-        elif isinstance(verify_cmd, list):
-            if len(verify_cmd) != len(verify_hw):
-                raise ValueError("Node control verify hw and cmd don't match")
+        elif len(verify_cmd) != len(verify_hw):
+            raise ValueError("Node control verify hw and cmd lengths don't match")
         verify_cmd = [x.lower() for x in verify_cmd]
 
         # Get from redis
@@ -402,7 +373,7 @@ class NodeControl():
 
         # Verify
         verification = {}
-        for node in self.nodes_in_redis:
+        for node in self.connected_nodes:
             verification[node] = {}
             for vhw, vcmd in zip(verify_hw, verify_cmd):
                 verification[node][vhw] = {}
@@ -421,6 +392,11 @@ class NodeControl():
                 pstatvhw = 'on' if pstat[node][shw] else 'off'
                 verification[node][vhw]['stat'] = pstatvhw == vcmd
                 verification[node][vhw]['agree'] = pcmdvhw == pstatvhw
+                verification[node][vhw]['all'] = True
+                for thisv in ['time', 'cmd', 'stat', 'cmd']:
+                    if not verification[node][vhw][thisv]:
+                        verification[node][vhw]['all'] = False
+                        break
         return verification
 
     def get_wr_status(self):
@@ -544,7 +520,7 @@ class NodeControl():
                         wrstat[node][key] = None
         return wrstat
 
-    def power_snap_relay(self, command):
+    def power_snap_relay(self, command, hold_for_verify=False, verify_mode='all'):
         """
         Controls the node snap relay via arduino.
 
@@ -555,6 +531,11 @@ class NodeControl():
         ---------
         command : str
             on or off
+        hold_for_verify : bool or int
+            Since the snap_relay has to be on first, you can hold that many seconds until
+            it is verified that it is on (only on, not off)
+        verify_mode : str
+            One of the keys in the verification dict
         """
         if not len(self.connected_nodes):
             print("No nodes connected.")
@@ -565,6 +546,20 @@ class NodeControl():
             cmdstamp = "{}|{}".format(command, tstamp)
             self.r.hset("{}{}".format(self.NC_CMD, node), "power_snap_relay_cmd", cmdstamp)
             self.senders[node].power_snap_relay(command)
+        if command == 'on' and isinstance(hold_for_verify, int):
+            started = time.time()
+            age = time.time() - started
+            while age < hold_for_verify:
+                counter = len(self.connected_nodes)
+                verdict = self.verify_states(['snap_relay'], ['on'])
+                for node in self.connected_nodes:
+                    if verdict[node][verify_mode]:
+                        counter -= 1
+                if not counter:
+                    return
+                time.sleep(1)
+                age = time.time() - started
+        raise RuntimeError('Timeout on snap_relay')
 
     def power_snap(self, snap_n, command):
         """
