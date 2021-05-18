@@ -422,7 +422,7 @@ class NodeControl():
                 print("cmd:  ",pcmdvhw,vcmd)
                 pstatvhw = 'on' if pstat[node][shw] else 'off'
                 verification[node][vhw]['stat'] = pstatvhw == vcmd
-                print("stat:  ",pstatvhwhw,vcmd)
+                print("stat:  ",pstatvhw,vcmd)
                 verification[node][vhw]['agree'] = pcmdvhw == pstatvhw
                 print("agree:  ",pcmdvhw, pstatvhw)
         return verification
