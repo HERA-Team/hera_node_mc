@@ -411,10 +411,14 @@ class NodeControl():
             shw = 'power_{}'.format(vhw)
             chw = vhw.replace('_', '') if 'relay' not in vhw else vhw
             verification[vhw]['time'] = pcmd[chw]['timestamp'] > pstat['timestamp']
-            verification[vhw]['cmd'] = pcmd[chw] == vcmd
+            try:
+                pcmdvhw = pcmd[chw]
+            except KeyError:
+                pcmdvhw = None
+            verification[vhw]['cmd'] = pcmdvhw == vcmd
             pstatvhw = 'on' if pstat[shw] else 'off'
             verification[vhw]['stat'] = pstatvhw == vcmd
-            verification[vhw]['agree'] = pcmd[chw] == pstatvhw
+            verification[vhw]['agree'] = pcmdvhw == pstatvhw
         return verification
 
     def get_wr_status(self):
