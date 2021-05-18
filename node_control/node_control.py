@@ -520,7 +520,7 @@ class NodeControl():
                         wrstat[node][key] = None
         return wrstat
 
-    def power_snap_relay(self, command, hold_for_verify=False, verify_mode='all'):
+    def power_snap_relay(self, command, hold_for_verify=300, verify_mode='all'):
         """
         Controls the node snap relay via arduino.
 
@@ -559,7 +559,7 @@ class NodeControl():
                     return
                 time.sleep(1)
                 age = time.time() - started
-        raise RuntimeError('Timeout on snap_relay')
+            raise RuntimeError('Timeout on snap_relay')
 
     def power_snap(self, snap_n, command):
         """
