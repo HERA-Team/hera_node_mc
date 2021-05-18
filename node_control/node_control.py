@@ -411,8 +411,6 @@ class NodeControl():
                 try:
                     verification[node][vhw]['time'] = (pcmd[node][chw]['timestamp'] <
                                                        pstat[node]['timestamp'])
-                    print("NC415:time  ",pcmd[node][chw]['timestamp'],pstat[node]['timestamp'])
-                    print(vhw,vcmd)
                 except KeyError:
                     verification[node][vhw]['time'] = False
                 try:
@@ -420,12 +418,9 @@ class NodeControl():
                 except KeyError:
                     pcmdvhw = None
                 verification[node][vhw]['cmd'] = pcmdvhw == vcmd
-                print("cmd:  ",pcmdvhw,vcmd)
                 pstatvhw = 'on' if pstat[node][shw] else 'off'
                 verification[node][vhw]['stat'] = pstatvhw == vcmd
-                print("stat:  ",pstatvhw,vcmd)
                 verification[node][vhw]['agree'] = pcmdvhw == pstatvhw
-                print("agree:  ",pcmdvhw, pstatvhw)
         return verification
 
     def get_wr_status(self):
