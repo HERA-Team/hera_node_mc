@@ -520,7 +520,7 @@ class NodeControl():
                         wrstat[node][key] = None
         return wrstat
 
-    def power_snap_relay(self, command, hold_for_verify=300, verify_mode='all'):
+    def power_snap_relay(self, command, hold_for_verify=120, verify_mode='all'):
         """
         Controls the node snap relay via arduino.
 
@@ -531,9 +531,9 @@ class NodeControl():
         ---------
         command : str
             on or off
-        hold_for_verify : bool or int
+        hold_for_verify : int
             Since the snap_relay has to be on first, you can hold that many seconds until
-            it is verified that it is on (only on, not off)
+            it is verified that it is on (only on, not off). Ignore if 0.
         verify_mode : str
             One of the keys in the verification dict
         """
@@ -546,20 +546,50 @@ class NodeControl():
             cmdstamp = "{}|{}".format(command, tstamp)
             self.r.hset("{}{}".format(self.NC_CMD, node), "power_snap_relay_cmd", cmdstamp)
             self.senders[node].power_snap_relay(command)
-        if command == 'on' and isinstance(hold_for_verify, int):
-            started = time.time()
-            age = time.time() - started
-            while age < hold_for_verify:
-                counter = len(self.connected_nodes)
-                verdict = self.verify_states(['snap_relay'], ['on'])
-                for node in self.connected_nodes:
-                    if verdict[node]['snap_relay'][verify_mode]:
+        if command == 'on' and hold_for_verify > 0:
+            self.verdict(['snap_relay'], ['on'], False,
+                         hold_for_verify=hold_for_verify, verify_mode=verify_mode)
+
+    def verdict(self, hw, cmd, verbose=True, hold_for_verify=120, verify_mode='all'):
+        """
+        Raises an error is the hardware and commands aren't verified.
+
+        Uses verify_states to make sure the hardware commands were set.
+        'hw' and 'cmd' must be corresponding hardware-name and
+        command (on/off) lists
+
+        Parameters
+        ----------
+        hw : list
+            List of hardware to check.
+        cmd : list
+            List of commands to verify (on/off)
+        hold_for_verify : int
+            Length of time till timeout (seconds)
+        verify_mode : str
+            Type of verification to check.
+        """
+        if hold_for_verify <= 0:  # Don't check.
+            return
+        started = time.time()
+        age = time.time() - started
+        while age < hold_for_verify:
+            counter = len(self.connected_nodes) * len(hw)
+            _verdict = self.verify_states(hw, cmd)
+            for node in self.connected_nodes:
+                for this_hw in hw:
+                    if _verdict[node][this_hw][verify_mode]:
                         counter -= 1
-                if not counter:
-                    return
-                time.sleep(1)
-                age = time.time() - started
-            raise RuntimeError('Timeout on snap_relay')
+            if not counter:  # all OK
+                if verbose:
+                    for node in self.connected_nodes:
+                        for this_hw, this_cmd in zip(hw, cmd):
+                            print("Node {} {} is verified as {}".format(
+                                node, this_hw, this_cmd))
+                return
+            time.sleep(1)  # Wait 1 second for next check.
+            age = time.time() - started
+        raise RuntimeError('Timeout on verification check for {}: {}'.format(hw, cmd))
 
     def power_snap(self, snap_n, command):
         """

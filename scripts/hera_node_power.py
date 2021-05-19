@@ -1,7 +1,6 @@
 #! /usr/bin/env python
 from __future__ import print_function
 import argparse
-import time
 from node_control import node_control
 
 parser = argparse.ArgumentParser(description='Turn on SNAP relay, SNAPs, FEM and PAM',
@@ -26,12 +25,18 @@ parser.add_argument('-p', '--pam', action='store_true', help='Turn on/off the PA
 parser.add_argument('-f', '--fem', action='store_true', help='Turn on/off the FEMs')
 parser.add_argument('--allhw', action='store_true',
                     help='Turn on/off snaps, pams and fems.  Equivalent to -s -p -f')
-parser.add_argument('--serverAddress', help='Name or redis server', default='redishost')
 parser.add_argument('--throttle', help='Throttle time in sec for udp_sender',
-                    type=float, default=0.1)
-parser.add_argument('--wait', dest='wait_time_in_sec', help="Seconds to wait to check results "
-                    "(use 0 to disable check)", default=5.0, type=float)
-parser.add_argument('--force-direct', dest='force_direct', help="Flag to ignore hostname.",
+                    type=float, default=1.0)
+parser.add_argument('--quiet', dest='verbose', help="Don't print verification.",
+                    action='store_false')
+parser.add_argument('--hold-for-verify', dest='hold_for_verify',
+                    help="Seconds to wait before timing out (use 0 to disable check)",
+                    default=120, type=int)
+parser.add_argument('--verify-mode', dest='verify_mode', help='Type of verify mode.',
+                    choices=['time', 'agree', 'cmd', 'stat', 'all'])
+parser.add_argument('--serverAddress', help='Name or redis server', default='redishost')
+parser.add_argument('--force-direct', dest='force_direct', help="Flag to ignore hostname. "
+                    "This is for development, so shouldn't ever need.",
                     action='store_true')
 
 args = parser.parse_args()
@@ -48,8 +53,8 @@ if not len(nc.connected_nodes):
     print("No nodes are connected.")
     sys.exit()
 
-if args.command == 'node_reset':
-    print("Abruptly reseting the arduinos!")
+if args.command == 'reset':
+    print("Abruptly resetting the arduinos!")
     nc.reset()
 else:
     keystates = {}
@@ -70,21 +75,29 @@ else:
     all_snap = len(snaps_to_set) == 4
 
     if args.command == 'on' and (args.snap_relay or any_snap):
-        nc.power_snap_relay('on')
-        keystates['power_snap_relay'] = 'on'
+        nc.power_snap_relay('on', 120, 'all')  # Defaults to verifying success.
+        keystates['snap_relay'] = 'on'
 
     for snap_n in snaps_to_set:
         nc.power_snap(snap_n, args.command)
-        keystates['power_snap_{}'.format(snap_n)] = args.command
-
-    if args.pam:
-        nc.power_pam(args.command)
-        keystates['power_pam'] = args.command
-
-    if args.fem:
-        nc.power_fem(args.command)
-        keystates['power_fem'] = args.command
+        keystates['snap_{}'.format(snap_n)] = args.command
 
     if args.command == 'off' and (args.snap_relay or all_snap):
         nc.power_snap_relay('off')
-        keystates['power_snap_relay'] = 'off'
+        keystates['snap_relay'] = 'off'
+
+    if args.pam:
+        nc.power_pam(args.command)
+        keystates['pam'] = args.command
+
+    if args.fem:
+        nc.power_fem(args.command)
+        keystates['fem'] = args.command
+
+    if args.hold_for_verify > 0:
+        hws, cmds = [], []
+        for key, state in keystates.items():
+            hws.append(key)
+            cmds.append(state)
+        nc.verdict(hws, cmds, verbose=args.verbose,
+                   hold_for_verify=args.hold_for_verify, verify_mode=args.verify_mode)
