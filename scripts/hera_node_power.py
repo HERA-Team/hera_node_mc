@@ -27,8 +27,7 @@ parser.add_argument('--allhw', action='store_true',
                     help='Turn on/off snaps, pams and fems.  Equivalent to -s -p -f')
 parser.add_argument('--throttle', help='Throttle time in sec for udp_sender',
                     type=float, default=1.0)
-parser.add_argument('--quiet', dest='verbose', help="Don't print verification.",
-                    action='store_false')
+parser.add_argument('--quiet', help="Don't print verification.", action='store_true')
 parser.add_argument('--hold-for-verify', dest='hold_for_verify',
                     help="Seconds to wait before timing out (use 0 to disable check)",
                     default=120, type=int)
@@ -45,6 +44,7 @@ if args.node.lower() == 'all':
     nodes2use = list(range(30))
 else:
     nodes2use = [int(x) for x in args.node.split(',')]
+verbose = not args.quiet
 
 nc = node_control.NodeControl(nodes2use, serverAddress=args.serverAddress, count=None)
 nc.get_node_senders(throttle=args.throttle, force_direct=args.force_direct)
@@ -99,5 +99,5 @@ else:
         for key, state in keystates.items():
             hws.append(key)
             cmds.append(state)
-        nc.verdict(hws, cmds, verbose=args.verbose,
+        nc.verdict(hws, cmds, verbose=verbose,
                    hold_for_verify=args.hold_for_verify, verify_mode=args.verify_mode)
