@@ -336,69 +336,6 @@ class NodeControl():
                     power[node][key] = str2bool(statii[key])
         return power
 
-    def verify_states(self, verify_hw, verify_cmd):
-        """
-        Check the state of hardware in nodes - command and status.
-
-        Parameters
-        ----------
-        verify_hw : str or list
-            Hardware to verify (full list is self.hw),
-            if 'all', use full list.  Else will split(',') a str
-        verify_cmd : str or list
-            state to verify, if list must match len of verify_hw
-            either on or off
-
-        Returns
-        -------
-        dict
-            keyed on node, and mode: 'time', 'agree', 'cmd', 'stat', 'all'
-            each one is a bool
-        """
-        # Prep the lists.
-        if verify_hw == 'all':
-            verify_hw = self.hw
-        elif isinstance(verify_hw, str):
-            verify_hw = verify_hw.split(',')
-        verify_hw = [x.lower() for x in verify_hw]
-        if isinstance(verify_cmd, str):
-            verify_cmd = [verify_cmd] * len(verify_hw)
-        elif len(verify_cmd) != len(verify_hw):
-            raise ValueError("Node control verify hw and cmd lengths don't match")
-        verify_cmd = [x.lower() for x in verify_cmd]
-
-        # Get from redis
-        pcmd = self.get_power_command_list()
-        pstat = self.get_power_status()
-
-        # Verify
-        verification = {}
-        for node in self.connected_nodes:
-            verification[node] = {}
-            for vhw, vcmd in zip(verify_hw, verify_cmd):
-                verification[node][vhw] = {}
-                shw = 'power_{}'.format(vhw)
-                chw = vhw.replace('_', '') if 'relay' not in vhw else vhw
-                try:
-                    verification[node][vhw]['time'] = (pcmd[node][chw]['timestamp'] <
-                                                       pstat[node]['timestamp'])
-                except KeyError:
-                    verification[node][vhw]['time'] = False
-                try:
-                    pcmdvhw = pcmd[node][chw]['command']
-                except KeyError:
-                    pcmdvhw = None
-                verification[node][vhw]['cmd'] = pcmdvhw == vcmd
-                pstatvhw = 'on' if pstat[node][shw] else 'off'
-                verification[node][vhw]['stat'] = pstatvhw == vcmd
-                verification[node][vhw]['agree'] = pcmdvhw == pstatvhw
-                verification[node][vhw]['all'] = True
-                for thisv in ['time', 'cmd', 'stat', 'cmd']:
-                    if not verification[node][vhw][thisv]:
-                        verification[node][vhw]['all'] = False
-                        break
-        return verification
-
     def get_wr_status(self):
         """
         Get the current status of this node's White Rabbit endpoint (assumed to have hostname
@@ -520,6 +457,150 @@ class NodeControl():
                         wrstat[node][key] = None
         return wrstat
 
+    def verdict(self, hw, cmd, verbose=True, hold_for_verify=120, verify_mode='all'):
+        """
+        Raises an error if the hardware and commands aren't verified.
+
+        Uses verify_states to make sure the hardware commands were set.
+        'hw' and 'cmd' must be corresponding hardware-name and
+        command (on/off) lists
+
+        Parameters
+        ----------
+        hw : list
+            List of hardware to check.
+        cmd : list
+            List of commands to verify (on/off)
+        hold_for_verify : int
+            Length of time till timeout (seconds)
+        verify_mode : str
+            Type of verification to check (see verify_states)
+        """
+        if hold_for_verify <= 0:  # Don't check.
+            return
+        started = time.time()
+        age = time.time() - started
+        node_counter = {}
+        while age < hold_for_verify:
+            counter = len(self.connected_nodes) * len(hw)
+            _verdict = self.verify_states(hw, cmd)
+            for node in self.connected_nodes:
+                node_counter[node] = len(hw)
+                for this_hw in hw:
+                    if _verdict[node][this_hw][verify_mode]:
+                        counter -= 1
+                        node_counter[node] -= 1
+            if not counter:  # all OK
+                if verbose:
+                    for node in self.connected_nodes:
+                        for this_hw, this_cmd in zip(hw, cmd):
+                            print("Node {} {} is verified for {}".format(
+                                node, this_hw, this_cmd))
+                return True
+            time.sleep(1)  # Wait 1 second for next check.
+            age = time.time() - started
+        node_counter['hw'] = hw
+        node_counter['cmd'] = cmd
+        return node_counter
+
+    def sentence(self, results, error_threshold=1.0, purge=True):
+        """
+        Determine what to do with the verdict.
+
+        error_threshold,
+        purge, ignore
+
+        Parameters
+        ----------
+        results : bool or dict
+            Returned from self.verdict
+        error_threshold : int
+            Threshold fractional value per node over which to raise an error.
+            0.0 will error if there are any unsuccessful
+            1.0 will never error
+        purge : bool
+            If True, remove unsuccessful nodes from self.connected_nodes.
+        """
+        if isinstance(results, bool) and results:
+            return 1.0  # All good!
+        failed = []
+        incoming_total = len(self.connected_nodes)
+        for node, counter in results.items():
+            if node in self.connected_nodes and counter:
+                failed.append(node)
+                if purge:
+                    self.connected_nodes.remove(node)
+        error_fraction = len(failed) / incoming_total
+        if error_fraction > error_threshold:
+            msg = "{} of {} nodes failed for {}:  {}".format(len(failed), incoming_total,
+                                                             results['hw'], results['cmd'])
+            raise RuntimeError(msg)
+        print("{} removed from connected_nodes.".format(failed))
+        return error_fraction
+
+    def verify_states(self, verify_hw, verify_cmd):
+        """
+        Check the state of hardware in nodes - command and status.
+
+        Parameters
+        ----------
+        verify_hw : str or list
+            Hardware to verify (full list is self.hw),
+            if 'all', use full list.  Else will split(',') a str
+        verify_cmd : str or list
+            state to verify, if list must match len of verify_hw
+            either on or off
+
+        Returns
+        -------
+        dict
+            keyed on node, and mode: 'time', 'agree', 'cmd', 'stat', 'all'
+            each one is a bool
+        """
+        # Prep the lists.
+        if verify_hw == 'all':
+            verify_hw = self.hw
+        elif isinstance(verify_hw, str):
+            verify_hw = verify_hw.split(',')
+        verify_hw = [x.lower() for x in verify_hw]
+        if isinstance(verify_cmd, str):
+            verify_cmd = [verify_cmd] * len(verify_hw)
+        elif len(verify_cmd) != len(verify_hw):
+            raise ValueError("Node control verify hw and cmd lengths don't match")
+        verify_cmd = [x.lower() for x in verify_cmd]
+
+        # Get from redis
+        pcmd = self.get_power_command_list()
+        pstat = self.get_power_status()
+
+        # Verify
+        verification = {}
+        for node in self.connected_nodes:
+            verification[node] = {}
+            for vhw, vcmd in zip(verify_hw, verify_cmd):
+                verification[node][vhw] = {}
+                shw = 'power_{}'.format(vhw)
+                chw = vhw.replace('_', '') if 'relay' not in vhw else vhw
+                try:
+                    verification[node][vhw]['time'] = (pcmd[node][chw]['timestamp'] <
+                                                       pstat[node]['timestamp'])
+                except KeyError:
+                    verification[node][vhw]['time'] = False
+                try:
+                    pcmdvhw = pcmd[node][chw]['command']
+                except KeyError:
+                    pcmdvhw = None
+                verification[node][vhw]['cmd'] = pcmdvhw == vcmd
+                pstatvhw = 'on' if pstat[node][shw] else 'off'
+                verification[node][vhw]['stat'] = pstatvhw == vcmd
+                verification[node][vhw]['agree'] = pcmdvhw == pstatvhw
+                verification[node][vhw]['all'] = True
+                for thisv in ['time', 'cmd', 'stat', 'cmd']:
+                    if not verification[node][vhw][thisv]:
+                        verification[node][vhw]['all'] = False
+                        break
+        return verification
+
     def power_snap_relay(self, command, hold_for_verify=120, verify_mode='all'):
         """
         Controls the node snap relay via arduino.
@@ -547,49 +628,9 @@ class NodeControl():
             self.r.hset("{}{}".format(self.NC_CMD, node), "power_snap_relay_cmd", cmdstamp)
             self.senders[node].power_snap_relay(command)
         if command == 'on' and hold_for_verify > 0:
-            self.verdict(['snap_relay'], ['on'], False,
-                         hold_for_verify=hold_for_verify, verify_mode=verify_mode)
-
-    def verdict(self, hw, cmd, verbose=True, hold_for_verify=120, verify_mode='all'):
-        """
-        Raises an error is the hardware and commands aren't verified.
-
-        Uses verify_states to make sure the hardware commands were set.
-        'hw' and 'cmd' must be corresponding hardware-name and
-        command (on/off) lists
-
-        Parameters
-        ----------
-        hw : list
-            List of hardware to check.
-        cmd : list
-            List of commands to verify (on/off)
-        hold_for_verify : int
-            Length of time till timeout (seconds)
-        verify_mode : str
-            Type of verification to check.
-        """
-        if hold_for_verify <= 0:  # Don't check.
-            return
-        started = time.time()
-        age = time.time() - started
-        while age < hold_for_verify:
-            counter = len(self.connected_nodes) * len(hw)
-            _verdict = self.verify_states(hw, cmd)
-            for node in self.connected_nodes:
-                for this_hw in hw:
-                    if _verdict[node][this_hw][verify_mode]:
-                        counter -= 1
-            if not counter:  # all OK
-                if verbose:
-                    for node in self.connected_nodes:
-                        for this_hw, this_cmd in zip(hw, cmd):
-                            print("Node {} {} is verified as {}".format(
-                                node, this_hw, this_cmd))
-                return
-            time.sleep(1)  # Wait 1 second for next check.
-            age = time.time() - started
-        raise RuntimeError('Timeout on verification check for {}: {}'.format(hw, cmd))
+            _r = self.verdict(['snap_relay'], ['on'], False,
+                              hold_for_verify=hold_for_verify, verify_mode=verify_mode)
+            self.snap_relay_error_fraction = self.sentence(_r, 1.0, purge=True)
 
     def power_snap(self, snap_n, command):
         """

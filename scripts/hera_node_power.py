@@ -33,6 +33,10 @@ parser.add_argument('--hold-for-verify', dest='hold_for_verify',
                     default=120, type=int)
 parser.add_argument('--verify-mode', dest='verify_mode', help='Type of verify mode.',
                     choices=['time', 'agree', 'cmd', 'stat', 'all'])
+parser.add_argument('--error-threshold', dest='error_threshold', default=1.0, type=float,
+                    help='Fractional failure rate over which to raise an error.')
+parser.add_argument('--dont-purge', dest='purge', help="Flag to keep all nodes.",
+                    action='store_false')
 parser.add_argument('--serverAddress', help='Name or redis server', default='redishost')
 parser.add_argument('--force-direct', dest='force_direct', help="Flag to ignore hostname. "
                     "This is for development, so shouldn't ever need.",
@@ -99,5 +103,6 @@ else:
         for key, state in keystates.items():
             hws.append(key)
             cmds.append(state)
-        nc.verdict(hws, cmds, verbose=verbose,
-                   hold_for_verify=args.hold_for_verify, verify_mode=args.verify_mode)
+        results = nc.verdict(hws, cmds, verbose=verbose,
+                             hold_for_verify=args.hold_for_verify, verify_mode=args.verify_mode)
+        nc.sentence(results, args.error_threshold, args.purge)
