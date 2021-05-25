@@ -487,6 +487,7 @@ class NodeControl():
             for node in self.connected_nodes:
                 node_counter[node] = len(hw)
                 for this_hw in hw:
+                    print("NC490:  ",node,this_hw,verify_mode)
                     if _verdict[node][this_hw][verify_mode]:
                         counter -= 1
                         node_counter[node] -= 1
