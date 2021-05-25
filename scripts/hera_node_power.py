@@ -33,7 +33,7 @@ parser.add_argument('--hold-for-verify', dest='hold_for_verify',
                     default=120, type=int)
 parser.add_argument('--verify-mode', dest='verify_mode', help='Type of verify mode.',
                     choices=['time', 'agree', 'cmd', 'stat', 'all'])
-parser.add_argument('--error-threshold', dest='error_threshold', default=1.0, type=float,
+parser.add_argument('--error-threshold', dest='error_threshold', default=0.0, type=float,
                     help='Fractional failure rate over which to raise an error.')
 parser.add_argument('--dont-purge', dest='purge', help="Flag to keep all nodes.",
                     action='store_false')
@@ -79,7 +79,7 @@ else:
     all_snap = len(snaps_to_set) == 4
 
     if args.command == 'on' and (args.snap_relay or any_snap):
-        nc.power_snap_relay('on', 120, 'all')  # Defaults to verifying success.
+        nc.power_snap_relay('on', args.hold_for_verify, args.verify_mode)
         keystates['snap_relay'] = 'on'
 
     for snap_n in snaps_to_set:
@@ -87,7 +87,7 @@ else:
         keystates['snap_{}'.format(snap_n)] = args.command
 
     if args.command == 'off' and (args.snap_relay or all_snap):
-        nc.power_snap_relay('off')
+        nc.power_snap_relay('off', args.hold_for_verify, args.verify_mode)
         keystates['snap_relay'] = 'off'
 
     if args.pam:
