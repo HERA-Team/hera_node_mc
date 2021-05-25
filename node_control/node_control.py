@@ -327,11 +327,11 @@ class NodeControl():
             power[node] = {'age': None}
             for key in list(statii.keys()):
                 if key == 'timestamp':
-                    power[node]['timestamp'] = float(statii[key])
                     try:
+                        power[node]['timestamp'] = float(statii[key])
                         power[node]['age'] = now - float(statii[key])
                     except ValueError:
-                        pass
+                        power[node]['timestamp'] = statii[key]
                 elif key.startswith("power"):
                     power[node][key] = str2bool(statii[key])
         return power
