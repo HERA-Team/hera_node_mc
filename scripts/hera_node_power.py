@@ -32,7 +32,7 @@ parser.add_argument('--hold-for-verify', dest='hold_for_verify',
                     help="Seconds to wait before timing out (use 0 to disable check)",
                     default=120, type=int)
 parser.add_argument('--verify-mode', dest='verify_mode', help='Type of verify mode.',
-                    choices=['time', 'agree', 'cmd', 'stat', 'all'])
+                    choices=['time', 'agree', 'cmd', 'stat', 'all'], default='all')
 parser.add_argument('--error-threshold', dest='error_threshold', default=0.0, type=float,
                     help='Fractional failure rate over which to raise an error.')
 parser.add_argument('--dont-purge', dest='purge', help="Flag to keep all nodes.",
