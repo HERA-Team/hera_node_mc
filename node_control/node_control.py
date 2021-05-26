@@ -164,7 +164,7 @@ class NodeControl():
             if len(self.r.hgetall("{}{}".format(self.NC_STAT, node))) >= count:
                 self.nodes_in_redis.append(node)
 
-    def get_node_senders(self, throttle=0.1, force_direct=False):
+    def get_node_senders(self, throttle=0.1):
         """
         Get udp node class for requested nodes that are in redis.
 
@@ -178,16 +178,13 @@ class NodeControl():
             List of all udp connected request_nodes
         sc_node : str
             String to print connected nodes
-        force_direct : bool
-            If True, will ignore hostnames for direct control
         """
         self.connected_nodes = []
         self.senders = {}
         for node in self.nodes_in_redis:
             hkey = "{}{}".format(self.NC_STAT, node)
             ip = self.r.hget(hkey, 'ip')
-            self.senders[node] = send_receive.UdpSenderReceiver(ip, throttle=throttle,
-                                                                force_direct=force_direct)
+            self.senders[node] = send_receive.UdpSenderReceiver(ip, throttle=throttle)
             if self.senders[node].node_is_connected:
                 self.connected_nodes.append(node)
                 self.r.hset(hkey, 'udp_status', 'connected')

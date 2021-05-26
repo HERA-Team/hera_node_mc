@@ -18,7 +18,6 @@ class UdpSenderReceiver():
     def __init__(self, arduinoAddress,
                  throttle=0.5,
                  connected_verbosity=True,
-                 force_direct=False,
                  serverAddress='0.0.0.0',
                  sendPort=8888,
                  rcvPort=8889):
@@ -38,8 +37,6 @@ class UdpSenderReceiver():
         connected_verbosity : bool
             If True, will print out a message that the node is not connected.
             upon any action if node_is_connected is False.
-        force_direct : bool
-            If True, will ignore hostname list for direct control.
         serverAddress : str
             Address for socket server
         sendPort : int
@@ -57,7 +54,7 @@ class UdpSenderReceiver():
 
         if arduinoAddress is None:
             self.node_is_connected = False
-        elif this_host in direct_control_hostnames or force_direct:
+        elif this_host in direct_control_hostnames:
             self.node_is_connected = True
             # define socket address for binding; necessary for communicating with Arduino
             if 'receive' in arduinoAddress.lower():

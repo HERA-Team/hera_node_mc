@@ -38,9 +38,6 @@ parser.add_argument('--error-threshold', dest='error_threshold', default=0.0, ty
 parser.add_argument('--dont-purge', dest='purge', help="Flag to keep all nodes.",
                     action='store_false')
 parser.add_argument('--serverAddress', help='Name or redis server', default='redishost')
-parser.add_argument('--force-direct', dest='force_direct', help="Flag to ignore hostname. "
-                    "This is for development, so shouldn't ever need.",
-                    action='store_true')
 
 args = parser.parse_args()
 
@@ -51,7 +48,7 @@ else:
 verbose = not args.quiet
 
 nc = node_control.NodeControl(nodes2use, serverAddress=args.serverAddress, count=None)
-nc.get_node_senders(throttle=args.throttle, force_direct=args.force_direct)
+nc.get_node_senders(throttle=args.throttle)
 if not len(nc.connected_nodes):
     import sys
     print("No nodes are connected.")
