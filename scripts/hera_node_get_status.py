@@ -51,11 +51,8 @@ for nd, pwr in powers.items():
         continue
     if 'timestamp' in pwr.keys():
         print("updated at {}".format(pwr['timestamp']))
-    elif 'age' in pwr.keys():
-        print("updated {} seconds ago".format(pwr['age']))
     else:
         print("no timestamp")
-
     for key, val in sorted(pwr.items()):
         if key in ['timestamp', 'age']:
             continue
@@ -69,11 +66,8 @@ for nd, sens in sensors.items():
         continue
     if 'timestamp' in sens.keys():
         print("updated at {}".format(sens['timestamp']))
-    elif 'age' in sens.keys():
-        print("updated {} seconds ago".format(sens['age']))
     else:
         print("no timestamp")
-    node_control.stale_data(sens['age'], args.stale)
     for key, val in sorted(sens.items()):
         if key in ['timestamp', 'age']:
             continue
@@ -89,8 +83,6 @@ if args.wr:
             continue
         if 'timestamp' in wrs.keys():
             print("updated at {}".format(wrs['timestamp']))
-        elif 'age' in wrs.keys():
-            print("updated {} seconds ago".format(wrs['age']))
         else:
             print("no timestamp")
         for key, val in sorted(wrs.items()):
