@@ -39,12 +39,12 @@ def stale_data(age, stale=60.0, show_warning=True):
 
     Returns
     -------
-    True if stale, None if None else False
+    True if stale or age not present/valid.
     """
     if age is None:
         if show_warning:
             print("***Warning: no age found.")
-        return None
+        return True
     if isinstance(age, datetime.timedelta):
         age = age.days*(24.0 * 3600.0) + age.seconds + age.microseconds/1E6
     try:
@@ -52,7 +52,7 @@ def stale_data(age, stale=60.0, show_warning=True):
     except ValueError:
         if show_warning:
             print("***Invalid age format.")
-        return None
+        return True
     if age > stale:
         if age > 86400:
             dyage = age / 86400.0
