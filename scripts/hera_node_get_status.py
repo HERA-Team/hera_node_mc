@@ -11,8 +11,10 @@ parser.add_argument('node', nargs='?', help="Specify the node ID numbers (csv li
                     default='all')
 parser.add_argument('--wr', action='store_true', help="Flag to add white rabbit status")
 parser.add_argument('--serverAddress', help='Name or redis server', default='redishost')
-parser.add_argument('--stale', help='Number of seconds for stale data warning',
+parser.add_argument('--stale', help='Number of seconds for stale data',
                     type=float, default=10.0)
+parser.add_argument('--show-stale', dest='show_stale', help="Flag to show stale data values",
+                    action='store_true')
 args = parser.parse_args()
 
 if args.node.lower() == 'all':
@@ -45,13 +47,15 @@ print("\nNode power states")
 print("-----------------")
 for nd, pwr in powers.items():
     print("Node {} -- ".format(nd), end='')
+    if node_control.stale_data(pwr['age'], args.stale) and not args.show_stale:
+        continue
     if 'timestamp' in pwr.keys():
         print("updated at {}".format(pwr['timestamp']))
     elif 'age' in pwr.keys():
         print("updated {} seconds ago".format(pwr['age']))
     else:
         print("no timestamp")
-    node_control.stale_data(pwr['age'], args.stale)
+
     for key, val in sorted(pwr.items()):
         if key in ['timestamp', 'age']:
             continue
@@ -61,6 +65,8 @@ print("\nNode values")
 print("-----------")
 for nd, sens in sensors.items():
     print("Node {} -- ".format(nd), end='')
+    if node_control.stale_data(sens['age'], args.stale) and not args.show_stale:
+        continue
     if 'timestamp' in sens.keys():
         print("updated at {}".format(sens['timestamp']))
     elif 'age' in sens.keys():
@@ -79,6 +85,8 @@ if args.wr:
     print("------------")
     for nd, wrs in wr.items():
         print("Node {} -- ".format(nd), end='')
+        if node_control.stale_data(wrs['age'], args.stale) and not args.show_stale:
+            continue
         if 'timestamp' in wrs.keys():
             print("updated at {}".format(wrs['timestamp']))
         elif 'age' in wrs.keys():
