@@ -24,7 +24,7 @@ def get_redis_client(serverAddress='redishost'):
     return redis.StrictRedis(connection_pool=connection_pool, charset='utf-8')
 
 
-def stale_data(age, stale=60.0, show_warning=True):
+def stale_data(age, stale=100.0, show_msg=True):
     """
     Print warning if data are too stale.
 
@@ -34,7 +34,7 @@ def stale_data(age, stale=60.0, show_warning=True):
         Age in seconds or timedelta
     state : float
         Stale timeframe in seconds
-    show_warning : bool
+    show_msg : bool
         Flag to actually show the warning.
 
     Returns
@@ -42,16 +42,16 @@ def stale_data(age, stale=60.0, show_warning=True):
     True if stale or age not present/valid.
     """
     if age is None:
-        if show_warning:
-            print("***Warning: no age found.")
+        if show_msg:
+            print("No age found.")
         return True
     if isinstance(age, datetime.timedelta):
         age = age.days*(24.0 * 3600.0) + age.seconds + age.microseconds/1E6
     try:
         age = float(age)
     except ValueError:
-        if show_warning:
-            print("***Invalid age format.")
+        if show_msg:
+            print("Invalid age format ({}).".format(age))
         return True
     if age > stale:
         if age > 86400:
@@ -62,8 +62,8 @@ def stale_data(age, stale=60.0, show_warning=True):
             w_msg = "{:.1f} hours".format(hrage)
         else:
             w_msg = "{} seconds".format(int(age))
-        if show_warning:
-            print("***Warning:  data are {} old".format(w_msg))
+        if show_msg:
+            print("Data are {} old".format(w_msg))
         return True
     return False
 

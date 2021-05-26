@@ -47,7 +47,7 @@ print("\nNode power states")
 print("-----------------")
 for nd, pwr in powers.items():
     print("Node {} -- ".format(nd), end='')
-    if node_control.stale_data(pwr['age'], args.stale) and not args.show_stale:
+    if node_control.stale_data(pwr['age'], args.stale, True) and not args.show_stale:
         continue
     if 'timestamp' in pwr.keys():
         print("updated at {}".format(pwr['timestamp']))
@@ -65,7 +65,7 @@ print("\nNode values")
 print("-----------")
 for nd, sens in sensors.items():
     print("Node {} -- ".format(nd), end='')
-    if node_control.stale_data(sens['age'], args.stale) and not args.show_stale:
+    if node_control.stale_data(sens['age'], args.stale, True) and not args.show_stale:
         continue
     if 'timestamp' in sens.keys():
         print("updated at {}".format(sens['timestamp']))
@@ -85,7 +85,7 @@ if args.wr:
     print("------------")
     for nd, wrs in wr.items():
         print("Node {} -- ".format(nd), end='')
-        if node_control.stale_data(wrs['age'], args.stale) and not args.show_stale:
+        if node_control.stale_data(wrs['age'], args.stale, True) and not args.show_stale:
             continue
         if 'timestamp' in wrs.keys():
             print("updated at {}".format(wrs['timestamp']))
