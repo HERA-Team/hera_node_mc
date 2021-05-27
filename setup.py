@@ -5,7 +5,7 @@ import subprocess
 import glob
 
 
-ver = '1.0.0'
+ver = '1.1.0'
 try:
     ver = (ver + '-' + subprocess.check_output(['git', 'describe', '--abbrev=8',
            '--always', '--dirty', '--tags']).strip().decode())
