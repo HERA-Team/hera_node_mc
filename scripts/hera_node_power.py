@@ -12,9 +12,9 @@ parser.add_argument('command', help="Specify 'on', 'off', or 'reset'.  "
 parser.add_argument('node', help="Specify the list of nodes (csv list of int) or 'all'", nargs='?',
                     default='all')
 parser.add_argument('-r', '--snap-relay', dest='snap_relay', action='store_true',
-                    help="Turn on/off the snap-relay "
-                    "(redundant if turning on _any_ snap or off _all_ snaps in one call; "
-                    "needed when turning off the last snap if done separately)")
+                    help="Turn on/off the snap-relay - generally not needed since "
+                    "redundant if turning on _any_ snap or off _all_ snaps in one call; "
+                    "needed when turning off the last snap if done separately")
 parser.add_argument('-s', '--snaps', action='store_true',
                     help='Turn on/off all the snaps.  Equivalent to -0 -1 -2 -3')
 parser.add_argument('-0', '--snap0', action='store_true', help='Turn on/off SNAP 0')

@@ -35,11 +35,11 @@ def stale_data(age, stale=100.0, show_msg=True):
     state : float
         Stale timeframe in seconds
     show_msg : bool
-        Flag to actually show the warning.
+        Flag to actually show the warning message.
 
     Returns
     -------
-    True if stale or age not present/valid.
+    True if stale or age not present/not valid.
     """
     if age is None:
         if show_msg:
@@ -77,6 +77,13 @@ class NodeControl():
     """
     This class is used to control power to PAM, FEM, and SNAP boards and
     get node status information through a Redis database.
+
+    A range of nodes is requested when instantiated, then those are looked for
+    in redis, then those are attempted to be connected. So:
+        connected_nodes is a subset of nodes_in_redis is a subset of request_nodes
+    Note that connected_nodes aren't necessarily connected, but the attempt just
+    doesn't error out in a higher level sense.  Using verdict/sentence can reduce
+    to actually connected.
 
     It also provides a status for the White Rabbit
 
@@ -462,7 +469,7 @@ class NodeControl():
 
     def verdict(self, hw, cmd, verbose=True, hold_for_verify=120, verify_mode='all'):
         """
-        Raises an error if the hardware and commands aren't verified.
+        Checks if commands are actually carried out - needs hera-node-receiver service running.
 
         Uses verify_states to make sure the hardware commands were set.
         'hw' and 'cmd' must be corresponding hardware-name and
@@ -510,8 +517,7 @@ class NodeControl():
         """
         Determine what to do with the verdict.
 
-        error_threshold,
-        purge, ignore
+        Computes error fraction and will error out if exceeds threshold.
 
         Parameters
         ----------
@@ -523,9 +529,14 @@ class NodeControl():
             1.0 will never error
         purge : bool
             If True, remove unsuccessful nodes from self.connected_nodes.
+
+        Returns
+        -------
+        float
+            computed error fraction: 0 - 1
         """
         if isinstance(results, bool) and results:
-            return 1.0  # All good!
+            return 0.0  # All good (none failed)!
         failed = []
         incoming_total = len(self.connected_nodes)
         for node, counter in results.items():
@@ -538,7 +549,8 @@ class NodeControl():
             msg = "{} of {} nodes failed for {}:  {}".format(len(failed), incoming_total,
                                                              results['hw'], results['cmd'])
             raise RuntimeError(msg)
-        print("{} removed from connected_nodes.".format(failed))
+        if purge:
+            print("{} removed from connected_nodes.".format(failed))
         return error_fraction
 
     def verify_states(self, verify_hw, verify_cmd):
@@ -609,7 +621,8 @@ class NodeControl():
         Controls the node snap relay via arduino.
 
         The SNAP relay has to be turn on before sending commands to individual SNAPs.
-        It logs the command to redis as status:node:N->power_snap_relay_cmd.
+        It logs the command to redis as status:node:N->power_snap_relay_cmd. If turning on,
+        it checks for success, since 1st of 2 stages to turn on SNAPs.
 
         Parameter
         ---------
