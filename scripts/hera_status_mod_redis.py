@@ -7,7 +7,7 @@ Set node_ID under status:node:*
 """
 
 import argparse
-from node_control import node_control
+from node_control.node_control import get_redis_client
 
 ap = argparse.ArgumentParser()
 ap.add_argument('nodes', help='List of node numbers.')
@@ -18,7 +18,7 @@ args = ap.parse_args()
 
 mod_nodes = [int(x) for x in args.nodes.split(',')]
 
-r = node_control.get_redis_client('redishost')
+r = get_redis_client('redishost')
 
 for node in mod_nodes:
     status_node = f"status:node:{node}"
