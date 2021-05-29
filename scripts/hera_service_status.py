@@ -1,9 +1,8 @@
 #! /usr/bin/env python
 from __future__ import print_function
-import redis
+from node_control.node_control import get_redis_client
 
-connection_pool = redis.ConnectionPool(host='redishost', decode_responses=True)
-r = redis.StrictRedis(connection_pool=connection_pool, charset='utf-8')
+r = get_redis_client()
 
 expected_services = {'hera_node_keep_alive': {'status': [], 'version': []},
                      'hera_node_receiver': {'status': [], 'version': []}}

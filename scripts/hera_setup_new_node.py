@@ -2,9 +2,9 @@
 from __future__ import print_function
 import argparse
 import os
-import redis
 import socket
 from node_control import hosts_ethers
+from node_control.node_control import get_redis_client
 
 
 # These are dumped from hera_mc on October 27, 2020
@@ -77,8 +77,7 @@ if hostname in ['hera-node-head', 'hera-mobile']:
     wr['ip'] = hosts.by_alias[wr['sn']]
     hosts.update_id(wr['ip'], '{}  {}'.format(wr['sn'], wr['node']))
 
-    connection_pool = redis.ConnectionPool(host='redishost', decode_responses=True)
-    r = redis.StrictRedis(connection_pool=connection_pool, charset='utf-8')
+    r = get_redis_client()
     rkey = 'status:node:{}'.format(int(args.node_num))
     r.hset(rkey, 'ip', rd['ip'])
     r.hset(rkey, 'mac', rd['mac'])
