@@ -87,7 +87,7 @@ if hostname == 'hera-mobile':  # RFI testing machine, so want to write the curre
     import datetime
     with open('CurrentNode.txt', 'w') as fp:
         print("{}".format(args.node_num), file=fp)
-        print(datetime.datetime.now().isoformat())
+        print(datetime.datetime.now().isoformat(), file=fp)
         print("Node: {}".format(args.node_num), file=fp)
         print('NCM: {}'.format(args.ncm), file=fp)
         for i in range(4):
