@@ -151,7 +151,7 @@ class NodeControl():
         rkey = "version:{}:{}".format(__package__, osp.basename(this_file))
         rval = {"version": __version__,
                 "timestamp": datetime.datetime.now().isoformat()}
-        self.r.hmset(rkey, rval)
+        self.r.hset(rkey, mapping=rval)
         self.status_scriptname = "status:script:{}:{}".format(send_receive.this_host, this_file)
 
     def get_nodes_in_redis(self, count=None):
@@ -207,6 +207,8 @@ class NodeControl():
             self.sc_node = "Node {}".format(self.connected_nodes[0])
         elif len(self.connected_nodes) > 1:
             self.sc_node = "Nodes {}".format(', '.join([str(x) for x in self.connected_nodes]))
+        else:
+            self.sc_node = "No nodes connected."
 
     def _get_raw_node_hash(self, this_key):
         """
@@ -468,7 +470,7 @@ class NodeControl():
         return wrstat
 
     def verdict(self, hw, cmd, verbose=True, hold_for_verify=120, verify_mode='all',
-                log_verdict_to_redis=True):
+                log_verdict=True):
         """
         Checks if commands are actually carried out - needs hera-node-receiver service running.
 
@@ -486,7 +488,7 @@ class NodeControl():
             Length of time till timeout (seconds)
         verify_mode : str
             Type of verification to check (see verify_states)
-        log_verdict_to_redis : bool
+        log_verdict : bool
             Flag to log the final verdict to redis.
         """
         if hold_for_verify <= 0:  # Don't check.
@@ -514,7 +516,27 @@ class NodeControl():
             age = time.time() - started
         node_counter['hw'] = hw
         node_counter['cmd'] = cmd
+        node_counter['mode'] = verify_mode
+        node_counter['timeout'] = hold_for_verify
+        node_counter['time'] = time.time()
+        if log_verdict:
+            self._log_verdict_in_redis(_verdict, node_counter)
         return node_counter
+
+    def _log_verdict_in_redis(self, vdt, nc):
+        """
+        Log the final verification dictionary to redis.
+        """
+        vpar = {'hw': ','.join(nc['hw']), 'cmd': ','.join(nc['cmd']),
+                'mode': nc['mode'], 'timeout': nc['timeout'], 'time': nc['time']}
+        self.r.hset('verdict', mapping=vpar)
+        for node in self._get_raw_node_hash('verdict:node:*').keys():
+            for k in self.r.hgetall(node):
+                print("Deleting ",node,k)
+                #self.r.hdel(node, k)
+        for node, vals in vdt.items():
+            print(node, vals)
+            # self.r.hset(node, )
 
     def sentence(self, results, error_threshold=1.0, purge=True):
         """

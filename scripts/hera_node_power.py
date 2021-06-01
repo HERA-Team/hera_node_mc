@@ -104,5 +104,5 @@ else:
             cmds.append(state)
         results = nc.verdict(hws, cmds, verbose=verbose,
                              hold_for_verify=args.hold_for_verify, verify_mode=args.verify_mode,
-                             log_verdict_to_redis=args.verdict)
+                             log_verdict=args.verdict)
         nc.sentence(results, args.error_threshold, args.purge)
