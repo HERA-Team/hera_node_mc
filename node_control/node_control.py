@@ -467,7 +467,8 @@ class NodeControl():
                         wrstat[node][key] = None
         return wrstat
 
-    def verdict(self, hw, cmd, verbose=True, hold_for_verify=120, verify_mode='all'):
+    def verdict(self, hw, cmd, verbose=True, hold_for_verify=120, verify_mode='all',
+                log_verdict_to_redis=True):
         """
         Checks if commands are actually carried out - needs hera-node-receiver service running.
 
@@ -485,6 +486,8 @@ class NodeControl():
             Length of time till timeout (seconds)
         verify_mode : str
             Type of verification to check (see verify_states)
+        log_verdict_to_redis : bool
+            Flag to log the final verdict to redis.
         """
         if hold_for_verify <= 0:  # Don't check.
             return

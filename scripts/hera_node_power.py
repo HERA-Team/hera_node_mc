@@ -33,6 +33,8 @@ parser.add_argument('--hold-for-verify', dest='hold_for_verify',
                     default=120, type=int)
 parser.add_argument('--verify-mode', dest='verify_mode', help='Type of verify mode.',
                     choices=['time', 'agree', 'cmd', 'stat', 'all'], default='all')
+parser.add_argument('--no-verdict', dest='verdict', action='store_false',
+                    help='Flag to not log the final verdict to redis.')
 parser.add_argument('--error-threshold', dest='error_threshold', default=0.0, type=float,
                     help='Fractional failure rate over which to raise an error.')
 parser.add_argument('--dont-purge', dest='purge', help="Flag to keep all nodes.",
@@ -101,5 +103,6 @@ else:
             hws.append(key)
             cmds.append(state)
         results = nc.verdict(hws, cmds, verbose=verbose,
-                             hold_for_verify=args.hold_for_verify, verify_mode=args.verify_mode)
+                             hold_for_verify=args.hold_for_verify, verify_mode=args.verify_mode,
+                             log_verdict_to_redis=args.verdict)
         nc.sentence(results, args.error_threshold, args.purge)
