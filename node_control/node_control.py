@@ -542,7 +542,7 @@ class NodeControl():
                 key = "verdict:node:{}:{}".format(node, hw)
                 self.r.hset(key, mapping=_tvd)
         for node, counter in nc.items():
-            key = "verdict:node:{}:success"
+            key = "verdict:node:{}:success".format(node)
             if counter:
                 self.r.hset(key, 0)
             else:
