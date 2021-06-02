@@ -483,7 +483,7 @@ class NodeControl():
         hw : list
             List of hardware to check.
         cmd : list
-            List of commands to verify (on/off)
+            List of commands to verify (on/off).  Same length as hw.
         hold_for_verify : int
             Length of time till timeout (seconds)
         verify_mode : str
@@ -530,13 +530,23 @@ class NodeControl():
         vpar = {'hw': ','.join(nc['hw']), 'cmd': ','.join(nc['cmd']),
                 'mode': nc['mode'], 'timeout': nc['timeout'], 'time': nc['time']}
         self.r.hset('verdict', mapping=vpar)
-        for node in self._get_raw_node_hash('verdict:node:*').keys():
-            for k in self.r.hgetall(node):
-                print("Deleting ",node,k)
-                #self.r.hdel(node, k)
+        for this_key in self.r.keys():
+            if 'verdict:node:' in this_key:
+                for k in self.r.hgetall(this_key):
+                    self.r.hdel(this_key, k)
         for node, vals in vdt.items():
-            print(node, vals)
-            # self.r.hset(node, )
+            for hw, _stg in vals.items():
+                _tvd = {}
+                for _aa, _bb in _stg.items():
+                    _tvd[_aa] = 1 if _bb else 0
+                key = "verdict:node:{}:{}".format(node, hw)
+                self.r.hset(key, mapping=_tvd)
+        for node, counter in nc.items():
+            key = "verdict:node:{}:success"
+            if counter:
+                self.r.hset(key, 0)
+            else:
+                self.r.hset(key, 1)
 
     def sentence(self, results, error_threshold=1.0, purge=True):
         """
