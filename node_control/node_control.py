@@ -544,9 +544,9 @@ class NodeControl():
         for node, counter in nc.items():
             key = "verdict:node:{}:success".format(node)
             if counter:
-                self.r.hset(key, 0)
+                self.r.set(key, 0)
             else:
-                self.r.hset(key, 1)
+                self.r.set(key, 1)
 
     def sentence(self, results, error_threshold=1.0, purge=True):
         """
