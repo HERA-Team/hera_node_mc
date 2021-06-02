@@ -542,11 +542,12 @@ class NodeControl():
                 key = "verdict:node:{}:{}".format(node, hw)
                 self.r.hset(key, mapping=_tvd)
         for node, counter in nc.items():
-            key = "verdict:node:{}:success".format(node)
-            if counter:
-                self.r.set(key, 0)
-            else:
-                self.r.set(key, 1)
+            if isinstance(node, int):
+                key = "valid:node:{}".format(node)
+                if counter:
+                    self.r.set(key, 0)
+                else:
+                    self.r.set(key, 1)
 
     def sentence(self, results, error_threshold=1.0, purge=True):
         """
