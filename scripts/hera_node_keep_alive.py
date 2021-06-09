@@ -18,8 +18,6 @@ parser.add_argument('--poke_time_sec', type=float,
                     help="Extra time to wait between pokes", default=2.0)
 parser.add_argument('-r', '--redishost', type=str, default='redishost',
                     help='IP or hostname string of host running the monitor redis server.')
-parser.add_argument('--force-direct', dest='force_direct', help="Flag to ignore hostname.",
-                    action='store_true')
 parser.add_argument('--heartbeat', type=int, default=60, help='redis heartbeat time in seconds')
 args = parser.parse_args()
 
@@ -32,7 +30,7 @@ try:
     while True:
         nc.r.set(nc.status_scriptname, "alive", ex=args.heartbeat)
         nc.get_nodes_in_redis(count=None)
-        nc.get_node_senders(throttle=0.02, force_direct=args.force_direct)
+        nc.get_node_senders(throttle=0.02)
         for node_id in nc.connected_nodes:
             nc.senders[node_id].poke()
             nc.r.hset('throttle:node:{}'.format(node_id), 'last_poke_sec', time.time())
