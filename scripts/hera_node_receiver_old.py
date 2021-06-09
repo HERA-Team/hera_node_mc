@@ -1,10 +1,3 @@
-"""
-Receives UDP packets from all active Arduinos containing sensor data and status information and
-pushes it up to Redis with status:node:x hash key.
-"""
-
-
-
 def noneify(v, noneval=-99.0):
     """
     Return None if v==noneval. Else return v.
