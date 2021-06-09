@@ -151,7 +151,7 @@ class NodeControl():
         rkey = "version:{}:{}".format(__package__, osp.basename(this_file))
         rval = {"version": __version__,
                 "timestamp": datetime.datetime.now().isoformat()}
-        self.r.hset(rkey, mapping=rval)
+        self.r.hmset(rkey, rval)
         self.status_scriptname = "status:script:{}:{}".format(send_receive.this_host, this_file)
 
     def get_nodes_in_redis(self, count=None):
@@ -529,7 +529,7 @@ class NodeControl():
         """
         vpar = {'hw': ','.join(nc['hw']), 'cmd': ','.join(nc['cmd']),
                 'mode': nc['mode'], 'timeout': nc['timeout'], 'time': nc['time']}
-        self.r.hset('verdict', mapping=vpar)
+        self.r.hmset('verdict', vpar)
         for this_key in self.r.keys():
             if 'verdict:node:' in this_key:
                 for k in self.r.hgetall(this_key):
@@ -540,7 +540,7 @@ class NodeControl():
                 for _aa, _bb in _stg.items():
                     _tvd[_aa] = 1 if _bb else 0
                 key = "verdict:node:{}:{}".format(node, hw)
-                self.r.hset(key, mapping=_tvd)
+                self.r.hmset(key, _tvd)
         for node, counter in nc.items():
             if isinstance(node, int):
                 key = "valid:node:{}".format(node)
