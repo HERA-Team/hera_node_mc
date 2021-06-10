@@ -17,7 +17,7 @@ args = parser.parse_args()
 
 try:
     while True:
-        os.system("python hera_node_serial.py >> %s" % args.file_name)
+        os.system("python hera_node_serial_debug.py >> %s" % args.file_name)
         time.sleep(float(args.interval))
 
 except KeyboardInterrupt:
