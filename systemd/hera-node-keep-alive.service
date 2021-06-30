@@ -13,9 +13,9 @@ Description=HERA Node Keep Alive Daemon
 Type=simple
 Restart=always
 RestartSec=60
-User=hera
-Group=hera
-ExecStart=/usr/local/bin/hera_node_keep_alive.py
+User=jackh
+Group=jackh
+ExecStart=/home/jackh/.local/bin/hera_node_keep_alive.py
 
 [Install]
 WantedBy=multi-user.target

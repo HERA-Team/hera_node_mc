@@ -4,7 +4,7 @@ import socket
 
 
 # Define hosts that can directly control the arduinos and this host
-direct_control_hostnames = ['hera-mobile', 'hera-node-head']
+direct_control_hostnames = ['hera-mobile', 'hera-node-head', 'DAVIDs-MBP']
 this_host = socket.gethostname()
 
 
