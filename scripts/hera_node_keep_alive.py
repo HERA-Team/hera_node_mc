@@ -4,6 +4,8 @@ Pokes Arduinos to ensure Arduino's connectivity to the server.
 It pokes either specified nodes with the -n argument or
 the nodes that have Redis status keys i.e. status:node:x where x is the node ID
 set by the I2C digital I/O cards plugged into PCBs.
+
+Note that the Arduino watchdog time-out is 8sec, which is an Arduino hw limit.
 """
 from __future__ import print_function
 import time
