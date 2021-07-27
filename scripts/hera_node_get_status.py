@@ -10,7 +10,7 @@ parser.add_argument('node', nargs='?', help="Specify the node ID numbers (csv li
                     "from 0 to 29) to get the corresponding Redis data or use 'all'",
                     default='all')
 parser.add_argument('--wr', action='store_true', help="Flag to add white rabbit status")
-parser.add_argument('--serverAddress', help='Name or redis server', default='redishost')
+parser.add_argument('--redisServer', help='Name or redis server', default='redishost')
 parser.add_argument('--stale', help='Number of seconds for stale data',
                     type=float, default=10.0)
 parser.add_argument('--show-stale', dest='show_stale', help="Flag to show stale data values",
@@ -24,7 +24,7 @@ else:
 
 print("Attempting to connect to the node control redis database on 'redishost'...")
 sys.stdout.flush()
-nc = node_control.NodeControl(nodes2use, serverAddress=args.serverAddress, count=1)
+nc = node_control.NodeControl(nodes2use, redisServer=args.redisServer, count=1)
 
 if len(nc.nodes_in_redis):
     nodes_present = nc.nodes_in_redis
