@@ -19,8 +19,8 @@ def str2bool(x):
     return x == "1"
 
 
-def get_redis_client(serverAddress='redishost'):
-    connection_pool = redis.ConnectionPool(host=serverAddress, decode_responses=True)
+def get_redis_client(redisServer='redishost'):
+    connection_pool = redis.ConnectionPool(host=redisServer, decode_responses=True)
     return redis.StrictRedis(connection_pool=connection_pool, charset='utf-8')
 
 
@@ -68,8 +68,8 @@ def stale_data(age, stale=100.0, show_msg=True):
     return False
 
 
-def get_redis_nodes(serverAddress='redishost', count=None):
-    nc = NodeControl(None, serverAddress, count)
+def get_redis_nodes(redisServer='redishost', count=None):
+    nc = NodeControl(None, redisServer, count)
     return nc.nodes_in_redis
 
 
@@ -99,7 +99,7 @@ class NodeControl():
     NC_CMD = 'commands:node:'
     hw = ['snap_relay', 'snap_0', 'snap_1', 'snap_2', 'snap_3', 'fem', 'pam']
 
-    def __init__(self, nodes, serverAddress="redishost", count=None):
+    def __init__(self, nodes, redisServer="redishost", count=None):
         """
         Create a NodeControl class instance to query/control nodes.
 
@@ -109,7 +109,7 @@ class NodeControl():
             ID numbers of the nodes with which this instance of NodeControl will interact.
             If None, it will check them all (0-29).  If not list, it will make a list.
             If a negative number, it will skip looking in redis.
-        serverAddress : str
+        redisServer : str
             The hostname, or dotted quad IP address, of the machine running the node control and
             monitoring redis server
         count : int or None
@@ -140,7 +140,7 @@ class NodeControl():
                 self.request_nodes = [nodes]
         else:
             self.request_nodes = nodes
-        self.r = get_redis_client(serverAddress)
+        self.r = get_redis_client(redisServer)
         self.nodes_in_redis = []
         self.connected_nodes = []
         self.sc_node = ''

@@ -39,7 +39,7 @@ parser.add_argument('--error-threshold', dest='error_threshold', default=0.0, ty
                     help='Fractional failure rate over which to raise an error.')
 parser.add_argument('--dont-purge', dest='purge', help="Flag to keep all nodes.",
                     action='store_false')
-parser.add_argument('--serverAddress', help='Name or redis server', default='redishost')
+parser.add_argument('--redisServer', help='Name of redis server', default='redishost')
 
 args = parser.parse_args()
 
@@ -49,7 +49,7 @@ else:
     nodes2use = [int(x) for x in args.node.split(',')]
 verbose = not args.quiet
 
-nc = node_control.NodeControl(nodes2use, serverAddress=args.serverAddress, count=None)
+nc = node_control.NodeControl(nodes2use, redisServer=args.redisServer, count=None)
 nc.get_node_senders(throttle=args.throttle)
 if not len(nc.connected_nodes):
     import sys
