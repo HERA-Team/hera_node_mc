@@ -199,6 +199,7 @@ class NodeControl():
             if node in self.senders.keys() and self.senders[node].node_is_connected:
                 self.connected_nodes.append(node)
             else:
+                print("L202:  updating senders.")
                 hkey = "{}{}".format(self.NC_STAT, node)
                 ip = self.r.hget(hkey, 'ip')
                 self.senders[node] = send_receive.UdpSenderReceiver(ip, throttle=throttle)

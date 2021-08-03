@@ -33,6 +33,7 @@ try:
         nc.r.set(nc.status_scriptname, "alive", ex=args.heartbeat)
         nc.get_nodes_in_redis(count=None)
         nc.get_node_senders(throttle=0.02)
+        print("L36:  ", nc.connected_nodes)
         for node_id in nc.connected_nodes:
             nc.senders[node_id].poke()
             nc.r.hset('throttle:node:{}'.format(node_id), 'last_poke_sec', time.time())
