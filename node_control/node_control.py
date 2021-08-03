@@ -143,6 +143,7 @@ class NodeControl():
         self.r = get_redis_client(redisServer)
         self.nodes_in_redis = []
         self.connected_nodes = []
+        self.senders = {}
         self.sc_node = ''
         self.status_node_keys = list(status_node.status_node(None, None).keys())
         self.get_nodes_in_redis(count)
@@ -187,23 +188,25 @@ class NodeControl():
         Attributes
         ----------
         senders : dict
-            Sender classes keyed on node_id (int) - one for every nodes_in_redis
+            Sender classes keyed on node_id (int)
         connected_nodes : list
             List of all udp connected request_nodes
         sc_node : str
             String to print connected nodes
         """
         self.connected_nodes = []
-        self.senders = {}
         for node in self.nodes_in_redis:
-            hkey = "{}{}".format(self.NC_STAT, node)
-            ip = self.r.hget(hkey, 'ip')
-            self.senders[node] = send_receive.UdpSenderReceiver(ip, throttle=throttle)
-            if self.senders[node].node_is_connected:
+            if node in self.senders.keys() and self.senders[node].node_is_connected:
                 self.connected_nodes.append(node)
-                self.r.hset(hkey, 'udp_status', 'connected')
             else:
-                self.r.hset(hkey, 'udp_status', 'not_connected')
+                hkey = "{}{}".format(self.NC_STAT, node)
+                ip = self.r.hget(hkey, 'ip')
+                self.senders[node] = send_receive.UdpSenderReceiver(ip, throttle=throttle)
+                if self.senders[node].node_is_connected:
+                    self.connected_nodes.append(node)
+                    self.r.hset(hkey, 'udp_status', 'connected')
+                else:
+                    self.r.hset(hkey, 'udp_status', 'not_connected')
         if len(self.connected_nodes) == 1:
             self.sc_node = "Node {}".format(self.connected_nodes[0])
         elif len(self.connected_nodes) > 1:
