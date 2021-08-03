@@ -173,6 +173,7 @@ class NodeControl():
             return
         if count is None:
             count = len(self.status_node_keys)
+        self.nodes_in_redis = []
         for node in self.request_nodes:
             if len(self.r.hgetall("{}{}".format(self.NC_STAT, node))) >= count:
                 self.nodes_in_redis.append(node)
