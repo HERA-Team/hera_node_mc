@@ -96,8 +96,6 @@ class UdpSenderReceiver():
         if not self._command_OK('poke', ['poke'], 'poke'):
             return
         arduinoSocket = (self.arduinoAddress, self.sendPort)
-        arduinoSocket = ('10.80.2.21', self.sendPort)
-        print("SR99: hard-coded poking ",arduinoSocket)
         self.client_socket.sendto(b'poke', arduinoSocket)
 
     def power_snap_relay(self, command):

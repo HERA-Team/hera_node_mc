@@ -195,14 +195,11 @@ class NodeControl():
             String to print connected nodes
         """
         self.connected_nodes = []
-        print("NC198:")
         self.nodes_in_redis = [17]
         for node in self.nodes_in_redis:
             if node in self.senders.keys() and self.senders[node].node_is_connected:
                 self.connected_nodes.append(node)
-                print("Existing ",node)
             else:
-                print("New ",node)
                 hkey = "{}{}".format(self.NC_STAT, node)
                 ip = self.r.hget(hkey, 'ip')
                 self.senders[node] = send_receive.UdpSenderReceiver(ip, throttle=throttle)
