@@ -20,7 +20,7 @@ with open(os.path.join(here, 'node_control', '__version__.py'), 'w') as fh:
 hostname = socket.gethostname()
 
 scripts = []
-if hostname in ['hera-node-head', 'hera-mobile', 'DAVIDs-MBP']:
+if hostname in ['hera-node-head', 'hera-mobile', 'DAVIDs-MBP'] or hostname.startswith('ral'):
     scripts = glob.glob('scripts/*')
 elif hostname == 'hera-snap-head':
     scripts = ['scripts/hera_setup_new_node.py']
