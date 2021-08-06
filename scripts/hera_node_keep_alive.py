@@ -36,7 +36,7 @@ try:
         for node_id in nc.connected_nodes:
             nc.senders[node_id].poke()
             nc.r.hset('throttle:node:{}'.format(node_id), 'last_poke_sec', time.time())
-        sleep_time = args.poke_time_sec - len(nc.connected_nodes) * nc.throttle
+        sleep_time = args.poke_time_sec - len(nc.connected_nodes) * nc.senders[node_id].throttle
         if sleep_time > 0.0:
             time.sleep(sleep_time)
 except KeyboardInterrupt:

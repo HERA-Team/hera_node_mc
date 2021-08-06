@@ -202,7 +202,6 @@ class NodeControl():
             String to print connected nodes
         """
         self.connected_nodes = []
-        self.throttle = throttle
         for node in self.nodes_in_redis:
             if node in self.senders.keys() and self.senders[node].node_is_connected:
                 self.connected_nodes.append(node)
