@@ -5,7 +5,7 @@ or removes its status from redis if remove-nodes flag is set.
 
 Set node_ID under status:node:*
 """
-
+from __future__ import print_function
 import argparse
 from node_control.node_control import get_redis_client
 
@@ -21,10 +21,10 @@ mod_nodes = [int(x) for x in args.nodes.split(',')]
 r = get_redis_client('redishost')
 
 for node in mod_nodes:
-    status_node = f"status:node:{node}"
+    status_node = "status:node:{}".format(node)
     if args.remove_nodes:
         for k in r.hgetall(status_node):
             r.hdel(status_node, k)
-            print(f"removing {status_node}:  {k}")
+            print("removing {}:  {}".format(status_node, k))
     else:
         r.hset(status_node, 'node_ID', node)
