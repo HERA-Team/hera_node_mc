@@ -3,6 +3,8 @@ from __future__ import print_function
 import sys
 import argparse
 from node_control import node_control
+from datetime import datetime
+
 
 parser = argparse.ArgumentParser(description='This script outputs the current node status',
                                  formatter_class=argparse.ArgumentDefaultsHelpFormatter)
@@ -50,7 +52,7 @@ for nd, pwr in powers.items():
     if node_control.stale_data(pwr['age'], args.stale, True) and not args.show_stale:
         continue
     if 'timestamp' in pwr.keys() and pwr['timestamp'] is not None:
-        print(" updated at {}".format(pwr['timestamp']))
+        print(" updated at {}".format(datetime.fromtimestamp(pwr['timestamp']).isoformat()))
     for key, val in sorted(pwr.items()):
         if key in ['timestamp', 'age']:
             continue
@@ -63,7 +65,7 @@ for nd, sens in sensors.items():
     if node_control.stale_data(sens['age'], args.stale, True) and not args.show_stale:
         continue
     if 'timestamp' in sens.keys() and sens['timestamp'] is not None:
-        print(" updated at {}".format(sens['timestamp']))
+        print(" updated at {}".format(datetime.fromtimestamp(sens['timestamp']).isoformat()))
     for key, val in sorted(sens.items()):
         if key in ['timestamp', 'age']:
             continue

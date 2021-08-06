@@ -513,7 +513,7 @@ class NodeControl():
                 if verbose:
                     for node in self.connected_nodes:
                         for this_hw, this_cmd in zip(hw, cmd):
-                            print("Node {} {} is verified for {}".format(
+                            print("Node {} {} is verified {}".format(
                                 node, this_hw, this_cmd))
                 return True
             time.sleep(1)  # Wait 1 second for next check.
