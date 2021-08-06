@@ -54,7 +54,7 @@ class UdpSenderReceiver():
 
         if arduinoAddress is None:
             self.node_is_connected = False
-        elif this_host in direct_control_hostnames:
+        elif this_host in direct_control_hostnames or this_host.startswith('ral'):
             self.node_is_connected = True
             # define socket address for binding; necessary for communicating with Arduino
             if 'receive' in arduinoAddress.lower():
