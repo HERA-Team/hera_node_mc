@@ -24,14 +24,15 @@ def get_redis_client(redisServer='redishost'):
     return redis.StrictRedis(connection_pool=connection_pool, charset='utf-8')
 
 
-def stale_data(age, stale=100.0, show_msg=True):
+def stale_data(data, key, stale=100.0, show_msg=True):
     """
-    Print warning if data are too stale.
+    Print warning if data are too stale or not present.
 
     Parameters
     ----------
-    age : timedelta, int, float or None
-        Age in seconds or timedelta
+    data : dictionary containing age value (if available)
+    key : str
+        key to age in seconds or timedelta (timedelta, int, float or None)
     state : float
         Stale timeframe in seconds
     show_msg : bool
@@ -41,9 +42,15 @@ def stale_data(age, stale=100.0, show_msg=True):
     -------
     True if stale or age not present/not valid.
     """
+    try:
+        age = data[key]
+    except KeyError:
+        if show_msg:
+            print("{} not found.".format(key))
+        return True
     if age is None:
         if show_msg:
-            print("No age found.")
+            print("{} is None.".format(key))
         return True
     if isinstance(age, datetime.timedelta):
         age = age.days*(24.0 * 3600.0) + age.seconds + age.microseconds/1E6
