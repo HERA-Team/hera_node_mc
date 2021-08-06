@@ -160,7 +160,7 @@ class NodeControl():
         rval = {"version": __version__,
                 "timestamp": datetime.datetime.now().isoformat()}
         self.r.hmset(rkey, rval)
-        self.status_scriptname = "status:script:{}:{}".format(send_receive.this_host, this_file)
+        self.status_scriptname = "status:script:{}:{}".format(send_receive.THIS_HOST, this_file)
 
     def get_nodes_in_redis(self, count=None):
         """
