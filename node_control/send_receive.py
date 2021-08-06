@@ -104,6 +104,7 @@ class UdpSenderReceiver():
             return
         arduinoSocket = (self.arduinoAddress, self.sendPort)
         self.client_socket.sendto(b'poke', arduinoSocket)
+        time.sleep(self.throttle)
 
     def power_snap_relay(self, command):
         """

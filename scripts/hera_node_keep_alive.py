@@ -17,8 +17,8 @@ parser = argparse.ArgumentParser(description='Send keep-alive pokes to all nodes
                                  'a status entry in redis and connected',
                                  formatter_class=argparse.ArgumentDefaultsHelpFormatter)
 parser.add_argument('--poke_time_sec', type=float,
-                    help="Extra time to wait between pokes", default=2.0)
-parser.add_argument('-r', '--redishost', type=str, default='redishost',
+                    help="Extra time to wait between pokes", default=4.0)
+parser.add_argument('-r', '--redishost', default='redishost',
                     help='IP or hostname string of host running the monitor redis server.')
 parser.add_argument('--heartbeat', type=int, default=60, help='redis heartbeat time in seconds')
 args = parser.parse_args()
@@ -32,11 +32,13 @@ try:
     while True:
         nc.r.set(nc.status_scriptname, "alive", ex=args.heartbeat)
         nc.get_nodes_in_redis(count=None)
-        nc.get_node_senders(throttle=0.02)
+        nc.get_node_senders(throttle=0.1)
         for node_id in nc.connected_nodes:
             nc.senders[node_id].poke()
             nc.r.hset('throttle:node:{}'.format(node_id), 'last_poke_sec', time.time())
-        time.sleep(args.poke_time_sec)  # actual time is this + poke time (~1s)
+        sleep_time = args.poke_time_sec - len(nc.connected_nodes) * nc.throttle
+        if sleep_time > 0.0:
+            time.sleep(sleep_time)
 except KeyboardInterrupt:
     print('Interrupted', file=sys.stderr)
     sys.exit(0)
