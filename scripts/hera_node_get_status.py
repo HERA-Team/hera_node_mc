@@ -49,8 +49,12 @@ print("\nNode power states")
 print("-----------------")
 for nd, pwr in powers.items():
     print("Node {} -- ".format(nd), end='')
-    if node_control.stale_data(pwr['age'], args.stale, True) and not args.show_stale:
-        continue
+    try:
+        if node_control.stale_data(pwr['age'], args.stale, True) and not args.show_stale:
+            continue
+    except KeyError:
+        if not args.show_stale:
+            continue
     if 'timestamp' in pwr.keys() and pwr['timestamp'] is not None:
         print(" updated at {}".format(datetime.fromtimestamp(pwr['timestamp']).isoformat()))
     for key, val in sorted(pwr.items()):
@@ -62,8 +66,12 @@ print("\nNode values")
 print("-----------")
 for nd, sens in sensors.items():
     print("Node {} -- ".format(nd), end='')
-    if node_control.stale_data(sens['age'], args.stale, True) and not args.show_stale:
-        continue
+    try:
+        if node_control.stale_data(sens['age'], args.stale, True) and not args.show_stale:
+            continue
+    except KeyError:
+        if not args.show_stale:
+            continue
     if 'timestamp' in sens.keys() and sens['timestamp'] is not None:
         print(" updated at {}".format(datetime.fromtimestamp(sens['timestamp']).isoformat()))
     for key, val in sorted(sens.items()):
@@ -77,8 +85,12 @@ if args.wr:
     print("------------")
     for nd, wrs in wr.items():
         print("Node {} -- ".format(nd), end='')
-        if node_control.stale_data(wrs['age'], args.stale, True) and not args.show_stale:
-            continue
+        try:
+            if node_control.stale_data(wrs['age'], args.stale, True) and not args.show_stale:
+                continue
+        except KeyError:
+            if not args.show_stale:
+                continue
         if 'timestamp' in wrs.keys() and wrs['timestamp'] is not None:
             print(" updated at {}".format(wrs['timestamp']))
         for key, val in sorted(wrs.items()):
