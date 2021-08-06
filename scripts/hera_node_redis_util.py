@@ -24,7 +24,7 @@ if args.nodes.lower().startswith('list'):
         print("Node {}".format(node))
         if args.nodes.lower() == 'listall':
             status_node = "status:node:{}".format(node)
-            for _a, _b in r.hgetall(status_node):
+            for _a, _b in r.hgetall(status_node).items():
                 print("\t{}: {}".format(_a, _b))
 else:
     if args.nodes.lower() == 'all':
