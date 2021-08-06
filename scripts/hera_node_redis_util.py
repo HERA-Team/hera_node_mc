@@ -7,7 +7,7 @@ Set node_ID under status:node:*
 """
 from __future__ import print_function
 import argparse
-import node_control
+from node_control import node_control
 
 ap = argparse.ArgumentParser()
 ap.add_argument('nodes', help="List of node numbers to process. "
