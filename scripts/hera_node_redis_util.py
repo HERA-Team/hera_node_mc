@@ -21,10 +21,11 @@ r = node_control.get_redis_client('redishost')
 
 if args.nodes.lower().startswith('list'):
     for node in node_control.get_redis_nodes(count=2):
-        print("{}".format(node))
-        if args.node.lower() == 'listall':
-            for _a, _b in r.hgetall(node):
-                print(_a, _b)
+        print("Node {}".format(node))
+        if args.nodes.lower() == 'listall':
+            status_node = "status:node:{}".format(node)
+            for _a, _b in r.hgetall(status_node):
+                print("\t{}: {}".format(_a, _b))
 else:
     if args.nodes.lower() == 'all':
         mod_nodes = list(range(30))

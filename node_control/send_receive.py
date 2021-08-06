@@ -3,9 +3,16 @@ import time
 import socket
 
 
-# Define hosts that can directly control the arduinos and this host
-direct_control_hostnames = ['hera-mobile', 'hera-node-head', 'DAVIDs-MBP']
-this_host = socket.gethostname()
+# Define hosts that can directly control the arduinos etc
+def direct_control_host(this_host):
+    if this_host in direct_control_hostnames or\
+       this_host.startswith('ral') or this_host.startswith('DAVID'):
+        return True
+    return False
+
+
+direct_control_hostnames = ['hera-mobile', 'hera-node-head']
+THIS_HOST = socket.gethostname()
 
 
 class UdpSenderReceiver():
@@ -54,7 +61,7 @@ class UdpSenderReceiver():
 
         if arduinoAddress is None:
             self.node_is_connected = False
-        elif this_host in direct_control_hostnames or this_host.startswith('ral'):
+        elif direct_control_host(THIS_HOST):
             self.node_is_connected = True
             # define socket address for binding; necessary for communicating with Arduino
             if 'receive' in arduinoAddress.lower():
