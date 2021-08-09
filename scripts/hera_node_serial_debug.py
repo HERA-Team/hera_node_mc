@@ -14,7 +14,7 @@ parser = argparse.ArgumentParser(description='This script dumps the serial outpu
                                  formatter_class=argparse.ArgumentDefaultsHelpFormatter)
 parser.add_argument('-f', '--file_name', help='Specify the file name to dump Redis data to e.g '
                     'datasetMMDDYY.txt If None (default) dumps to screen', default=None)
-parser.add_argument('-t', '--interval', default=300,
+parser.add_argument('-t', '--interval', default=1,
                     help='Specify the time interval, in seconds, for data collection')
 parser.add_argument('--server', help='Server IP (default 0.0.0.0)', default='0.0.0.0')
 parser.add_argument('--port', help='Port to use on server (default 8890)', default=8890)
@@ -29,8 +29,9 @@ try:
     while True:
         # Receive data continuously from all active Arduinos
         data, addr = rcvr.client_socket.recvfrom(2048)
-        print(data, file=args.file_name)
-        print((datetime.datetime.now()), file=args.file_name)
+        print("{}  at  ({})".format((datetime.datetime.now()), addr), file=args.file_name)
+        print('\t', data, file=args.file_name)
+
         time.sleep(float(args.interval))
 except KeyboardInterrupt:
     print('Interrupted')
