@@ -21,7 +21,9 @@ parser.add_argument('--port', help='Port to use on server (default 8890)', defau
 
 args = parser.parse_args()
 if args.file_name is None:
-    args.file_name = sys.stdout
+    fp = sys.stdout
+else:
+    fp = open(args.file_name, 'w')
 
 rcvr = send_receive.UdpSenderReceiver('receive', serverAddress=args.server, rcvPort=int(args.port))
 
@@ -29,9 +31,8 @@ try:
     while True:
         # Receive data continuously from all active Arduinos
         data, addr = rcvr.client_socket.recvfrom(2048)
-        print("{}  at  ({})".format((datetime.datetime.now()), addr), file=args.file_name)
-        print('\t', data, file=args.file_name)
-
+        print("{}  at  {}:{}".format((datetime.datetime.now()), addr[0], addr[1]), file=fp)
+        print('\t', data, file=fp)
         time.sleep(float(args.interval))
 except KeyboardInterrupt:
     print('Interrupted')
