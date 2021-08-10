@@ -365,7 +365,7 @@ void parseUdpPacket(){
 	UdpRcv.read(packetBuffer, UDP_TX_PACKET_MAX_SIZE); //Read the data request
 	String command(packetBuffer); //Convert char array packetBuffer into a string called command
 	if (command == "poke") {
-		Serial.println("I've been poked!");
+		Serial.println("I've been pokd!");
 		#ifdef VERBOSE
 			serialUdp("I've been poked!");
 		#endif
@@ -479,6 +479,3 @@ void serialUdp(String message){
 	UdpSer.print(debugMessage);
 	UdpSer.endPacket();
 }
-
-
-
