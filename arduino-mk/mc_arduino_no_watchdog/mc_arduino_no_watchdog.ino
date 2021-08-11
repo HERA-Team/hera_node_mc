@@ -129,6 +129,7 @@ void parseUdpPacket();
 void setup() {
   // bit 6 controls Watchdog 0-disable
 	// Watchdog.enable(8000);
+  Watchdog.disable();
 	unsigned long startSetup = millis();
 	// Initialize Serial port
 	Serial.begin(57600);
