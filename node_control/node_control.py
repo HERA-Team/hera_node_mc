@@ -186,6 +186,10 @@ class NodeControl():
             if len(self.r.hgetall("{}{}".format(self.NC_STAT, node))) >= count:
                 self.nodes_in_redis.append(node)
 
+    def reset_node_senders(self):
+        self.connected_nodes = []
+        self.senders = {}
+
     def get_node_senders(self, throttle=0.1):
         """
         Get udp node class for requested nodes that are in redis.
@@ -203,17 +207,20 @@ class NodeControl():
         """
         self.connected_nodes = []
         for node in self.nodes_in_redis:
-            if node in self.senders.keys() and self.senders[node].node_is_connected:
-                self.connected_nodes.append(node)
+            if node in self.senders.keys():
+                if self.senders[node].node_is_connected:
+                    self.connected_nodes.append(node)
             else:
                 hkey = "{}{}".format(self.NC_STAT, node)
                 ip = self.r.hget(hkey, 'ip')
                 self.senders[node] = send_receive.UdpSenderReceiver(ip, throttle=throttle)
                 if self.senders[node].node_is_connected:
                     self.connected_nodes.append(node)
-                    self.r.hset(hkey, 'udp_status', 'connected')
+                    _ping = self.senders[node].pingable
+                    self.r.hset(hkey, 'udp_status', 'ping {}/{} : {}s'
+                                .format(_ping['rcvd'], _ping['sent'], _ping['avg']))
                 else:
-                    self.r.hset(hkey, 'udp_status', 'not_connected')
+                    self.r.hset(hkey, 'udp_status', 'not connected')
         if len(self.connected_nodes) == 1:
             self.sc_node = "Node {}".format(self.connected_nodes[0])
         elif len(self.connected_nodes) > 1:

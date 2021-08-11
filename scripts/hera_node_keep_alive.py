@@ -20,23 +20,35 @@ parser.add_argument('--poke_time_sec', type=float,
                     help="Extra time to wait between pokes", default=4.0)
 parser.add_argument('-r', '--redishost', default='redishost',
                     help='IP or hostname string of host running the monitor redis server.')
-parser.add_argument('--heartbeat', type=int, default=60, help='redis heartbeat time in seconds')
+parser.add_argument('--refresh', type=float, default=8.0,
+                    help="Sender connection refresh time in hours.")
+parser.add_argument('--throttle', type=float, default=0.1,
+                    help="Throttle time within inner loop between node calls in sec.")
+parser.add_argument('--heartbeat', type=int, default=60,
+                    help='script redis heartbeat time in seconds')
 args = parser.parse_args()
 
 
 nc = node_control.node_control.NodeControl('all', args.redishost)
 nc.log_service_in_redis(__file__)
+rfrsh_sec = args.refresh * 3600.0
+t0 = time.time()
 
 # Sends poke signal to Arduinos inside the nodes
 try:
     while True:
         nc.r.set(nc.status_scriptname, "alive", ex=args.heartbeat)
+        t1 = time.time()
+        if t1 - t0 > rfrsh_sec:
+            nc.reset_node_senders()
+            t0 = t1
+            nc.r.set('refresh_nodes', t1)
         nc.get_nodes_in_redis(count=None)
-        nc.get_node_senders(throttle=0.1)
+        nc.get_node_senders(throttle=args.throttle)
         for node_id in nc.connected_nodes:
             nc.senders[node_id].poke()
-            nc.r.hset('throttle:node:{}'.format(node_id), 'last_poke_sec', time.time())
-        sleep_time = args.poke_time_sec - len(nc.connected_nodes) * nc.senders[node_id].throttle
+            nc.r.hset('throttle:node:{}'.format(node_id), 'last_poke_sec', t1)
+        sleep_time = args.poke_time_sec - len(nc.connected_nodes) * args.throttle
         if sleep_time > 0.0:
             time.sleep(sleep_time)
 except KeyboardInterrupt:

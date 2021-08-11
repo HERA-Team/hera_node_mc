@@ -117,7 +117,9 @@ class UdpSenderReceiver():
                         raise ValueError()
                 # Now check if there is something on the other end for sender.
                 if self.socketDirection == 'sender':
-                    print(ping(self.arduinoAddress))
+                    self.pingable = ping(self.arduinoAddress)
+                    if self.pingable is None:
+                        self.node_is_connected = False
         else:
             self.node_is_connected = False
 
