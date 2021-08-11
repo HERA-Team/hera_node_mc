@@ -33,24 +33,31 @@ nc = node_control.node_control.NodeControl('all', args.redishost)
 nc.log_service_in_redis(__file__)
 rfrsh_sec = args.refresh * 3600.0
 t0 = time.time()
+t1 = t0
+nc.get_nodes_in_redis(count=None)
+nc.get_node_senders(throttle=args.throttle)
+nc.r.hset('poke_nodes', 'time', t0)
+nc.r.hset('poke_nodes', 'nodes', ','.join([str(x) for x in nc.conencted_nodes]))
 
 # Sends poke signal to Arduinos inside the nodes
 try:
     while True:
         nc.r.set(nc.status_scriptname, "alive", ex=args.heartbeat)
-        t1 = time.time()
-        if t1 - t0 > rfrsh_sec:
-            nc.reset_node_senders()
-            t0 = t1
-            nc.r.set('refresh_nodes', t1)
-        nc.get_nodes_in_redis(count=None)
-        nc.get_node_senders(throttle=args.throttle)
         for node_id in nc.connected_nodes:
             nc.senders[node_id].poke()
             nc.r.hset('throttle:node:{}'.format(node_id), 'last_poke_sec', t1)
         sleep_time = args.poke_time_sec - len(nc.connected_nodes) * args.throttle
         if sleep_time > 0.0:
             time.sleep(sleep_time)
+        t1 = time.time()
+        if t1 - t0 > rfrsh_sec:
+            nc.r.hset('poke_nodes', 'time', t1)
+            nc.r.hset('poke_nodes', 'nodes', ','.join([str(x) for x in nc.connected_nodes]))
+            nc.reset_node_senders()
+            t0 = t1
+        nc.get_nodes_in_redis(count=None)
+        nc.get_node_senders(throttle=args.throttle)
+
 except KeyboardInterrupt:
     print('Interrupted', file=sys.stderr)
     sys.exit(0)
