@@ -1,6 +1,7 @@
 from __future__ import print_function
 import time
 import socket
+import subprocess
 
 
 # Define hosts that can directly control the arduinos etc
@@ -9,6 +10,28 @@ def direct_control_host(this_host):
        this_host.startswith('ral') or this_host.startswith('DAVID'):
         return True
     return False
+
+
+def ping(server, count=1, wait_sec=1):
+    cmd = "ping -c {} -W {} {}".format(count, wait_sec, server).split()
+    try:
+        output = subprocess.check_output(cmd).decode().strip()
+        lines = output.split("\n")
+        sent = lines[-2].split(',')[0].split()[0]
+        rcvd = lines[-2].split(',')[1].split()[0]
+        loss = lines[-2].split(',')[2].split()[0]
+        timing = lines[-1].split()[3].split('/')
+        return {
+            'min': timing[0],
+            'avg': timing[1],
+            'max': timing[2],
+            'mdev': timing[3],
+            'sent': sent,
+            'rcvd': rcvd,
+            'loss': loss
+        }
+    except Exception:
+        return None
 
 
 direct_control_hostnames = ['hera-mobile', 'hera-node-head']
@@ -92,6 +115,9 @@ class UdpSenderReceiver():
                     self.node_is_connected = False
                     if self.socketDirection == 'receiver':
                         raise ValueError()
+                # Now check if there is something on the other end for sender.
+                if self.socketDirection == 'sender':
+                    print(ping(self.arduinoAddress))
         else:
             self.node_is_connected = False
 
