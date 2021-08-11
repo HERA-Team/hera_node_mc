@@ -36,8 +36,8 @@ t0 = time.time()
 t1 = t0
 nc.get_nodes_in_redis(count=None)
 nc.get_node_senders(throttle=args.throttle)
-nc.r.hset('poke_nodes', 'time', t0)
-nc.r.hset('poke_nodes', 'nodes', ','.join([str(x) for x in nc.conencted_nodes]))
+nc.r.hset('poke_nodes', 'time', t1)
+nc.r.hset('poke_nodes', 'nodes', ','.join([str(x) for x in nc.connected_nodes]))
 
 # Sends poke signal to Arduinos inside the nodes
 try:
