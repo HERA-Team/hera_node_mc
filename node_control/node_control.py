@@ -305,7 +305,7 @@ class NodeControl():
             reset
         Format of values for all is on/off/reset|time(unix)XXXXXXX
         """
-        valid = ["power_{}".format(x) for x in self.hw] + ['reset']
+        valid = ["power_{}_cmd".format(x) for x in self.hw] + ['reset']
         power = {}
         now = time.time()
         for node, statii in self._get_raw_node_hash("{}*".format(self.NC_CMD)).items():
