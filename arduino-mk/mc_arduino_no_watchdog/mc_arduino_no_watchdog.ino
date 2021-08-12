@@ -361,10 +361,8 @@ void parseUdpPacket(){
 	UdpRcv.read(packetBuffer, UDP_TX_PACKET_MAX_SIZE); //Read the data request
 	String command(packetBuffer); //Convert char array packetBuffer into a string called command
 	if (command == "poke") {
-		Serial.println("I've been pokd!");
-		#ifdef VERBOSE
-			serialUdp("I've been pokd!");
-		#endif
+		Serial.println("poke");
+		serialUdp("poke");
 		// Watchdog.reset();
 	}
 	else if (command == "snapRelay_on") {

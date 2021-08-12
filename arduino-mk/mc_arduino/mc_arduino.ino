@@ -7,8 +7,6 @@
 // is hardwired into the arduino-netboot software available in the
 
 
-
-
 //================ EEPROM Memory Map ================= 
 // Address Byte       Data(8 bits)        Type                
 //      0              ---- ----       MAC byte 0       
@@ -26,8 +24,6 @@
 //      ..             ---- ----       unassigned
 //      ...            ---- ----       unassigned
 //      1024           ---- ----       unassigned
-
-
 
 
 #include <Adafruit_SleepyDog.h>
@@ -73,8 +69,10 @@
 #define TEMP_MID_ADDR 0x1A
 #define TEMP_BOT_ADDR 0x18
 
-// Comment this line and recompile to turn off verbose mode
-#define VERBOSE
+// Comment this line and recompile to turn off general verbose mode
+// #define VERBOSE
+// ..."... for the temperature sensors
+#define VERBOSE_HW
 
 // Surely we can get the TFTP server address via DHCP?
 IPAddress serverIp(10, 80, 2, 1); // RFI TFTP server IP address
@@ -284,7 +282,7 @@ void loop() {
 	}
 	else {
 		Serial.println("MCP9808 TOP not found");
-		#ifdef VERBOSE
+		#ifdef VERBOSE_HW
 		      serialUdp("MCP9808 TOP not found");
 		#endif
 		      statusStruct.mcpTempTop = -99;
@@ -297,7 +295,7 @@ void loop() {
 	}
 	else {
 		Serial.println("MCP9808 MID not found");
-		#ifdef VERBOSE
+		#ifdef VERBOSE_HW
 			serialUdp("MCP9808 MID not found"); 
 		#endif
 		statusStruct.mcpTempMid = -99;
@@ -310,7 +308,7 @@ void loop() {
 	}
 	else {
 		Serial.println("MCP9808 BOT not found");
-		#ifdef VERBOSE
+		#ifdef VERBOSE_HW
 			serialUdp("MCP9808 BOT not found"); 
 		#endif
 		statusStruct.mcpTempBot = -99;
@@ -324,7 +322,7 @@ void loop() {
 	}
 	else {
 		Serial.println("HTU21DF not found!");
-		#ifdef VERBOSE
+		#ifdef VERBOSE_HW
 			serialUdp("HTU21DF not found!");
 		#endif
 		statusStruct.htuTemp = -99;
@@ -334,7 +332,9 @@ void loop() {
 	// If it's been more than 2 seconds since last UDP packet transfer, send another one
 	unsigned long time_now = millis();
 	if ((time_now - last_sent) > 2000) {
-		serialUdp(String(time_now - last_sent));
+    #ifdef VERBOSE
+ 		  serialUdp(String(time_now - last_sent));
+    #endif
 		// Calculate the cpu uptime since the last Setup in seconds.
 		statusStruct.cpu_uptime_ms = millis();
 		// Send UDP packet to the server ip address serverIp that's listening on port sndPort
@@ -342,8 +342,8 @@ void loop() {
 		UdpSnd.write((byte *)&statusStruct, sizeof statusStruct); // Send the struct as UDP packet
 		UdpSnd.endPacket(); // End the packet
 		Serial.println("UDP packet sent...");
-		#ifdef VERBOSE
-			serialUdp("UDP packet sent...");
+		#ifdef VERBOSE_HW
+			serialUdp(">2s-UDP packet sent");
 		#endif
 		last_sent = time_now;   
 	}
@@ -366,10 +366,8 @@ void parseUdpPacket(){
 	UdpRcv.read(packetBuffer, UDP_TX_PACKET_MAX_SIZE); //Read the data request
 	String command(packetBuffer); //Convert char array packetBuffer into a string called command
 	if (command == "poke") {
-		Serial.println("I've been pokd!");
-		#ifdef VERBOSE
-			serialUdp("I've been pokd!");
-		#endif
+		Serial.println("Poke");
+		serialUdp("Poke");
 		Watchdog.reset();
 	}
 	else if (command == "snapRelay_on") {
@@ -459,7 +457,8 @@ void parseUdpPacket(){
 		bootReset();
 	}
 	else {
-		serialUdp("Unknown command received..");
+		serialUdp("Unknown command");
+    serialUdp(command);
 	}    
 	// Clear UDP packet buffer before sending another packet
 	memset(packetBuffer, 0, UDP_TX_PACKET_MAX_SIZE);
