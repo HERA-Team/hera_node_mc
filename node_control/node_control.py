@@ -295,17 +295,17 @@ class NodeControl():
         Returns a dict keyed on node|part|timestamp/age/command
 
         Valid power command keys are:
-            power_snap_relay_cmd
-            power_snap_0_cmd
-            power_snap_1_cmd
-            power_snap_2_cmd
-            power_snap_3_cmd
-            power_fem_cmd
-            power_pam_cmd
+            power_snap_relay
+            power_snap_0
+            power_snap_1
+            power_snap_2
+            power_snap_3
+            power_fem
+            power_pam
             reset
-        Format of values for all is on/off/reset|time(unix)
+        Format of values for all is on/off/reset|time(unix)XXXXXXX
         """
-        valid = ["power_{}_cmd".format(x) for x in self.hw] + ['reset']
+        valid = ["power_{}".format(x) for x in self.hw] + ['reset']
         power = {}
         now = time.time()
         for node, statii in self._get_raw_node_hash("{}*".format(self.NC_CMD)).items():
@@ -589,6 +589,8 @@ class NodeControl():
         float
             computed error fraction: 0 - 1
         """
+        if results is None:
+            return 0.0
         if isinstance(results, bool) and results:
             return 0.0  # All good (none failed)!
         failed = []
@@ -670,6 +672,11 @@ class NodeControl():
                         break
         return verification
 
+    def _log_cmd_to_redis(self, node, component, tstamp, cmd):
+        key = "{}{}".format(self.NC_CMD, node)
+        val = "{}|{}".format(tstamp, cmd)
+        self.r.hset(key, component, val)
+
     def power_snap_relay(self, command, hold_for_verify=120, verify_mode='all'):
         """
         Controls the node snap relay via arduino.
@@ -694,7 +701,7 @@ class NodeControl():
         tstamp = int(time.time())
         print("Turning {} snap relay for {}".format(command, self.sc_node))
         for node in self.connected_nodes:
-            self.r.hset("{}{}:power_snap_relay".format(self.NC_CMD, node), tstamp, command)
+            self._log_cmd_to_redis(node, 'power_snap_relay', tstamp, command)
             self.senders[node].power_snap_relay(command)
         if command == 'on' and hold_for_verify > 0:
             _r = self.verdict(['snap_relay'], ['on'], False,
@@ -720,8 +727,7 @@ class NodeControl():
         tstamp = int(time.time())
         print("Turning {} snap{} for {}".format(command, snap_n, self.sc_node))
         for node in self.connected_nodes:
-            self.r.hset("{}{}:power_snap_{}".format(self.NC_CMD, node, snap_n),
-                        tstamp, command)
+            self._log_cmd_to_redis(node, 'power_snap_{}'.format(snap_n), tstamp, command)
             self.senders[node].power_snap(snap_n, command)
 
     def power_fem(self, command):
@@ -741,7 +747,7 @@ class NodeControl():
         tstamp = int(time.time())
         print("Turning {} fem for {}".format(command, self.sc_node))
         for node in self.connected_nodes:
-            self.r.hset("{}{}:power_fem".format(self.NC_CMD, node), tstamp, command)
+            self._log_cmd_to_redis(node, 'power_fem', tstamp, command)
             self.senders[node].power_fem(command)
 
     def power_pam(self, command):
@@ -761,7 +767,7 @@ class NodeControl():
         tstamp = int(time.time())
         print("Turning {} pam for {}".format(command, self.sc_node))
         for node in self.connected_nodes:
-            self.r.hset("{}{}:power_pam".format(self.NC_CMD, node), tstamp, command)
+            self._log_cmd_to_redis(node, 'power_pam', tstamp, command)
             self.senders[node].power_pam(command)
 
     def reset(self):
@@ -776,5 +782,5 @@ class NodeControl():
         tstamp = int(time.time())
         print("Resetting nodes {}".format(self.sc_node))
         for node in self.connected_nodes:
-            self.r.hset("{}{}:reset".format(self.NC_CMD, node), tstamp, 'reset')
+            self._log_cmd_to_redis(node, 'reset', tstamp, 'reset')
             self.senders[node].reset()
