@@ -674,8 +674,9 @@ class NodeControl():
 
     def _log_cmd_to_redis(self, node, component, tstamp, cmd):
         key = "{}{}".format(self.NC_CMD, node)
-        val = "{}|{}".format(tstamp, cmd)
-        self.r.hset(key, component, val)
+        val = "{}|{}".format(cmd, tstamp)
+        cmp = "{}_cmd".format(component)
+        self.r.hset(key, cmp, val)
 
     def power_snap_relay(self, command, hold_for_verify=120, verify_mode='all'):
         """
