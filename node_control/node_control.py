@@ -295,13 +295,13 @@ class NodeControl():
         Returns a dict keyed on node|part|timestamp/age/command
 
         Valid power command keys are:
-            power_snap_relay
-            power_snap_0
-            power_snap_1
-            power_snap_2
-            power_snap_3
-            power_fem
-            power_pam
+            power_snap_relay_cmd
+            power_snap_0_cmd
+            power_snap_1_cmd
+            power_snap_2_cmd
+            power_snap_3_cmd
+            power_fem_cmd
+            power_pam_cmd
             reset
         Format of values for all is on/off/reset|time(unix)XXXXXXX
         """
