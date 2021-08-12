@@ -694,7 +694,7 @@ class NodeControl():
         tstamp = int(time.time())
         print("Turning {} snap relay for {}".format(command, self.sc_node))
         for node in self.connected_nodes:
-            self.r.hset("{}{}power_snap_relay".format(self.NC_CMD, node), tstamp, command)
+            self.r.hset("{}{}:power_snap_relay".format(self.NC_CMD, node), tstamp, command)
             self.senders[node].power_snap_relay(command)
         if command == 'on' and hold_for_verify > 0:
             _r = self.verdict(['snap_relay'], ['on'], False,
@@ -720,7 +720,7 @@ class NodeControl():
         tstamp = int(time.time())
         print("Turning {} snap{} for {}".format(command, snap_n, self.sc_node))
         for node in self.connected_nodes:
-            self.r.hset("{}{}power_snap_{}".format(self.NC_CMD, node, snap_n),
+            self.r.hset("{}{}:power_snap_{}".format(self.NC_CMD, node, snap_n),
                         tstamp, command)
             self.senders[node].power_snap(snap_n, command)
 
@@ -741,7 +741,7 @@ class NodeControl():
         tstamp = int(time.time())
         print("Turning {} fem for {}".format(command, self.sc_node))
         for node in self.connected_nodes:
-            self.r.hset("{}{}power_fem".format(self.NC_CMD, node), tstamp, command)
+            self.r.hset("{}{}:power_fem".format(self.NC_CMD, node), tstamp, command)
             self.senders[node].power_fem(command)
 
     def power_pam(self, command):
@@ -761,7 +761,7 @@ class NodeControl():
         tstamp = int(time.time())
         print("Turning {} pam for {}".format(command, self.sc_node))
         for node in self.connected_nodes:
-            self.r.hset("{}{}power_pam".format(self.NC_CMD, node), tstamp, command)
+            self.r.hset("{}{}:power_pam".format(self.NC_CMD, node), tstamp, command)
             self.senders[node].power_pam(command)
 
     def reset(self):
@@ -776,5 +776,5 @@ class NodeControl():
         tstamp = int(time.time())
         print("Resetting nodes {}".format(self.sc_node))
         for node in self.connected_nodes:
-            self.r.hset("{}{}reset".format(self.NC_CMD, node), tstamp, 'reset')
+            self.r.hset("{}{}:reset".format(self.NC_CMD, node), tstamp, 'reset')
             self.senders[node].reset()
