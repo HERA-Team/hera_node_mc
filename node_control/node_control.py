@@ -564,13 +564,12 @@ class NodeControl():
                     _tvd[_aa] = 1 if _bb else 0
                 key = "verdict:node:{}:{}".format(node, hw)
                 self.r.hmset(key, _tvd)
-        for node, counter in nc.items():
-            if isinstance(node, int):
-                key = "valid:node:{}".format(node)
-                if counter:
-                    self.r.set(key, 0)
-                else:
-                    self.r.set(key, 1)
+        for node in self.connected_nodes:
+            key = "valid:node:{}".format(node)
+            if nc[node]:
+                self.r.set(key, 0)
+            else:
+                self.r.set(key, 1)
 
     def sentence(self, results, error_threshold=1.0, purge=True):
         """
