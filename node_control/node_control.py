@@ -512,18 +512,17 @@ class NodeControl():
         started = time.time()
         age = 0.0
         node_counter = {}
-        all_counter = len(self.connected_nodes) * lenhw  # total to check
-        print("NC516 ",all_counter)
         while age < hold_for_verify:
+            countdown = len(self.connected_nodes) * lenhw  # total to check
             _verdict = self.verify_states(hwcmd)
             for node in self.connected_nodes:
                 node_counter[node] = lenhw
                 for this_hw in hwcmd.keys():
                     if _verdict[node][this_hw][verify_mode]:
-                        all_counter -= 1
+                        countdown -= 1
                         node_counter[node] -= 1
-                        print("COUNTDOWN  ",node,this_hw)
-            if not all_counter:  # all OK so can quit loop
+                        print("COUNTDOWN  ",node,this_hw,countdown)
+            if not countdown:  # all OK so can quit loop
                 break
             time.sleep(1)  # Wait 1 second for next check.
             age = time.time() - started
