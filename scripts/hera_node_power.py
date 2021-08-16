@@ -6,11 +6,12 @@ from node_control import node_control
 parser = argparse.ArgumentParser(description='Turn on SNAP relay, SNAPs, FEM and PAM',
                                  formatter_class=argparse.ArgumentDefaultsHelpFormatter)
 
-parser.add_argument('command', help="Specify 'on', 'off', or 'reset'.  "
-                    "reset doesn't use any other arguments.",
-                    choices=['on', 'off', 'reset'])
-parser.add_argument('node', help="Specify the list of nodes (csv list of int) or 'all'", nargs='?',
-                    default='all')
+parser.add_argument('command', help="Specify 'on', 'off', 'start', 'stop' or 'reset'.  "
+                    "start/stop turn everything on/off.  start/stop/reset don't use any "
+                    "other arguments.  start/stop also raise the error fraction to 1.0",
+                    choices=['on', 'off', 'start', 'stop', 'reset'])
+parser.add_argument('node', help="Specify the list of nodes (csv list of int) or 'all' (default)",
+                    nargs='?', default='all')
 parser.add_argument('-r', '--snap-relay', dest='snap_relay', action='store_true',
                     help="Turn on/off the snap-relay - generally not needed since "
                     "redundant if turning on _any_ snap or off _all_ snaps in one call; "
@@ -25,8 +26,8 @@ parser.add_argument('-p', '--pam', action='store_true', help='Turn on/off the PA
 parser.add_argument('-f', '--fem', action='store_true', help='Turn on/off the FEMs')
 parser.add_argument('--allhw', action='store_true',
                     help='Turn on/off snaps, pams and fems.  Equivalent to -s -p -f')
-parser.add_argument('--throttle', help='Throttle time in sec for udp_sender',
-                    type=float, default=1.0)
+parser.add_argument('--throttle', help='Throttle time in sec for udp_sender (0.2s)',
+                    type=float, default=0.2)
 parser.add_argument('--quiet', help="Don't print verification.", action='store_true')
 parser.add_argument('--hold-for-verify', dest='hold_for_verify',
                     help="Seconds to wait before timing out (use 0 to disable check)",
@@ -36,9 +37,7 @@ parser.add_argument('--verify-mode', dest='verify_mode', help='Type of verify mo
 parser.add_argument('--no-verdict', dest='verdict', action='store_false',
                     help='Flag to not log the final verdict to redis.')
 parser.add_argument('--error-threshold', dest='error_threshold', default=0.0, type=float,
-                    help='Fractional failure rate over which to raise an error.')
-parser.add_argument('--dont-purge', dest='purge', help="Flag to keep all nodes.",
-                    action='store_false')
+                    help='Fractional failure rate over which to raise an error (default 0.0).')
 parser.add_argument('--redisServer', help='Name of redis server', default='redishost')
 
 args = parser.parse_args()
@@ -57,52 +56,59 @@ if not len(nc.connected_nodes):
     sys.exit()
 
 if args.command == 'reset':
-    print("Abruptly resetting the arduinos!")
+    print("Resetting the arduinos.")
     nc.reset()
+    import sys
+    sys.exit()
+elif args.command == 'start':
+    args.command = 'on'
+    args.allhw = True
+    args.error_threshold = 1.0
+elif args.command == 'stop':
+    args.command = 'off'
+    args.allhw = True
+    args.error_threshold = 1.0
+
+keystates = {}
+if args.allhw:
+    args.snap_relay = True
+    args.snaps = True
+    args.pam = True
+    args.fem = True
+
+snaps_to_set = []
+if args.snaps:
+    snaps_to_set = [0, 1, 2, 3]
 else:
-    keystates = {}
-    if args.allhw:
-        args.snap_relay = True
-        args.snaps = True
-        args.pam = True
-        args.fem = True
+    for i in range(4):
+        if getattr(args, 'snap{}'.format(i)):
+            snaps_to_set.append(i)
+any_snap = len(snaps_to_set) > 0
+all_snap = len(snaps_to_set) == 4
 
-    snaps_to_set = []
-    if args.snaps:
-        snaps_to_set = [0, 1, 2, 3]
-    else:
-        for i in range(4):
-            if getattr(args, 'snap{}'.format(i)):
-                snaps_to_set.append(i)
-    any_snap = len(snaps_to_set) > 0
-    all_snap = len(snaps_to_set) == 4
+if args.command == 'on' and (args.snap_relay or any_snap):
+    nc.power_snap_relay('on', args.hold_for_verify, args.verify_mode)
+    keystates['snap_relay'] = 'on'
 
-    if args.command == 'on' and (args.snap_relay or any_snap):
-        nc.power_snap_relay('on', args.hold_for_verify, args.verify_mode)
-        keystates['snap_relay'] = 'on'
+for snap_n in snaps_to_set:
+    nc.power_snap(snap_n, args.command)
+    keystates['snap_{}'.format(snap_n)] = args.command
 
-    for snap_n in snaps_to_set:
-        nc.power_snap(snap_n, args.command)
-        keystates['snap_{}'.format(snap_n)] = args.command
+if args.command == 'off' and (args.snap_relay or all_snap):
+    nc.power_snap_relay('off', args.hold_for_verify, args.verify_mode)
+    keystates['snap_relay'] = 'off'
 
-    if args.command == 'off' and (args.snap_relay or all_snap):
-        nc.power_snap_relay('off', args.hold_for_verify, args.verify_mode)
-        keystates['snap_relay'] = 'off'
+if args.pam:
+    nc.power_pam(args.command)
+    keystates['pam'] = args.command
 
-    if args.pam:
-        nc.power_pam(args.command)
-        keystates['pam'] = args.command
+if args.fem:
+    nc.power_fem(args.command)
+    keystates['fem'] = args.command
 
-    if args.fem:
-        nc.power_fem(args.command)
-        keystates['fem'] = args.command
-
-    if args.hold_for_verify > 0:
-        hws, cmds = [], []
-        for key, state in keystates.items():
-            hws.append(key)
-            cmds.append(state)
-        results = nc.verdict(hws, cmds, verbose=verbose,
-                             hold_for_verify=args.hold_for_verify, verify_mode=args.verify_mode,
-                             log_verdict=args.verdict)
-        nc.sentence(results, args.error_threshold, args.purge)
+if args.hold_for_verify > 0:
+    results = nc.verdict(keystates, verbose=verbose,
+                         hold_for_verify=args.hold_for_verify,
+                         verify_mode=args.verify_mode,
+                         log_verdict=args.verdict)
+    nc.sentence(results, args.error_threshold, purge=True)

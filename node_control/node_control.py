@@ -303,7 +303,7 @@ class NodeControl():
             power_fem_cmd
             power_pam_cmd
             reset
-        Format of values for all is on/off/reset|time(unix)XXXXXXX
+        Format of values for all is on/off/reset|time(unix)
         """
         valid = ["power_{}_cmd".format(x) for x in self.hw] + ['reset']
         power = {}
@@ -487,21 +487,18 @@ class NodeControl():
                         wrstat[node][key] = None
         return wrstat
 
-    def verdict(self, hw, cmd, verbose=True, hold_for_verify=120, verify_mode='all',
+    def verdict(self, hwcmd, verbose=True, hold_for_verify=120, verify_mode='all',
                 log_verdict=True):
         """
         Checks if commands are actually carried out - needs hera-node-receiver service running.
 
-        Uses verify_states to make sure the hardware commands were set.
-        'hw' and 'cmd' must be corresponding hardware-name and
-        command (on/off) lists
+        Uses verify_states to make sure the hardware commands were set as requested.
+        Note that it bases off of connected_nodes, not requested_nodes.
 
         Parameters
         ----------
-        hw : list
-            List of hardware to check.
-        cmd : list
-            List of commands to verify (on/off).  Same length as hw.
+        hwcmd : dict
+            Dict of hardware to check and the commands (on or off)
         hold_for_verify : int
             Length of time till timeout (seconds)
         verify_mode : str
@@ -509,44 +506,52 @@ class NodeControl():
         log_verdict : bool
             Flag to log the final verdict to redis.
         """
+        lenhw = len(hwcmd.keys())
         if hold_for_verify <= 0:  # Don't check.
             return
         started = time.time()
-        age = time.time() - started
+        age = 0.0
         node_counter = {}
+        all_counter = len(self.connected_nodes) * lenhw  # total to check
         while age < hold_for_verify:
-            counter = len(self.connected_nodes) * len(hw)
-            _verdict = self.verify_states(hw, cmd)
+            _verdict = self.verify_states(hwcmd)
             for node in self.connected_nodes:
-                node_counter[node] = len(hw)
-                for this_hw in hw:
+                node_counter[node] = lenhw
+                for this_hw in hwcmd.keys():
                     if _verdict[node][this_hw][verify_mode]:
-                        counter -= 1
+                        all_counter -= 1
                         node_counter[node] -= 1
-            if not counter:  # all OK
-                if verbose:
-                    for node in self.connected_nodes:
-                        for this_hw, this_cmd in zip(hw, cmd):
-                            print("Node {} {} is verified {}".format(
-                                node, this_hw, this_cmd))
-                return True
+            if not all_counter:  # all OK so can quit loop
+                break
             time.sleep(1)  # Wait 1 second for next check.
             age = time.time() - started
-        node_counter['hw'] = hw
-        node_counter['cmd'] = cmd
+        node_counter['hwcmd'] = hwcmd
         node_counter['mode'] = verify_mode
         node_counter['timeout'] = hold_for_verify
+        node_counter['age'] = age
         node_counter['time'] = time.time()
         if log_verdict:
             self._log_verdict_in_redis(_verdict, node_counter)
+        if verbose:
+            for node in self.connected_nodes:
+                for this_hw in _verdict[node].keys():
+                    if _verdict[node][this_hw][verify_mode]:
+                        print("Node {} SUCCESS in turning {} {} in mode {}".format(
+                                node, this_hw, hwcmd[this_hw], verify_mode))
+                    else:
+                        print("Node {} FAIL in turning {} {} in mode {}".format(
+                                node, this_hw, hwcmd[this_hw], verify_mode))
         return node_counter
 
     def _log_verdict_in_redis(self, vdt, nc):
         """
         Log the final verification dictionary to redis.
         """
-        vpar = {'hw': ','.join(nc['hw']), 'cmd': ','.join(nc['cmd']),
-                'mode': nc['mode'], 'timeout': nc['timeout'], 'time': nc['time']}
+        vpar = {'mode': nc['mode'], 'timeout': nc['timeout'],
+                'time': nc['time'], 'age': nc['age']}
+        vpar['hw'] = ','.join(nc['hwcmd'].keys())
+        vpar['cmd'] = ','.join([nc['hwcmd'][x] for x in vpar['hw'].split(',')])
+
         self.r.hmset('verdict', vpar)
         for this_key in self.r.keys():
             if 'verdict:node:' in this_key:
@@ -595,32 +600,26 @@ class NodeControl():
             return 0.0  # All good (none failed)!
         failed = []
         incoming_total = len(self.connected_nodes)
-        for node, counter in results.items():
-            if node in self.connected_nodes and counter:
+        for node in self.connected_nodes:
+            if results[node]:  # there were some left over so didn't all work
                 failed.append(node)
                 if purge:
                     self.connected_nodes.remove(node)
         error_fraction = len(failed) / incoming_total
         if error_fraction > error_threshold:
-            msg = "{} of {} nodes failed for {}:  {}".format(len(failed), incoming_total,
-                                                             results['hw'], results['cmd'])
+            msg = "{} of {} nodes failed.".format(len(failed), incoming_total)
             raise RuntimeError(msg)
         if purge:
             print("{} removed from connected_nodes.".format(failed))
         return error_fraction
 
-    def verify_states(self, verify_hw, verify_cmd):
+    def verify_states(self, hwcmd):
         """
         Check the state of hardware in nodes - command and status.
 
         Parameters
         ----------
-        verify_hw : str or list
-            Hardware to verify (full list is self.hw),
-            if 'all', use full list.  Else will split(',') a str
-        verify_cmd : str or list
-            state to verify, if list must match len of verify_hw
-            either on or off
+        hwcmd : dictionary of hardware and on/off command.
 
         Returns
         -------
@@ -629,15 +628,13 @@ class NodeControl():
             each one is a bool
         """
         # Prep the lists.
-        if verify_hw == 'all':
+        if 'all' in hwcmd.keys():
             verify_hw = self.hw
-        elif isinstance(verify_hw, str):
-            verify_hw = verify_hw.split(',')
+            verify_cmd = [hwcmd['all'] for x in verify_hw]
+        else:
+            verify_hw = list(hwcmd.keys())
+            verify_cmd = [hwcmd[x] for x in verify_hw]
         verify_hw = [x.lower() for x in verify_hw]
-        if isinstance(verify_cmd, str):
-            verify_cmd = [verify_cmd] * len(verify_hw)
-        elif len(verify_cmd) != len(verify_hw):
-            raise ValueError("Node control verify hw and cmd lengths don't match")
         verify_cmd = [x.lower() for x in verify_cmd]
 
         # Get from redis
@@ -705,7 +702,7 @@ class NodeControl():
             self._log_cmd_to_redis(node, 'power_snap_relay', tstamp, command)
             self.senders[node].power_snap_relay(command)
         if command == 'on' and hold_for_verify > 0:
-            _r = self.verdict(['snap_relay'], ['on'], False,
+            _r = self.verdict({'snap_relay': 'on'}, False,
                               hold_for_verify=hold_for_verify, verify_mode=verify_mode)
             self.snap_relay_error_fraction = self.sentence(_r, 1.0, purge=True)
 
