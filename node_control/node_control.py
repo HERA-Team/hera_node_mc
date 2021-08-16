@@ -506,12 +506,15 @@ class NodeControl():
         log_verdict : bool
             Flag to log the final verdict to redis.
         """
+        if verbose:
+            print("...Verifying...", end='')
         lenhw = len(hwcmd.keys())
         if hold_for_verify <= 0 or not lenhw:  # Don't check.
             return
         started = time.time()
         age = 0.0
         node_counter = {}
+        all_verified = False
         while age < hold_for_verify:
             countdown = len(self.connected_nodes) * lenhw  # total to check
             _verdict = self.verify_states(hwcmd)
@@ -522,9 +525,14 @@ class NodeControl():
                         countdown -= 1
                         node_counter[node] -= 1
             if not countdown:  # all OK so can quit loop
+                all_verified = True
+                if verbose:
+                    print("...all ok")
                 break
             time.sleep(1)  # Wait 1 second for next check.
             age = time.time() - started
+        if verbose and not all_verified:
+            print("...timeout {:.1f}".format(age))
         node_counter['hwcmd'] = hwcmd
         node_counter['mode'] = verify_mode
         node_counter['timeout'] = hold_for_verify
@@ -536,11 +544,11 @@ class NodeControl():
             for node in self.connected_nodes:
                 for this_hw in _verdict[node].keys():
                     if _verdict[node][this_hw][verify_mode]:
-                        print("SUCCESS Node {} turned {} {} (mode '{}')".format(
-                                node, this_hw, hwcmd[this_hw], verify_mode))
+                        print("SUCCESS Node {} turned {} {}".format(
+                                node, this_hw, hwcmd[this_hw]))
                     else:
-                        print("FAIL Node {} turned {} {} ( mode '{}')".format(
-                                node, this_hw, hwcmd[this_hw], verify_mode))
+                        print("FAIL Node {} turned {} {}".format(
+                                node, this_hw, hwcmd[this_hw]))
         return node_counter
 
     def _log_verdict_in_redis(self, vdt, nc):
