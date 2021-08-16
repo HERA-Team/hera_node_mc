@@ -31,7 +31,7 @@ parser.add_argument('--throttle', help='Throttle time in sec for udp_sender (0.2
 parser.add_argument('--quiet', help="Don't print verification.", action='store_true')
 parser.add_argument('--hold-for-verify', dest='hold_for_verify',
                     help="Seconds to wait before timing out (use 0 to disable check)",
-                    default=120, type=int)
+                    default=90, type=int)
 parser.add_argument('--verify-mode', dest='verify_mode', help='Type of verify mode.',
                     choices=['time', 'agree', 'cmd', 'stat', 'all'], default='all')
 parser.add_argument('--no-verdict', dest='verdict', action='store_false',

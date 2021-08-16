@@ -521,12 +521,10 @@ class NodeControl():
                     if _verdict[node][this_hw][verify_mode]:
                         countdown -= 1
                         node_counter[node] -= 1
-                        print("COUNTDOWN  ",node,this_hw,countdown)
             if not countdown:  # all OK so can quit loop
                 break
             time.sleep(1)  # Wait 1 second for next check.
             age = time.time() - started
-            print("Verifying ({:.1f})".format(age))
         node_counter['hwcmd'] = hwcmd
         node_counter['mode'] = verify_mode
         node_counter['timeout'] = hold_for_verify
