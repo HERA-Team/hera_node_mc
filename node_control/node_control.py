@@ -507,7 +507,7 @@ class NodeControl():
             Flag to log the final verdict to redis.
         """
         lenhw = len(hwcmd.keys())
-        if hold_for_verify <= 0:  # Don't check.
+        if hold_for_verify <= 0 or not lenhw:  # Don't check.
             return
         started = time.time()
         age = 0.0
@@ -536,10 +536,10 @@ class NodeControl():
             for node in self.connected_nodes:
                 for this_hw in _verdict[node].keys():
                     if _verdict[node][this_hw][verify_mode]:
-                        print("Node {} SUCCESS in turning {} {} in mode {}".format(
+                        print("SUCCESS Node {} turned {} {} (mode '{}')".format(
                                 node, this_hw, hwcmd[this_hw], verify_mode))
                     else:
-                        print("Node {} FAIL in turning {} {} in mode {}".format(
+                        print("FAIL Node {} turned {} {} ( mode '{}')".format(
                                 node, this_hw, hwcmd[this_hw], verify_mode))
         return node_counter
 
@@ -549,9 +549,7 @@ class NodeControl():
         """
         vpar = {'mode': nc['mode'], 'timeout': nc['timeout'],
                 'time': nc['time'], 'age': nc['age']}
-        print("NC552:  ",nc['hwcmd'])
         vpar['hw'] = ','.join(nc['hwcmd'].keys())
-        print(vpar['hw'])
         vpar['cmd'] = ','.join([nc['hwcmd'][x] for x in vpar['hw'].split(',')])
 
         self.r.hmset('verdict', vpar)
@@ -610,7 +608,7 @@ class NodeControl():
         if error_fraction > error_threshold:
             msg = "{} of {} nodes failed.".format(len(failed), incoming_total)
             raise RuntimeError(msg)
-        if purge:
+        if purge and len(failed) > 0:
             print("{} removed from connected_nodes.".format(failed))
         return error_fraction
 

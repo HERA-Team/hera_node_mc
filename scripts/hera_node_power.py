@@ -111,4 +111,4 @@ if args.hold_for_verify > 0:
                          hold_for_verify=args.hold_for_verify,
                          verify_mode=args.verify_mode,
                          log_verdict=args.verdict)
-    nc.sentence(results, args.error_threshold, purge=True)
+    nc.sentence(results, args.error_threshold, purge=False)
