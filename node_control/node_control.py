@@ -554,8 +554,7 @@ class NodeControl():
 
         for this_key in self.r.keys():  # purge all old values
             if this_key.startswith('verdict:node:'):
-                for k in self.r.hgetall(this_key):
-                    self.r.hdel(this_key, k)
+                self.r.delete(this_key)
         self.r.hmset('verdict:node:par'.format(), vpar)
         for node, vals in vdt.items():
             for hw, _stg in vals.items():
