@@ -551,7 +551,7 @@ class NodeControl():
                 'time': nc['time'], 'age': nc['age']}
         print("NC552:  ",nc['hwcmd'])
         vpar['hw'] = ','.join(nc['hwcmd'].keys())
-        print(vpar['hw]'])
+        print(vpar['hw'])
         vpar['cmd'] = ','.join([nc['hwcmd'][x] for x in vpar['hw'].split(',')])
 
         self.r.hmset('verdict', vpar)
