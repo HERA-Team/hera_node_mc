@@ -545,18 +545,18 @@ class NodeControl():
 
     def _log_verdict_in_redis(self, vdt, nc):
         """
-        Log the final verification dictionary to redis.
+        Log the final verification dictionary to redis under verdict:node:
         """
         vpar = {'mode': nc['mode'], 'timeout': nc['timeout'],
                 'time': nc['time'], 'age': nc['age']}
         vpar['hw'] = ','.join(nc['hwcmd'].keys())
         vpar['cmd'] = ','.join([nc['hwcmd'][x] for x in vpar['hw'].split(',')])
 
-        self.r.hmset('verdict', vpar)
-        for this_key in self.r.keys():
-            if 'verdict:node:' in this_key:
+        for this_key in self.r.keys():  # purge all old values
+            if this_key.startswith('verdict:node:'):
                 for k in self.r.hgetall(this_key):
                     self.r.hdel(this_key, k)
+        self.r.hmset('verdict:node:par'.format(), vpar)
         for node, vals in vdt.items():
             for hw, _stg in vals.items():
                 _tvd = {}
@@ -565,7 +565,7 @@ class NodeControl():
                 key = "verdict:node:{}:{}".format(node, hw)
                 self.r.hmset(key, _tvd)
         for node in self.connected_nodes:
-            key = "valid:node:{}".format(node)
+            key = "verdict:node:{}:valid".format(node)
             if nc[node]:
                 self.r.set(key, 0)
             else:
