@@ -140,11 +140,15 @@ class NodeControl():
         """
         if nodes is None or nodes == 'all':
             self.request_nodes = list(range(MAX_NODES))
-        elif not isinstance(nodes, list):
-            if int(nodes) < 0:
+        elif isinstance(nodes, str):
+            self.request_nodes = [int(x) for x in nodes.split(',')]
+            if self.request_nodes[0] < 0:
+                self.request_nodes = None
+        elif isinstance(nodes, (int, float)):
+            if nodes < 0:
                 self.request_nodes = None
             else:
-                self.request_nodes = [nodes]
+                self.request_nodes = [int(nodes)]
         else:
             self.request_nodes = nodes
         self.r = get_redis_client(redisServer)
