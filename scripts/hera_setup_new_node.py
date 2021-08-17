@@ -46,17 +46,18 @@ hostname = socket.gethostname()
 # Read files and get macs and ips
 hosts = hosts_ethers.HostsEthers('/etc/hosts')
 ethers = hosts_ethers.HostsEthers('/etc/ethers')
+print(__file__)
 
 if args.snaps is not None and send_receive.is_snap_control_host(hostname):
     # Set up SNAPs
-    args.snap0, args.snap1, args.snap2, args.snap3 = [int(x) for x in args.snaps.split(',')]
+    _snp = [int(x) for x in args.snaps.split(',')]
     snap_rev = args.snap_rev.upper().split(",")
     if len(snap_rev) == 1:
         snap_rev = snap_rev * 4
     snaps = [{}, {}, {}, {}]
     for i in range(4):
         snaps[i]['node'] = 'heraNode{}Snap{}'.format(args.node_num, i)
-        snaps[i]['sn'] = 'SNP{}{:06d}'.format(snap_rev[i], getattr(args, 'snap{}'.format(i)))
+        snaps[i]['sn'] = 'SNP{}{:06d}'.format(snap_rev[i], _snp[i])
         snaps[i]['mac'] = ethers.by_alias[snaps[i]['sn']]
         snaps[i]['ip'] = hosts.by_alias[snaps[i]['sn']]
         hosts.update_id(snaps[i]['ip'], '{}  {}'.format(snaps[i]['sn'], snaps[i]['node']))
