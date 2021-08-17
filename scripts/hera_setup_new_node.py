@@ -47,7 +47,6 @@ hostname = socket.gethostname()
 # Read files and get macs and ips
 hosts = hosts_ethers.HostsEthers('/etc/hosts')
 ethers = hosts_ethers.HostsEthers('/etc/ethers')
-print(__file__)
 
 snaps = None
 if args.snaps is not None and send_receive.is_snap_control_host(hostname):
