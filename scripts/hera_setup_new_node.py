@@ -68,7 +68,7 @@ if hostname in ['hera-node-head', 'hera-mobile']:
     rd['node'] = 'heraNode{}'.format(args.node_num)
     rd['node_ID'] = args.node_num
     rd['ncm'] = ncm
-    rd['sn'] = 'arduino{}'.format(RDmap[ncm][2:])
+    rd['sn'] = 'arduino{}'.format(int(RDmap[ncm][2:]))
     rd['mac'] = ethers.by_alias[rd['sn']]
     rd['ip'] = hosts.by_alias[rd['sn']]
     hosts.update_id(rd['ip'], '{}  {}'.format(rd['sn'], rd['node']))
