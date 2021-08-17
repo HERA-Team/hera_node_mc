@@ -22,7 +22,6 @@ class HostsEthers:
         differences.  It does not handle removed lines gracefully at all (but no
         method currently does that.) or new lines except at the end.
         """
-        print("This is a very limited rewriting method!")
         if len(self.file_contents_by_line) == 0:
             print("{} in memory to rewrite is empty - skipping"
                   .format(self.filename))
@@ -47,6 +46,7 @@ class HostsEthers:
         if check_only:
             print("Not writing file - checking only.")
         else:
+            print("This is a very limited rewriting method!")
             with open(self.filename, 'w') as fp:
                 for line in self.file_contents_by_line:
                     print("{}".format(line), file=fp)

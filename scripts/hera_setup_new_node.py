@@ -2,6 +2,7 @@
 from __future__ import print_function
 import argparse
 import os
+import time
 import socket
 from node_control import hosts_ethers
 from node_control.node_control import get_redis_client
@@ -63,10 +64,11 @@ if hostname in ['hera-node-head', 'hera-mobile']:
     status_node_keys = list(status_node.status_node(None, None).keys())
     rd = {}
     for key in status_node_keys:
-        rd[key] = -1
+        rd[key] = 0
     ncm = 'NCM{:02d}'.format(args.ncm)
     rd['node'] = 'heraNode{}'.format(args.node_num)
     rd['node_ID'] = args.node_num
+    rd['timestamp'] = time.time()
     rd['ncm'] = ncm
     rd['sn'] = 'arduino{}'.format(int(RDmap[ncm][2:]))
     rd['mac'] = ethers.by_alias[rd['sn']]
