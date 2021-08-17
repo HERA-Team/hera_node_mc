@@ -42,7 +42,7 @@ for node in nc.nodes_in_redis:
             hosts_ip = hosts.by_alias[node_host]
             hpn = hosts.by_id[hosts_ip][0]
             if hosts_ip.strip() == redis_ip.strip():
-                print("\thost/redis IP agrees at {}".format(redis_ip))
+                print("\thost/redis IPs agree at {}".format(redis_ip))
                 print("\tassociated with {}".format(hpn))
             else:
                 print("\thost/redis IPs disagree {}/{}".format(hosts_ip, redis_ip))
@@ -50,16 +50,30 @@ for node in nc.nodes_in_redis:
                 hpn = None
         except KeyError:
             print("\t{} not in hosts file.".format(node_host))
+            hpn = None
         if hpn is not None:
             try:
                 ethers_mac = ethers.by_alias[hpn]
                 if ethers_mac.strip() == redis_mac.strip():
-                    print("\tethers/redis mac agrees at {}".format(redis_mac))
+                    print("\tethers/redis macs agree at {}".format(redis_mac))
                 else:
                     print("\tethers/redis macs disagree {}/{}".format(ethers_mac, redis_mac))
             except KeyError:
                 print("\t{} not in ethers.".format(hpn))
-
+        wr_host = "{}wr".format(node_host)
+        try:
+            hosts_wr = hosts.by_alias[wr_host]
+            hpn = hosts.by_id[hosts_wr][0]
+            print("\tWR {} -> {}".format(hosts_wr, hosts.by_id[hosts_wr]))
+        except KeyError:
+            hosts_wr = None
+            print("\tno WR found.")
+        if hosts_wr is not None:
+            try:
+                mac_wr = ethers.by_alias[hpn]
+                print("\tassociated with mac {}".format(mac_wr))
+            except KeyError:
+                print("\t{} not in ethers".format(hpn))
     elif args.command == 'update':
         if args.key is None or args.value is None:
             print("Need key value.")
