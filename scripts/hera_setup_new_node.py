@@ -37,7 +37,8 @@ ap.add_argument('-s', '--snaps', help='csv-list of snaps, if supplied 4-ints no 
 ap.add_argument('--snap-rev', help="__Shouldn't need to change__  Rev letter of SNAP (csv-list).  "
                 "If one supplied, it applies to all.", dest='snap_rev', default='C')
 ap.add_argument('--actually-modify', dest='modify', action='store_true',
-                help='Flag to actually rewrite hosts/ethers and restart dnsmasq')
+                help='Flag to actually rewrite hosts/ethers and restart dnsmasq '
+                '(ignore for rfi machine)')
 args = ap.parse_args()
 
 hostname = socket.gethostname()
@@ -108,6 +109,10 @@ if hostname == 'hera-mobile' or hostname.startswith('ral'):
         print("White Rabbit: {}".format(wr['node']), file=fp)
         for k in ['sn', 'mac', 'ip']:
             print("\t{}: {}".format(k, wr[k]), file=fp)
+
+if hostname == 'hera-mobile':
+    if __file__.startswith('/usr/local'):
+        args.modify = True
 
 hosts.rewrite_file(check_only=not args.modify)
 if args.modify:
