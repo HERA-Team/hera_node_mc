@@ -48,6 +48,7 @@ hosts = hosts_ethers.HostsEthers('/etc/hosts')
 ethers = hosts_ethers.HostsEthers('/etc/ethers')
 print(__file__)
 
+snaps = None
 if args.snaps is not None and send_receive.is_snap_control_host(hostname):
     # Set up SNAPs
     _snp = [int(x) for x in args.snaps.split(',')]
@@ -96,10 +97,11 @@ if hostname == 'hera-mobile' or hostname.startswith('ral'):
         print(datetime.datetime.now().isoformat(), file=fp)
         print("Node: {}".format(args.node_num), file=fp)
         print('NCM: {}'.format(args.ncm), file=fp)
-        for i in range(4):
-            print("SNAP: {}".format(snaps[i]['node']), file=fp)
-            for k in ['sn', 'mac', 'ip']:
-                print("\t{}:  {}".format(k, snaps[i][k]), file=fp)
+        if snaps is not None:
+            for i in range(4):
+                print("SNAP: {}".format(snaps[i]['node']), file=fp)
+                for k in ['sn', 'mac', 'ip']:
+                    print("\t{}:  {}".format(k, snaps[i][k]), file=fp)
         print("Arduino: {}".format(rd['node']), file=fp)
         for k in ['sn', 'mac', 'ip']:
             print("\t{}: {}".format(k, rd[k]), file=fp)
