@@ -112,6 +112,7 @@ if hostname == 'hera-mobile' or hostname.startswith('ral'):
 if hostname == 'hera-mobile':
     if __file__.startswith('/usr/local'):
         args.modify = True
+        os.chmod('CurrentNode.txt', 0o666)
 
 hosts.rewrite_file(check_only=not args.modify)
 if args.modify:
