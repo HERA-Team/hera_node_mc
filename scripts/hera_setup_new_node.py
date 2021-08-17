@@ -35,15 +35,12 @@ ap.add_argument('snap2', help="SNAP serial number (int)", type=int)
 ap.add_argument('snap3', help="SNAP serial number (int)", type=int)
 ap.add_argument('--snap-rev', help="__Shouldn't need to change__  Rev letter of SNAP (csv-list).  "
                 "If one supplied, it applies to all.", dest='snap_rev', default='C')
-ap.add_argument('--check-only', help='Flag to only check and not rewrite hosts/ethers nor restart '
-                'dnsmasq', dest='check_only', action='store_true')
-ap.add_argument('--dont-reset-dnsmasq', dest='reset_dnsmasq', help="Don't reset the dnsmasq",
-                action='store_false')
+ap.add_argument('--actually-modify', dest='modify', action='store_true',
+                help='Flag to actually rewrite hosts/ethers and restart dnsmasq')
 args = ap.parse_args()
-if args.check_only:
-    args.reset_dnsmasq = False
 
 hostname = socket.gethostname()
+
 
 # Read files and get macs and ips
 hosts = hosts_ethers.HostsEthers('/etc/hosts')
@@ -62,9 +59,15 @@ if hostname in ['hera-snap-head', 'hera-mobile']:
         snaps[i]['ip'] = hosts.by_alias[snaps[i]['sn']]
         hosts.update_id(snaps[i]['ip'], '{}  {}'.format(snaps[i]['sn'], snaps[i]['node']))
 if hostname in ['hera-node-head', 'hera-mobile']:
+    from node_control import status_node
+    status_node_keys = list(status_node.status_node(None, None).keys())
+    rd = {}
+    for key in status_node_keys:
+        rd[key] = -1
     ncm = 'NCM{:02d}'.format(args.ncm)
-    # Set up arduino
-    rd = {'node': 'heraNode{}'.format(args.node_num)}
+    rd['node'] = 'heraNode{}'.format(args.node_num)
+    rd['node_ID'] = args.node_num
+    rd['ncm'] = ncm
     rd['sn'] = 'arduino{}'.format(RDmap[ncm][2:])
     rd['mac'] = ethers.by_alias[rd['sn']]
     rd['ip'] = hosts.by_alias[rd['sn']]
@@ -79,9 +82,7 @@ if hostname in ['hera-node-head', 'hera-mobile']:
 
     r = get_redis_client()
     rkey = 'status:node:{}'.format(int(args.node_num))
-    r.hset(rkey, 'ip', rd['ip'])
-    r.hset(rkey, 'mac', rd['mac'])
-    r.hset(rkey, 'node_ID', args.node_num)
+    r.hmset(rkey, rd)
 
 if hostname == 'hera-mobile':  # RFI testing machine, so want to write the current node info
     import datetime
@@ -101,8 +102,8 @@ if hostname == 'hera-mobile':  # RFI testing machine, so want to write the curre
         for k in ['sn', 'mac', 'ip']:
             print("\t{}: {}".format(k, wr[k]), file=fp)
 
-hosts.rewrite_file(check_only=args.check_only)
-if args.reset_dnsmasq:
+hosts.rewrite_file(check_only=not args.modify)
+if args.modify:
     os.system('sudo /etc/init.d/dnsmasq stop')
     os.system('sudo rm /var/lib/misc/dnsmasq.leases')
     os.system('sudo /etc/init.d/dnsmasq start')

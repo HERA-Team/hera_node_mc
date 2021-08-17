@@ -16,10 +16,13 @@ class HostsEthers:
 
     def rewrite_file(self, check_only=False):
         """
+        Writes updated file - but only allow changes by line from original.
+
         Writes the contents of list "file_contents_by_line" to the filename, showing
         differences.  It does not handle removed lines gracefully at all (but no
-        method currently does that.)
+        method currently does that.) or new lines except at the end.
         """
+        print("This is a very limited rewriting method!")
         if len(self.file_contents_by_line) == 0:
             print("{} in memory to rewrite is empty - skipping"
                   .format(self.filename))
