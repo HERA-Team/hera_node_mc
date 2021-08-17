@@ -49,7 +49,7 @@ ethers = hosts_ethers.HostsEthers('/etc/ethers')
 
 if args.snaps is not None and send_receive.is_snap_control_host(hostname):
     # Set up SNAPs
-    snap0, snap1, snap2, snap3 = [int(x) for x in args.snaps.split(',')]
+    args.snap0, args.snap1, args.snap2, args.snap3 = [int(x) for x in args.snaps.split(',')]
     snap_rev = args.snap_rev.upper().split(",")
     if len(snap_rev) == 1:
         snap_rev = snap_rev * 4
