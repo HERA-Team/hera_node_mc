@@ -5,6 +5,7 @@ import os
 import time
 import socket
 from node_control import hosts_ethers
+from node_control import send_receive
 from node_control.node_control import get_redis_client
 
 
@@ -30,10 +31,9 @@ WRmap = {'NCMP2': 'WRA000028', 'NCM03': 'WRA000084', 'NCM06': 'WRA000093', 'NCM0
 ap = argparse.ArgumentParser()
 ap.add_argument('node_num', help="Node number (int)", type=int)
 ap.add_argument('ncm', help="Node-control-module (NCM) number (int)", type=int)
-ap.add_argument('snap0', help="SNAP serial number (int)", type=int)
-ap.add_argument('snap1', help="SNAP serial number (int)", type=int)
-ap.add_argument('snap2', help="SNAP serial number (int)", type=int)
-ap.add_argument('snap3', help="SNAP serial number (int)", type=int)
+ap.add_argument('-s', '--snaps', help='csv-list of snaps, if supplied 4-ints no spaces'
+                '(if None, will ignore SNAPs which is the default)',
+                default=None)
 ap.add_argument('--snap-rev', help="__Shouldn't need to change__  Rev letter of SNAP (csv-list).  "
                 "If one supplied, it applies to all.", dest='snap_rev', default='C')
 ap.add_argument('--actually-modify', dest='modify', action='store_true',
@@ -47,8 +47,9 @@ hostname = socket.gethostname()
 hosts = hosts_ethers.HostsEthers('/etc/hosts')
 ethers = hosts_ethers.HostsEthers('/etc/ethers')
 
-if hostname in ['hera-snap-head', 'hera-mobile']:
+if args.snaps is not None and send_receive.is_snap_control_host(hostname):
     # Set up SNAPs
+    snap0, snap1, snap2, snap3 = [int(x) for x in args.snaps.split(',')]
     snap_rev = args.snap_rev.upper().split(",")
     if len(snap_rev) == 1:
         snap_rev = snap_rev * 4
@@ -59,7 +60,7 @@ if hostname in ['hera-snap-head', 'hera-mobile']:
         snaps[i]['mac'] = ethers.by_alias[snaps[i]['sn']]
         snaps[i]['ip'] = hosts.by_alias[snaps[i]['sn']]
         hosts.update_id(snaps[i]['ip'], '{}  {}'.format(snaps[i]['sn'], snaps[i]['node']))
-if hostname in ['hera-node-head', 'hera-mobile']:
+if send_receive.is_node_control_host(hostname):
     from node_control import status_node
     status_node_keys = list(status_node.status_node(None, None).keys())
     rd = {}
@@ -86,7 +87,8 @@ if hostname in ['hera-node-head', 'hera-mobile']:
     rkey = 'status:node:{}'.format(int(args.node_num))
     r.hmset(rkey, rd)
 
-if hostname == 'hera-mobile':  # RFI testing machine, so want to write the current node info
+# RFI testing machine, so want to write the current node info
+if hostname == 'hera-mobile' or hostname.startswith('ral'):
     import datetime
     with open('CurrentNode.txt', 'w') as fp:
         print("{}".format(args.node_num), file=fp)

@@ -5,7 +5,17 @@ import subprocess
 
 
 # Define hosts that can directly control the arduinos etc
-def direct_control_host(this_host):
+def is_node_control_host(this_host):
+    direct_control_hostnames = ['hera-mobile', 'hera-node-head']
+    if this_host in direct_control_hostnames or\
+       this_host.startswith('ral') or this_host.startswith('DAVID'):
+        return True
+    return False
+
+
+# Define hosts that can directly control the snaps
+def is_snap_control_host(this_host):
+    direct_control_hostnames = ['hera-mobile', 'hera-snap-head']
     if this_host in direct_control_hostnames or\
        this_host.startswith('ral') or this_host.startswith('DAVID'):
         return True
@@ -34,7 +44,6 @@ def ping(server, count=1, wait_sec=1):
         return None
 
 
-direct_control_hostnames = ['hera-mobile', 'hera-node-head']
 THIS_HOST = socket.gethostname()
 
 
@@ -84,7 +93,7 @@ class UdpSenderReceiver():
 
         if arduinoAddress is None:
             self.node_is_connected = False
-        elif direct_control_host(THIS_HOST):
+        elif is_node_control_host(THIS_HOST):
             self.node_is_connected = True
             # define socket address for binding; necessary for communicating with Arduino
             if 'receive' in arduinoAddress.lower():
