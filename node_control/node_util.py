@@ -1,8 +1,6 @@
-#! /usr/bin/env python
-"""
-Receives UDP packets from all active Arduinos containing sensor data and status
-information and pushes it up to Redis with status:node:x hash key. <status_node>
-"""
+from __future__ import print_function
+import redis
+import datetime
 import time
 import struct
 
@@ -75,3 +73,67 @@ def status_node(data, addr):
                  'timestamp': time.time()
                  }
     return data_dict
+
+
+def str2bool(x):
+    """
+    Convert the string `x` to a boolean.
+    :return: bool(x == '1')
+    """
+    return x == "1"
+
+
+def get_redis_client(redisServer='redishost'):
+    connection_pool = redis.ConnectionPool(host=redisServer, decode_responses=True)
+    return redis.StrictRedis(connection_pool=connection_pool, charset='utf-8')
+
+
+def stale_data(data, key, stale=100.0, show_msg=True):
+    """
+    Print warning if data are too stale or not present.
+
+    Parameters
+    ----------
+    data : dictionary containing age value (if available)
+    key : str
+        key to age in seconds or timedelta (timedelta, int, float or None)
+    state : float
+        Stale timeframe in seconds
+    show_msg : bool
+        Flag to actually show the warning message.
+
+    Returns
+    -------
+    True if stale or age not present/not valid.
+    """
+    try:
+        age = data[key]
+    except KeyError:
+        if show_msg:
+            print("{} not found.".format(key))
+        return True
+    if age is None:
+        if show_msg:
+            print("{} is None.".format(key))
+        return True
+    if isinstance(age, datetime.timedelta):
+        age = age.days*(24.0 * 3600.0) + age.seconds + age.microseconds/1E6
+    try:
+        age = float(age)
+    except ValueError:
+        if show_msg:
+            print("Invalid age format ({}).".format(age))
+        return True
+    if age > stale:
+        if age > 86400:
+            dyage = age / 86400.0
+            w_msg = "{:.1f} days".format(dyage)
+        elif age > 3600:
+            hrage = age / 3600.0
+            w_msg = "{:.1f} hours".format(hrage)
+        else:
+            w_msg = "{} seconds".format(int(age))
+        if show_msg:
+            print("Data are {} old".format(w_msg))
+        return True
+    return False

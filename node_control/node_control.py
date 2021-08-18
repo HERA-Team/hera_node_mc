@@ -1,78 +1,13 @@
 from __future__ import print_function
-import redis
 import dateutil.parser
 import json
 import datetime
 import time
 from os import path as osp
-from . import send_receive, status_node, __version__
+from . import send_receive, node_util, __version__
 
 
 MAX_NODES = 30
-
-
-def str2bool(x):
-    """
-    Convert the string `x` to a boolean.
-    :return: bool(x == '1')
-    """
-    return x == "1"
-
-
-def get_redis_client(redisServer='redishost'):
-    connection_pool = redis.ConnectionPool(host=redisServer, decode_responses=True)
-    return redis.StrictRedis(connection_pool=connection_pool, charset='utf-8')
-
-
-def stale_data(data, key, stale=100.0, show_msg=True):
-    """
-    Print warning if data are too stale or not present.
-
-    Parameters
-    ----------
-    data : dictionary containing age value (if available)
-    key : str
-        key to age in seconds or timedelta (timedelta, int, float or None)
-    state : float
-        Stale timeframe in seconds
-    show_msg : bool
-        Flag to actually show the warning message.
-
-    Returns
-    -------
-    True if stale or age not present/not valid.
-    """
-    try:
-        age = data[key]
-    except KeyError:
-        if show_msg:
-            print("{} not found.".format(key))
-        return True
-    if age is None:
-        if show_msg:
-            print("{} is None.".format(key))
-        return True
-    if isinstance(age, datetime.timedelta):
-        age = age.days*(24.0 * 3600.0) + age.seconds + age.microseconds/1E6
-    try:
-        age = float(age)
-    except ValueError:
-        if show_msg:
-            print("Invalid age format ({}).".format(age))
-        return True
-    if age > stale:
-        if age > 86400:
-            dyage = age / 86400.0
-            w_msg = "{:.1f} days".format(dyage)
-        elif age > 3600:
-            hrage = age / 3600.0
-            w_msg = "{:.1f} hours".format(hrage)
-        else:
-            w_msg = "{} seconds".format(int(age))
-        if show_msg:
-            print("Data are {} old".format(w_msg))
-        return True
-    return False
 
 
 def get_redis_nodes(redisServer='redishost', count=None):
@@ -121,7 +56,7 @@ class NodeControl():
             monitoring redis server
         count : int or None
             Number of status fields to make a node count as actually used.
-            If None, reads from status_nodes
+            If None, reads from node_util.status_node
 
         Attributes
         ----------
@@ -151,12 +86,12 @@ class NodeControl():
                 self.request_nodes = [int(nodes)]
         else:
             self.request_nodes = nodes
-        self.r = get_redis_client(redisServer)
+        self.r = node_util.get_redis_client(redisServer)
         self.nodes_in_redis = []
         self.connected_nodes = []
         self.senders = {}
         self.sc_node = ''
-        self.status_node_keys = list(status_node.status_node(None, None).keys())
+        self.status_node_keys = list(node_util.status_node(None, None).keys())
         self.get_nodes_in_redis(count)
 
     def log_service_in_redis(self, this_file):
@@ -367,7 +302,7 @@ class NodeControl():
                     except ValueError:
                         power[node]['timestamp'] = statii[key]
                 elif key.startswith("power"):
-                    power[node][key] = str2bool(statii[key])
+                    power[node][key] = node_util.str2bool(statii[key])
         return power
 
     def get_wr_status(self):
