@@ -125,6 +125,8 @@ class HostsEthers:
         for line in self.file_contents_by_line:
             if len(line) < 10 or line[0] == '#':
                 continue
+            if '#' in line:
+                line = line.split('#')[0].strip()
             data = line.split()
             if data[0] in self.by_id.keys():
                 msg = '{} is duplicated in {}'.format(data[0], self.filename)
