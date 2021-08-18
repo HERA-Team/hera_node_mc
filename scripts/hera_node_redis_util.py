@@ -7,7 +7,7 @@ Set node_ID under status:node:*
 """
 from __future__ import print_function
 import argparse
-from node_control import node_control
+from node_control import node_control, node_util
 
 ap = argparse.ArgumentParser()
 ap.add_argument('command', help='Command to execute.',
@@ -18,7 +18,7 @@ ap.add_argument('-n', '--nodes', help="List of node numbers to use. "
 ap.add_argument('-k', '--key', help='If update, give status keyname', default=None)
 ap.add_argument('-v', '--value', help='If update, give status key value', default=None)
 args = ap.parse_args()
-r = node_control.get_redis_client('redishost')
+r = node_util.get_redis_client('redishost')
 nc = node_control.NodeControl(args.nodes, count=2)
 
 for node in nc.nodes_in_redis:

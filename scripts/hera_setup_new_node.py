@@ -6,7 +6,7 @@ import time
 import socket
 from node_control import hosts_ethers
 from node_control import send_receive
-from node_control.node_control import get_redis_client
+from node_control.node_util import get_redis_client
 
 
 # These are dumped from hera_mc on October 27, 2020

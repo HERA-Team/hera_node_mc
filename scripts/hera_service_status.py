@@ -1,6 +1,6 @@
 #! /usr/bin/env python
 from __future__ import print_function
-from node_control.node_control import get_redis_client
+from node_control.node_util import get_redis_client
 
 r = get_redis_client()
 
