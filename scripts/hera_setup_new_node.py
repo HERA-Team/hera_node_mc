@@ -63,8 +63,8 @@ if args.snaps is not None and send_receive.is_snap_control_host(hostname):
         snaps[i]['ip'] = hosts.by_alias[snaps[i]['sn']]
         hosts.update_id(snaps[i]['ip'], '{}  {}'.format(snaps[i]['sn'], snaps[i]['node']))
 if send_receive.is_node_control_host(hostname):
-    from node_control import status_node
-    status_node_keys = list(status_node.status_node(None, None).keys())
+    from node_control.node_util import status_node
+    status_node_keys = list(status_node(None, None).keys())
     rd = {}
     for key in status_node_keys:
         rd[key] = 0
