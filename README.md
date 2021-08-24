@@ -1,10 +1,9 @@
 
 # About
-The updated version is now in main (production-node, prototype-node, h4cv2 are currently being retained )
-
-The prototype node and the production nodes have different architectures and therefore different software. For example, in prototype node, SNAP power is controlled in pairs (SNAP 0 & 1 or SNAP 2 & 3) and in production nodes, the SNAP power is controlled separately. Make sure you're using the right branch, either **prototype-node** or **production-node**.
-
+Code to monitor and control the arduinos in the node-control-module.
 See the 'Monitor and Control Subsystem Description' document for more details: https://www.overleaf.com/read/njphvbyxchfs
+
+Note that this code is only valid for the production nodes -- prototype nodes will need to use the code at the "old-prototype-node" tag.
 # Installation
 
 #### git clone --recursive https://github.com/reeveress/monitor-control.git
