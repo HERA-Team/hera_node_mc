@@ -326,14 +326,14 @@ class NodeControl():
             'mode' (str)                : WR-LEN operating mode (eg. "WRC_SLAVE_WR0")
             'serial' (str)              : Canonical HERA hostname (~=serial number) of node's WR-LEN
             'temp' (float)              : WR-LEN temperature in degrees C
-            'sw_build_date' (datetime)  : Build date of WR-LEN software
-            'wr_gw_date' (datetime)     : WR-LEN gateware build date
+            'sw_build_date' (timestamp)  : Build date of WR-LEN software
+            'wr_gw_date' (timestamp)     : WR-LEN gateware build date
             'wr_gw_version' (str)       : WR-LEN gateware version number
             'wr_gw_id' (str)            : WR-LEN gateware ID number
             'wr_build' (str)            : WR-LEN build git hash
             'wr_fru_custom' (str)   : Custom manufacturer tag'
             'wr_fru_device' (str)   : Manufacturer device name designation
-            'wr_fru_fid' (datetime) : Manufacturer invoice(?) date
+            'wr_fru_fid' (timestamp) : Manufacturer invoice(?) date
             'wr_fru_partnum' (str)  : Manufacturer part number
             'wr_fru_serial' (str)   : Manufacturer serial number
             'wr_fru_vendor' (str)   : Vendor name
@@ -406,7 +406,7 @@ class NodeControl():
             '_tx': int,
             '_ucnt': int,
             '_sec': int,
-            "timestamp": dateutil.parser.parse
+            'timestamp': dateutil.parser.parse
         }
         wrstat = {}
         for node, stats in self._get_raw_node_hash("status:wr:heraNode*wr").items():
@@ -424,6 +424,8 @@ class NodeControl():
                         wrstat[node][key] = convfunc(stats[key])
                     except:  # noqa
                         wrstat[node][key] = None
+                if isinstance(wrstat[node][key], datetime):
+                    wrstat[node][key] = time.mktime(wrstat[node][key].timetuple())
         return wrstat
 
     def verdict(self, hwcmd, verbose=True, hold_for_verify=120, verify_mode='all',
