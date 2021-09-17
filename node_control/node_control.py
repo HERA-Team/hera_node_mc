@@ -264,7 +264,7 @@ class NodeControl():
                 try:
                     this_timestamp = float(stad[1])
                     this_age = now - this_timestamp
-                except IndexError:
+                except (IndexError, ValueError):
                     this_timestamp = -99
                     this_age = -99
                 power[node][this_key] = {'timestamp': this_timestamp,
@@ -300,7 +300,8 @@ class NodeControl():
                         power[node]['timestamp'] = float(statii[key])
                         power[node]['age'] = now - float(statii[key])
                     except ValueError:
-                        power[node]['timestamp'] = statii[key]
+                        power[node]['timestamp'] = -99
+                        power[node]['timestamp'] = -99
                 elif key.startswith("power"):
                     power[node][key] = node_util.str2bool(statii[key])
         return power
@@ -312,7 +313,7 @@ class NodeControl():
 
         If no stats exist for this White Rabbit endpoint, returns `None`.
 
-        Otherwise Returns a dict where `timestamp` is a python `datetime` object describing when
+        Otherwise Returns a dict where `timestamp` is a python `timestamp` describing when
         the values were last updated in redis, and `statii` is a dictionary of status values.
 
         If a status value is not available it will be `None`
