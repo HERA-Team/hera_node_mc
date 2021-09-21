@@ -301,7 +301,7 @@ class NodeControl():
                         power[node]['age'] = now - float(statii[key])
                     except ValueError:
                         power[node]['timestamp'] = -99
-                        power[node]['timestamp'] = -99
+                        power[node]['age'] = -99
                 elif key.startswith("power"):
                     power[node][key] = node_util.str2bool(statii[key])
         return power
