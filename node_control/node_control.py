@@ -326,9 +326,9 @@ class NodeControl():
             'ip' (str)                  : IP address of this node's WR-LEN
             'mode' (str)                : WR-LEN operating mode (eg. "WRC_SLAVE_WR0")
             'serial' (str)              : Canonical HERA hostname (~=serial number) of node's WR-LEN
-            'temp' (float)              : WR-LEN temperature in degrees C
-            'sw_build_date' (timestamp)  : Build date of WR-LEN software
-            'wr_gw_date' (timestamp)     : WR-LEN gateware build date
+            'temperature' (float)       : WR-LEN temperature in degrees C
+            'sw_build_date' (timestamp) : Build date of WR-LEN software
+            'wr_gw_date' (timestamp)    : WR-LEN gateware build date
             'wr_gw_version' (str)       : WR-LEN gateware version number
             'wr_gw_id' (str)            : WR-LEN gateware ID number
             'wr_build' (str)            : WR-LEN build git hash
@@ -371,7 +371,7 @@ class NodeControl():
             'ip': str,
             'mode': str,
             'serial': str,
-            'temp': float,
+            'temperature': float,
             'sw_build_date': dateutil.parser.parse,
             'wr_gw_date': lambda x: dateutil.parser.parse('20' + x),  # hack!
             'wr_gw_version': str,
