@@ -1,7 +1,7 @@
 from __future__ import print_function
 import dateutil.parser
 import json
-import datetime
+from datetime import datetime
 import time
 from os import path as osp
 from . import send_receive, node_util, __version__
@@ -97,7 +97,7 @@ class NodeControl():
     def log_service_in_redis(self, this_file):
         rkey = "version:{}:{}".format(__package__, osp.basename(this_file))
         rval = {"version": __version__,
-                "timestamp": datetime.datetime.now().isoformat()}
+                "timestamp": datetime.now().isoformat()}
         self.r.hmset(rkey, rval)
         self.status_scriptname = "status:script:{}:{}".format(send_receive.THIS_HOST, this_file)
 
