@@ -1,0 +1,21 @@
+# Configuration file for systemd that keeps the HERA White Rabbit status
+# daemon running.
+#
+# Copy this file to /etc/systemd/system/. Then run
+# `systemctl enable hera-wr-redis-monitor and `systemctl start hera-wr-redis-monitor`.
+#
+# This service is meant to be run on hera-node-head.
+
+[Unit]
+Description=HERA WR-LEN status poller
+
+[Service]
+Type=simple
+Restart=always
+RestartSec=60
+User=hera
+Group=hera
+ExecStart=/usr/local/bin/hera_wr_redis_monitor.py -t 60
+
+[Install]
+WantedBy=multi-user.target

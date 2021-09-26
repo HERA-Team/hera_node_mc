@@ -1,5 +1,4 @@
 from __future__ import print_function
-import dateutil.parser
 import json
 from datetime import datetime
 import time
@@ -332,12 +331,12 @@ class NodeControl():
             'wr_gw_version' (str)       : WR-LEN gateware version number
             'wr_gw_id' (str)            : WR-LEN gateware ID number
             'wr_build' (str)            : WR-LEN build git hash
-            'wr_fru_custom' (str)   : Custom manufacturer tag'
-            'wr_fru_device' (str)   : Manufacturer device name designation
-            'wr_fru_fid' (timestamp) : Manufacturer invoice(?) date
-            'wr_fru_partnum' (str)  : Manufacturer part number
-            'wr_fru_serial' (str)   : Manufacturer serial number
-            'wr_fru_vendor' (str)   : Vendor name
+            'wr_fru_custom' (str)       : Custom manufacturer tag'
+            'wr_fru_device' (str)       : Manufacturer device name designation
+            'wr_fru_fid' (timestamp)    : Manufacturer invoice(?) date
+            'wr_fru_partnum' (str)      : Manufacturer part number
+            'wr_fru_serial' (str)       : Manufacturer serial number
+            'wr_fru_vendor' (str)       : Vendor name
             The following entries are prefixed `wr0` or `wr1` for WR-LEN ports 0 and 1,
             respectively.  Most values will only be not None for one of the two ports.
             'wr[0|1]_ad'    (int)  : ???
@@ -372,14 +371,15 @@ class NodeControl():
             'mode': str,
             'serial': str,
             'temperature': float,
-            'sw_build_date': dateutil.parser.parse,
-            'wr_gw_date': lambda x: dateutil.parser.parse('20' + x),  # hack!
+            'timestamp': float,
+            'sw_build_date': str,
+            'wr_gw_date': str,
             'wr_gw_version': str,
             'wr_gw_id': str,
             'wr_build': str,
             'wr_fru_custom': str,
             'wr_fru_device': str,
-            'wr_fru_fid': dateutil.parser.parse,
+            'wr_fru_fid': str,
             'wr_fru_partnum': str,
             'wr_fru_serial': str,
             'wr_fru_vendor': str,
@@ -406,8 +406,7 @@ class NodeControl():
             '_syncs': str,
             '_tx': int,
             '_ucnt': int,
-            '_sec': int,
-            'timestamp': dateutil.parser.parse
+            '_sec': int
         }
         wrstat = {}
         for node, stats in self._get_raw_node_hash("status:wr:heraNode*wr").items():
@@ -425,8 +424,6 @@ class NodeControl():
                         wrstat[node][key] = convfunc(stats[key])
                     except:  # noqa
                         wrstat[node][key] = None
-                if isinstance(wrstat[node][key], datetime):
-                    wrstat[node][key] = time.mktime(wrstat[node][key].timetuple())
         return wrstat
 
     def verdict(self, hwcmd, verbose=True, hold_for_verify=120, verify_mode='all',
