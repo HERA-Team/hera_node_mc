@@ -423,7 +423,10 @@ class NodeControl():
                     try:
                         wrstat[node][key] = convfunc(stats[key])
                     except:  # noqa
-                        wrstat[node][key] = None
+                        if key == 'timestamp':
+                            wrstat[node][key] = 0
+                        else:
+                            wrstat[node][key] = None
         return wrstat
 
     def verdict(self, hwcmd, verbose=True, hold_for_verify=120, verify_mode='all',
