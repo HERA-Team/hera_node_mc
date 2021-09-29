@@ -7,15 +7,11 @@ parser = argparse.ArgumentParser(description='Turn on SNAP relay, SNAPs, FEM and
                                  formatter_class=argparse.ArgumentDefaultsHelpFormatter)
 
 parser.add_argument('command', help="Specify 'on', 'off', 'start', 'stop' or 'reset'.  "
-                    "start/stop turn everything on/off.  start/stop/reset don't use any "
+                    "start/stop turns everything on/off.  start/stop/reset don't use any "
                     "other arguments.  start/stop also raise the error fraction to 1.0",
                     choices=['on', 'off', 'start', 'stop', 'reset'])
 parser.add_argument('node', help="Specify the list of nodes (csv list of int) or 'all' (default)",
                     nargs='?', default='all')
-parser.add_argument('-r', '--snap-relay', dest='snap_relay', action='store_true',
-                    help="Turn on/off the snap-relay - generally not needed since "
-                    "redundant if turning on _any_ snap or off _all_ snaps in one call; "
-                    "needed when turning off the last snap if done separately")
 parser.add_argument('-s', '--snaps', action='store_true',
                     help='Turn on/off all the snaps.  Equivalent to -0 -1 -2 -3')
 parser.add_argument('-0', '--snap0', action='store_true', help='Turn on/off SNAP 0')
@@ -24,6 +20,10 @@ parser.add_argument('-2', '--snap2', action='store_true', help='Turn on/off SNAP
 parser.add_argument('-3', '--snap3', action='store_true', help='Turn on/off SNAP 3')
 parser.add_argument('-p', '--pam', action='store_true', help='Turn on/off the PAMs')
 parser.add_argument('-f', '--fem', action='store_true', help='Turn on/off the FEMs')
+parser.add_argument('-r', '--snap-relay', dest='snap_relay', action='store_true',
+                    help="Turn on/off the snap-relay - generally not needed since "
+                    "redundant if turning on _any_ snap or off _all_ snaps in one call; "
+                    "needed when turning off the last snap if done separately")
 parser.add_argument('--allhw', action='store_true',
                     help='Turn on/off snaps, pams and fems.  Equivalent to -s -p -f')
 parser.add_argument('--throttle', help='Throttle time in sec for udp_sender (0.2s)',
@@ -37,7 +37,8 @@ parser.add_argument('--verify-mode', dest='verify_mode', help='Type of verify mo
 parser.add_argument('--no-verdict', dest='verdict', action='store_false',
                     help='Flag to not log the final verdict to redis.')
 parser.add_argument('--error-threshold', dest='error_threshold', default=0.0, type=float,
-                    help='Fractional failure rate over which to raise an error (default 0.0).')
+                    help='Fractional failure rate of nodes successfully turning on '
+                    'over which to raise an error (default 0.0).')
 parser.add_argument('--redisServer', help='Name of redis server', default='redishost')
 
 args = parser.parse_args()

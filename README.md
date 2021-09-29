@@ -3,66 +3,14 @@
 Code to monitor and control the arduinos in the node-control-module.
 See the 'Monitor and Control Subsystem Description' document for more details: https://www.overleaf.com/read/njphvbyxchfs
 
-Note that this code is only valid for the production nodes -- prototype nodes will need to use the code at the "old-prototype-node" tag.
 # Installation
 
-#### git clone --recursive https://github.com/reeveress/monitor-control.git
---recursive makes sure the git clone command downloads all the submodules.
-```shell
- cd monitor-control
- pip install -r requirements.txt
- python setup.py install
-```
-this installs the monitor-control package and its dependencies (`redis` and `dateutil`) to your system, so you can import the nodeControl module and scripts from any directory. For example, running `hera_node_power.py on 4 -p` from anywhere in your system will send a 'turn on!' command to the PAM inside node 4.
-
+pip install .
 
 # Usage
-### iPython
-##### Make sure you can connect to Redis database running on the monitor-control head node before proceeding
 
-```python
- ipython
- import nodeControl
- n = nodeControl.NodeControl(nodeID [, redisServerHostName, throttle])
-```
-nodeID is a digit from 0 to 29. redisServerHostName is either a hostname or ip address of the monitor-control head node that hosts the Redis database. Default value is hera-digi-vm but that could change in the future.  throttle is the delay interval in sec
-Running n.[tab key]  returns:
-
-```python
-n.get_sensors
-n.get_power_status
-n.power_snap_relay
-n.power_snap_0
-n.power_snap_1
-n.power_snap_2
-n.power_snap_3
-n.power_fem
-n.power_pam
-n.reset
-```
-The power methods provide the ability to send power commands to Arduino.
-All power methods take a string command 'on' or 'off' as an argument.
-### Scripts
-```shell
-hera_node[tab]
-```
-will return these scripts
-```shell
-hera_node_cmd_check.py           hera_node_serial.py
-hera_node_data_dump.py           hera_node_turn_off.py
-hera_node_get_status.py          hera_node_turn_off_sender.py
-hera_node_keep_alive.py          hera_node_turn_on.py
-hera_node_receiver.py            hera_node_turn_on_sender.py
-hera_node_serial_dump.py
-```
-These are the  scripts that are available to HERA Team:
-```shell
-hera_node_turn_on.py     	 hera_node_get_status.py
-hera_node_turn_off.py   	 hera_node_data_dump.py
-```
-* hera\_node\_turn\_on.py requires a node ID argument and a command argument in a form of a flag (-p for PAM, -r for relay, etc.)
-* hera\_node\_get\_status.py returns the status:node:x Redis key contents.
-* hera\_node\_data\_dump.py takes in node ID, filename and optional time interval at which to dump the Redis status:node:x contents to the file.
+There are basically only two user scripts:  `hera_node_power.py` and `hera_node_get_status.py`.
+Simple use is `hera_node_power.py start` to turn everything on or `hera_node_power.py stop` to turn everything off.
 
 # Backend Instructions
 ### redis-server
