@@ -1,21 +1,6 @@
 from setuptools import setup
-import os
 import socket
-import subprocess
 import glob
-
-
-ver = '2.0.0'
-try:
-    ver = (ver + '-' + subprocess.check_output(['git', 'describe', '--abbrev=8',
-           '--always', '--dirty', '--tags']).strip().decode())
-except:  # noqa
-    print(("Couldn't get version from git. Defaulting to %s" % ver))
-
-# Generate a __version__.py file with this version in it
-here = os.path.abspath(os.path.dirname(__file__))
-with open(os.path.join(here, 'node_control', '__version__.py'), 'w') as fh:
-    fh.write('__version__ = "%s"' % ver)
 
 hostname = socket.gethostname()
 
@@ -30,7 +15,6 @@ else:
 
 setup(
     name='node_control',
-    version=ver,
     description='A node monitor and control interface',
     license='BSD',
     author='David DeBoer',
@@ -39,14 +23,7 @@ setup(
     long_description=open('README.md').read(),
     package_dir={'node_control': 'node_control'},
     packages=['node_control'],
-    # scripts = [glob.glob('scripts/*'),glob.glob('backend/scripts/*')],
-    scripts=scripts
+    scripts=scripts,
+    use_scm_version=True,
+    install_requires=['redis']
 )
-
-if ver.endswith("dirty"):
-    print("********************************************")
-    print("* You are installing from a dirty git repo *")
-    print("*      One day you will regret this.       *")
-    print("*                                          *")
-    print("*  Consider cleaning up and reinstalling.  *")
-    print("********************************************")
