@@ -24,7 +24,7 @@ parser.add_argument('-r', '--snap-relay', dest='snap_relay', action='store_true'
                     help="Turn on/off the snap-relay - generally not needed since "
                     "redundant if turning on _any_ snap or off _all_ snaps in one call; "
                     "needed when turning off the last snap if done separately")
-parser.add_argument('--allhw', action='store_true',
+parser.add_argument('-a', '--all_hardware', action='store_true',
                     help='Turn on/off snaps, pams and fems.  Equivalent to -s -p -f')
 parser.add_argument('--throttle', help='Throttle time in sec for udp_sender (0.2s)',
                     type=float, default=0.2)
@@ -71,7 +71,7 @@ elif args.command == 'stop':
     args.error_threshold = 1.0
 
 keystates = {}
-if args.allhw:
+if args.all_hardware:
     args.snap_relay = True
     args.snaps = True
     args.pam = True
