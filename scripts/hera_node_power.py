@@ -33,7 +33,7 @@ parser.add_argument('--hold-for-verify', dest='hold_for_verify',
                     help="Seconds to wait before timing out (use 0 to disable check)",
                     default=90, type=int)
 parser.add_argument('--verify-mode', dest='verify_mode', help='Type of verify mode.',
-                    choices=['time', 'agree', 'cmd', 'stat', 'all'], default='all')
+                    choices=['time', 'agree', 'cmd', 'stat', 'all'], default='agree')
 parser.add_argument('--no-verdict', dest='verdict', action='store_false',
                     help='Flag to not log the final verdict to redis.')
 parser.add_argument('--error-threshold', dest='error_threshold', default=0.0, type=float,
