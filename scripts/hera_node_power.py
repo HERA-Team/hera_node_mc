@@ -63,11 +63,11 @@ if args.command == 'reset':
     sys.exit()
 elif args.command == 'start':
     args.command = 'on'
-    args.allhw = True
+    args.all_hardware = True
     args.error_threshold = 1.0
 elif args.command == 'stop':
     args.command = 'off'
-    args.allhw = True
+    args.all_hardware = True
     args.error_threshold = 1.0
 
 keystates = {}
