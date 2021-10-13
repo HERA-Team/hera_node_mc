@@ -2,8 +2,7 @@
 Simple script to poll WR-LEN endpoints by hostname and
 write stats to redis
 '''
-
-
+from __future__ import print_function
 import socket
 import argparse
 import redis
