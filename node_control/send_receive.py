@@ -222,6 +222,7 @@ class UdpSenderReceiver():
     def _command_OK(self, command, allowed, call_cmd):
         if self.node_is_connected and command in allowed:
             return True
+        print("COMMAND_OK NOT TRUE:  ", command, allowed, call_cmd)
         if self.connected_verbosity:
             if not self.node_is_connected:
                 print("Node not connected ({})".format(call_cmd))
