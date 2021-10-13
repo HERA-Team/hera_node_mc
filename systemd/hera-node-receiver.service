@@ -13,9 +13,9 @@ Description=HERA Node Receiver Daemon
 Type=simple
 Restart=always
 RestartSec=60
-User=jackh
-Group=jackh
-ExecStart=/home/jackh/.local/bin/hera_node_receiver.py
+User=hera
+Group=hera
+ExecStart=/home/hera/miniconda3/envs/hera/bin/hera_node_receiver.py
 
 [Install]
 WantedBy=multi-user.target

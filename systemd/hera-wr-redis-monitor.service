@@ -15,7 +15,7 @@ Restart=always
 RestartSec=60
 User=hera
 Group=hera
-ExecStart=/usr/local/bin/hera_wr_redis_monitor.py -t 60
+ExecStart=/home/hera/miniconda3/envs/hera/bin/hera_wr_redis_monitor.py -t 60
 
 [Install]
 WantedBy=multi-user.target
