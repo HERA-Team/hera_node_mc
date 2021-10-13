@@ -5,7 +5,6 @@ or removes its status from redis if remove-nodes flag is set.
 
 Set node_ID under status:node:*
 """
-from __future__ import print_function
 import argparse
 from node_control import node_control, node_util
 

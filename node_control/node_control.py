@@ -710,7 +710,6 @@ class NodeControl():
             print("No nodes connected.")
             return
         tstamp = int(time.time())
-        print("Turning {} pam for {}".format(command, self.sc_node))
         for node in self.connected_nodes:
             self._log_cmd_to_redis(node, 'power_pam', tstamp, command)
             self.senders[node].power_pam(command)

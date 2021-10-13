@@ -7,7 +7,6 @@ set by the I2C digital I/O cards plugged into PCBs.
 
 Note that the Arduino watchdog time-out is 8sec, which is an Arduino hw limit.
 """
-from __future__ import print_function
 import time
 import node_control
 import sys

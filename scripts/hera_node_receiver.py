@@ -3,7 +3,6 @@
 Receives UDP packets from all active Arduinos containing sensor data and status
 information and pushes it up to Redis with status:node:x hash key. <hera_node_receiver>
 """
-from __future__ import print_function
 import sys
 import node_control
 

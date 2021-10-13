@@ -2,7 +2,6 @@
 """
 This class is used for receiving debug messages on port 8890 from all the active Arduinos.
 """
-from __future__ import print_function
 import datetime
 import time
 import sys
