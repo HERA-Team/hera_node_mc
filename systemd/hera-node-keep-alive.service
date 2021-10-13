@@ -15,7 +15,7 @@ Restart=always
 RestartSec=60
 User=hera
 Group=hera
-ExecStart=/home/hera/miniconda3/envs/hera/bin/hera_node_keep_alive.py
+ExecStart=/home/hera/miniconda3/envs/hera27/bin/hera_node_keep_alive.py
 
 [Install]
 WantedBy=multi-user.target
