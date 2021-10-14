@@ -32,9 +32,7 @@ parser.add_argument('--hold-for-verify', dest='hold_for_verify',
                     help="Seconds to wait before timing out (use 0 to disable check)",
                     default=90, type=int)
 parser.add_argument('--verify-mode', dest='verify_mode', help='Type of verify mode.',
-                    choices=['time', 'agree', 'cmd', 'stat', 'all'], default='agree')
-parser.add_argument('--no-verdict', dest='verdict', action='store_false',
-                    help='Flag to not log the final verdict to redis.')
+                    choices=['time', 'agree', 'cmd', 'stat', 'all'], default='all')
 parser.add_argument('--error-threshold', dest='error_threshold', default=0.0, type=float,
                     help='Fractional failure rate of nodes successfully turning on '
                     'over which to raise an error (default 0.0).')
@@ -110,5 +108,5 @@ if args.hold_for_verify > 0:
     results = nc.verdict(keystates, verbose=verbose,
                          hold_for_verify=args.hold_for_verify,
                          verify_mode=args.verify_mode,
-                         log_verdict=args.verdict)
+                         log_verdict=True)
     nc.sentence(results, args.error_threshold, purge=False)
