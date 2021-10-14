@@ -34,8 +34,7 @@ parser.add_argument('--hold-for-verify', dest='hold_for_verify',
 parser.add_argument('--verify-mode', dest='verify_mode', help='Type of verify mode.',
                     choices=['time', 'agree', 'cmd', 'stat', 'all'], default='all')
 parser.add_argument('--error-threshold', dest='error_threshold', default=0.0, type=float,
-                    help='Fractional failure rate of nodes successfully turning on '
-                    'over which to raise an error (default 0.0).')
+                    help='Fractional failure rate for error (0->any, 1->none) (default 0.0).')
 parser.add_argument('--redisServer', help='Name of redis server', default='redishost')
 
 args = parser.parse_args()
