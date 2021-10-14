@@ -11,12 +11,13 @@ parser = argparse.ArgumentParser(description='This script outputs the current no
 parser.add_argument('node', nargs='?', help="Specify the node ID numbers (csv list of int "
                     "from 0 to 29) to get the corresponding Redis data or use 'all'",
                     default='all')
-parser.add_argument('--wr', action='store_true', help="Flag to add white rabbit status")
-parser.add_argument('--redisServer', help='Name or redis server', default='redishost')
+parser.add_argument('-t', '--temperature', action='store_true', help="Flag to show node temps")
+parser.add_argument('-w', '--wr', action='store_true', help="Flag to add white rabbit status")
 parser.add_argument('--stale', help='Number of seconds for stale data',
                     type=float, default=10.0)
 parser.add_argument('--show-stale', dest='show_stale', help="Flag to show stale data values",
                     action='store_true')
+parser.add_argument('--redisServer', help='Name or redis server', default='redishost')
 args = parser.parse_args()
 
 if args.node.lower() == 'all':
@@ -24,7 +25,7 @@ if args.node.lower() == 'all':
 else:
     nodes2use = [int(x) for x in args.node.split(',')]
 
-print("Attempting to connect to the node control redis database on 'redishost'...")
+print("Getting nodes.")
 sys.stdout.flush()
 nc = node_control.NodeControl(nodes2use, redisServer=args.redisServer, count=1)
 
@@ -58,18 +59,19 @@ for nd, pwr in powers.items():
             continue
         print("  {:20s} {}".format(key, switch[val]))
 
-print("\nNode values")
-print("-----------")
-for nd, sens in sensors.items():
-    print("Node {} -- ".format(nd), end='')
-    if stale_data(sens, 'age', args.stale, True) and not args.show_stale:
-        continue
-    if 'timestamp' in sens.keys() and sens['timestamp'] is not None:
-        print(" updated at {}".format(datetime.fromtimestamp(sens['timestamp']).isoformat()))
-    for key, val in sorted(sens.items()):
-        if key in ['timestamp', 'age']:
+if args.temperature:
+    print("\nNode values")
+    print("-----------")
+    for nd, sens in sensors.items():
+        print("Node {} -- ".format(nd), end='')
+        if stale_data(sens, 'age', args.stale, True) and not args.show_stale:
             continue
-        print("  {:20s} {}".format(key, val))
+        if 'timestamp' in sens.keys() and sens['timestamp'] is not None:
+            print(" updated at {}".format(datetime.fromtimestamp(sens['timestamp']).isoformat()))
+        for key, val in sorted(sens.items()):
+            if key in ['timestamp', 'age']:
+                continue
+            print("  {:20s} {}".format(key, val))
 
 if args.wr:
     wr = nc.get_wr_status()
