@@ -9,7 +9,7 @@ if hostname in ['hera-node-head', 'hera-mobile']\
    or hostname.startswith('DAVID') or hostname.startswith('ral'):
     scripts = glob.glob('scripts/*')
 elif hostname == 'hera-snap-head':
-    scripts = ['scripts/hera_setup_new_node.py']
+    scripts = ['scripts/hera_setup_new_node.py', 'scripts/hera_node_get_status.py']
 else:
     scripts = ['scripts/hera_node_get_status.py']
 
