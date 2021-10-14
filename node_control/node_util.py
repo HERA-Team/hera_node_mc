@@ -87,7 +87,7 @@ def get_redis_client(redisServer='redishost'):
     return redis.StrictRedis(connection_pool=connection_pool, charset='utf-8')
 
 
-def node_power_table(node, pwr):
+def node_power_entry(node, pwr):
     switch = {True: 'On', False: 'Off'}
     sline = "Node {} -- ".format(node)
     if 'timestamp' in pwr.keys() and pwr['timestamp'] is not None:
@@ -101,7 +101,7 @@ def node_power_table(node, pwr):
     return sline
 
 
-def node_sensor_table(node, ss):
+def node_sensor_entry(node, ss):
     sline = "Node {} -- ".format(node)
     if 'timestamp' in ss.keys() and ss['timestamp'] is not None:
         nice_ts = datetime.datetime.fromtimestamp(ss['timestamp']).isoformat()

@@ -49,16 +49,15 @@ print("-----------------")
 for nd, pwr in powers.items():
     if node_util.stale_data(pwr, 'age', args.stale, f"Node {nd} -- ") and not args.show_stale:
         continue
-    print(node_util.node_power_table(nd, pwr))
+    print(node_util.node_power_entry(nd, pwr))
 
 if args.temperature:
     print("\nNode values")
     print("-----------")
     for nd, sens in sensors.items():
         if node_util.stale_data(sens, 'age', args.stale, f"Node {nd} -- ") and not args.show_stale:
-            print("Node {} has stale data.".format(nd))
             continue
-        print(node_util.node_sensor_table(nd, sens))
+        print(node_util.node_sensor_entry(nd, sens))
 
 
 if args.wr:
