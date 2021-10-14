@@ -55,7 +55,6 @@ class UdpSenderReceiver():
 
     def __init__(self, arduinoAddress,
                  throttle=0.5,
-                 connected_verbosity=True,
                  serverAddress='0.0.0.0',
                  sendPort=8888,
                  rcvPort=8889):
@@ -72,9 +71,6 @@ class UdpSenderReceiver():
             If 'receive', then make a receive socket.
         throttle : float
             Delay time in seconds
-        connected_verbosity : bool
-            If True, will print out a message that the node is not connected.
-            upon any action if node_is_connected is False.
         serverAddress : str
             Address for socket server
         sendPort : int
@@ -84,7 +80,6 @@ class UdpSenderReceiver():
         """
         self.arduinoAddress = arduinoAddress
         self.throttle = throttle
-        self.connected_verbosity = connected_verbosity
         self.sendPort = sendPort
         self.rcvPort = rcvPort
         self.serverAddress = serverAddress
@@ -221,9 +216,9 @@ class UdpSenderReceiver():
     def _command_OK(self, command, allowed, call_cmd):
         if self.node_is_connected and command in allowed:
             return True
-        if self.connected_verbosity:
-            if not self.node_is_connected:
-                print("Node not connected ({})".format(call_cmd))
-            else:
-                print("{}: {} not in {}".format(call_cmd, command, allowed))
+        print("COMMAND NOT OK!")
+        if not self.node_is_connected:
+            print("Node not connected ({})".format(call_cmd))
+        else:
+            print("{}: {} not in {}".format(call_cmd, command, allowed))
         return False
