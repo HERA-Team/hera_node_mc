@@ -2,7 +2,7 @@
 import sys
 import argparse
 from node_control import node_control
-from node_control.node_util import stale_data
+from node_control import node_util
 from datetime import datetime
 
 
@@ -50,7 +50,7 @@ print("\nNode power states")
 print("-----------------")
 for nd, pwr in powers.items():
     print("Node {} -- ".format(nd), end='')
-    if stale_data(pwr, 'age', args.stale, True) and not args.show_stale:
+    if node_util.stale_data(pwr, 'age', args.stale, True) and not args.show_stale:
         continue
     if 'timestamp' in pwr.keys() and pwr['timestamp'] is not None:
         print(" updated at {}".format(datetime.fromtimestamp(pwr['timestamp']).isoformat()))
@@ -63,15 +63,11 @@ if args.temperature:
     print("\nNode values")
     print("-----------")
     for nd, sens in sensors.items():
-        print("Node {} -- ".format(nd), end='')
-        if stale_data(sens, 'age', args.stale, True) and not args.show_stale:
+        if node_util.stale_data(sens, 'age', args.stale, True) and not args.show_stale:
+            print("Node {} has stale data.".format(nd))
             continue
-        if 'timestamp' in sens.keys() and sens['timestamp'] is not None:
-            print(" updated at {}".format(datetime.fromtimestamp(sens['timestamp']).isoformat()))
-        for key, val in sorted(sens.items()):
-            if key in ['timestamp', 'age']:
-                continue
-            print("  {:20s} {}".format(key, val))
+        print(node_util.node_sensor_table(nd, sens))
+
 
 if args.wr:
     wr = nc.get_wr_status()
@@ -80,7 +76,7 @@ if args.wr:
     args.show_stale = True  # Always show (but maybe will change when update hera_wr_cm)
     for nd, wrs in wr.items():
         print("Node {} -- ".format(nd), end='')
-        if stale_data(wrs, 'age', args.stale, True) and not args.show_stale:
+        if node_util.stale_data(wrs, 'age', args.stale, True) and not args.show_stale:
             continue
         if 'timestamp' in wrs.keys() and wrs['timestamp'] is not None:
             print(" updated at {}".format(wrs['timestamp']))

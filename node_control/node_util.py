@@ -87,6 +87,21 @@ def get_redis_client(redisServer='redishost'):
     return redis.StrictRedis(connection_pool=connection_pool, charset='utf-8')
 
 
+def node_sensor_table(node, ss):
+    sline = "Node {} -- ".format(node)
+    if 'timestamp' in ss.keys() and ss['timestamp'] is not None:
+        nice_ts = datetime.datetime.fromtimestamp(ss['timestamp']).isoformat()
+        sline += "updated at {}".format(nice_ts)
+    if 'cpu_uptime_ms' in ss.keys() and ss['cpu_uptime_ms'] is not None:
+        sline += "   (cpu_uptime:  {:.1f}hr)".format(ss['cpu_uptime_ms']/1000.0/3600.0)
+    sline += "\n\tip:  {}\tmac:  {}\n".format(ss['ip'], ss['mac'])
+    sline += "\thumidity:  {}%\n".format(ss['humid'])
+    sline += "\tT [C]:  top        middle     bottom     humid\n"
+    sline += "\t        {:11s}{:11s}{:11s}{:11s}".format(str(ss['temp_top']), str(ss['temp_mid']),
+                                                         str(ss['temp_bot']), str(ss['temp_humid']))
+    return sline
+
+
 def stale_data(data, key, stale=100.0, show_msg=True):
     """
     Print warning if data are too stale or not present.
