@@ -97,6 +97,7 @@ def node_power_table(node, pwr):
     for hw in ['power_fem', 'power_pam', 'power_snap_0', 'power_snap_1',
                'power_snap_2', 'power_snap_3', 'power_snap_relay']:
         sline += "{:11s}".format(switch[pwr[hw]])
+    sline += '\n'
     return sline
 
 
@@ -112,6 +113,7 @@ def node_sensor_table(node, ss):
     sline += "\tT [C]:  top        middle     bottom     humid\n"
     sline += "\t        {:11s}{:11s}{:11s}{:11s}".format(str(ss['temp_top']), str(ss['temp_mid']),
                                                          str(ss['temp_bot']), str(ss['temp_humid']))
+    sline += '\n'
     return sline
 
 
