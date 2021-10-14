@@ -87,6 +87,19 @@ def get_redis_client(redisServer='redishost'):
     return redis.StrictRedis(connection_pool=connection_pool, charset='utf-8')
 
 
+def node_power_table(node, pwr):
+    switch = {True: 'On', False: 'Off'}
+    sline = "Node {} -- ".format(node)
+    if 'timestamp' in pwr.keys() and pwr['timestamp'] is not None:
+        nice_ts = datetime.datetime.fromtimestamp(pwr['timestamp']).isoformat()
+        sline += "updated at {}".format(nice_ts)
+    sline += "\n\tFEM        PAM        SNAP0      SNAP1      SNAP2      SNAP3      SNAPrelay\n\t"
+    for hw in ['power_fem', 'power_pam', 'power_snap_0', 'power_snap_1',
+               'power_snap_2', 'power_snap_3', 'power_snap_relay']:
+        sline += "{:11s}".format(switch[pwr[hw]])
+    return sline
+
+
 def node_sensor_table(node, ss):
     sline = "Node {} -- ".format(node)
     if 'timestamp' in ss.keys() and ss['timestamp'] is not None:
@@ -113,22 +126,27 @@ def stale_data(data, key, stale=100.0, show_msg=True):
         key to age in seconds or timedelta (timedelta, int, float or None)
     state : float
         Stale timeframe in seconds
-    show_msg : bool
-        Flag to actually show the warning message.
+    show_msg : bool or str
+        Flag to actually show the warning message.  If str prepend.
 
     Returns
     -------
     True if stale or age not present/not valid.
     """
+    prepend = ""
+    if isinstance(show_msg, str):
+        prepend = show_msg
+        show_msg = True
+
     try:
         age = data[key]
     except KeyError:
         if show_msg:
-            print("{} not found.".format(key))
+            print("{}{} not found.".format(prepend, key))
         return True
     if age is None:
         if show_msg:
-            print("{} is None.".format(key))
+            print("{}{} is None.".format(prepend, key))
         return True
     if isinstance(age, datetime.timedelta):
         age = age.days*(24.0 * 3600.0) + age.seconds + age.microseconds/1E6
@@ -136,7 +154,7 @@ def stale_data(data, key, stale=100.0, show_msg=True):
         age = float(age)
     except ValueError:
         if show_msg:
-            print("Invalid age format ({}).".format(age))
+            print("{}Invalid age format ({}).".format(prepend, age))
         return True
     if age > stale:
         if age > 86400:
@@ -148,6 +166,6 @@ def stale_data(data, key, stale=100.0, show_msg=True):
         else:
             w_msg = "{} seconds".format(int(age))
         if show_msg:
-            print("Data are {} old".format(w_msg))
+            print("{}Data are {} old!!!".format(prepend, w_msg))
         return True
     return False

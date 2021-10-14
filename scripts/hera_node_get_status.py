@@ -3,7 +3,6 @@ import sys
 import argparse
 from node_control import node_control
 from node_control import node_util
-from datetime import datetime
 
 
 parser = argparse.ArgumentParser(description='This script outputs the current node status',
@@ -45,25 +44,18 @@ else:
 powers = nc.get_power_status()
 sensors = nc.get_sensors()
 
-switch = {True: 'On', False: 'Off'}
 print("\nNode power states")
 print("-----------------")
 for nd, pwr in powers.items():
-    print("Node {} -- ".format(nd), end='')
-    if node_util.stale_data(pwr, 'age', args.stale, True) and not args.show_stale:
+    if node_util.stale_data(pwr, 'age', args.stale, f"Node {nd} -- ") and not args.show_stale:
         continue
-    if 'timestamp' in pwr.keys() and pwr['timestamp'] is not None:
-        print(" updated at {}".format(datetime.fromtimestamp(pwr['timestamp']).isoformat()))
-    for key, val in sorted(pwr.items()):
-        if key in ['timestamp', 'age']:
-            continue
-        print("  {:20s} {}".format(key, switch[val]))
+    print(node_util.node_power_table(nd, pwr))
 
 if args.temperature:
     print("\nNode values")
     print("-----------")
     for nd, sens in sensors.items():
-        if node_util.stale_data(sens, 'age', args.stale, True) and not args.show_stale:
+        if node_util.stale_data(sens, 'age', args.stale, f"Node {nd} -- ") and not args.show_stale:
             print("Node {} has stale data.".format(nd))
             continue
         print(node_util.node_sensor_table(nd, sens))
