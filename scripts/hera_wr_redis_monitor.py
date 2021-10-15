@@ -10,7 +10,7 @@ import redis
 import time
 import datetime
 import os
-from node_control.wr_len import WrLen
+from node_control import wr_len
 from node_control import __version__
 
 hostname = socket.gethostname()
@@ -48,7 +48,7 @@ while(True):
             except socket.gaierror:
                 continue
             try:
-                wr_devices[host] = WrLen(host)
+                wr_devices[host] = wr_len.WrLen(host)
             except:  # noqa
                 print("Error while connecting to %s" % host)
                 continue
