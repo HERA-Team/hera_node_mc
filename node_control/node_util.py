@@ -27,6 +27,9 @@ def get_syslog():
                 timestamp = ' '.join(data[:3])
                 log[device].append(timestamp)
                 info[device] = {'mac': data[-2], 'ip': data[-3]}
+    for ard, ts in log.items():
+        if ard.startswith('arduino'):
+            print(f"{ard} ({len(ts)}):  {', '.join(ts)}")
     return log, info
 
 
