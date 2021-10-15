@@ -14,6 +14,22 @@ def noneify(v, noneval=-99.0):
         return v
 
 
+def get_syslog():
+    log = {}
+    info = {}
+
+    with open('/var/log/syslog', 'r') as fp:
+        for line in fp:
+            if 'DHCPACK(eth1) 10.80.2' in line:
+                data = line.split()
+                device = data[-1]
+                log.setdefault(device, [])
+                timestamp = ' '.join(data[:3])
+                log[device].append(timestamp)
+                info[device] = {'mac': data[-2], 'ip': data[-3]}
+    return log, info
+
+
 def status_node(data, addr):
     data_dict = {}
     if data is None or addr is None:  # Return empty dict to get keys.
