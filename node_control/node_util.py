@@ -29,7 +29,7 @@ def get_syslog():
                 info[device] = {'mac': data[-2], 'ip': data[-3]}
     for ard, ts in log.items():
         if ard.startswith('arduino'):
-            print(f"{ard} ({len(ts)}):  {', '.join(ts)}")
+            print(f"{ard:9s} ({len(ts)}):  {', '.join(ts)}")
     return log, info
 
 
