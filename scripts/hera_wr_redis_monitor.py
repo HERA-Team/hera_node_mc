@@ -1,3 +1,4 @@
+#! /usr/bin/env python
 '''
 Simple script to poll WR-LEN endpoints by hostname and
 write stats to redis

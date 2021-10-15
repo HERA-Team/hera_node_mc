@@ -14,7 +14,7 @@ def noneify(v, noneval=-99.0):
         return v
 
 
-def get_syslog():
+def get_syslog(looking_for='arduino'):
     log = {}
     info = {}
 
@@ -28,7 +28,7 @@ def get_syslog():
                 log[device].append(timestamp)
                 info[device] = {'mac': data[-2], 'ip': data[-3]}
     for ard, ts in log.items():
-        if ard.startswith('arduino'):
+        if ard.startswith(looking_for):
             print(f"{ard:9s} ({len(ts)}):  {', '.join(ts)}")
     return log, info
 
