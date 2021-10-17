@@ -639,7 +639,7 @@ class NodeControl():
             if command != self.power_switch[pstat[cnode][hw]]:
                 change_node.append(cnode)
         if print_stat:
-            prhw = hw.strip('power_').replace('_', ' ')
+            prhw = hw.strip('power').replace('_', ' ')
             if len(change_node):
                 s = 's' if len(change_node) > 0 else ''
                 prnd = "Node{} {}".format(s, ', '.join([str(x) for x in change_node]))
