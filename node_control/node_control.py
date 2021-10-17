@@ -150,7 +150,8 @@ class NodeControl():
                     self.connected_nodes.append(node)
             else:
                 hkey = "{}{}".format(self.NC_STAT, node)
-                ip = self.r.hget(hkey, 'ip')
+                # ip = self.r.hget(hkey, 'ip')  # use name not number
+                ip = f"heraNode{node}"
                 self.senders[node] = send_receive.UdpSenderReceiver(ip, throttle=throttle)
                 if self.senders[node].node_is_connected:
                     self.connected_nodes.append(node)
