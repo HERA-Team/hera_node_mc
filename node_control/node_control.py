@@ -38,6 +38,7 @@ class NodeControl():
     NC_STAT = 'status:node:'
     NC_CMD = 'commands:node:'
     hw = ['snap_relay', 'snap_0', 'snap_1', 'snap_2', 'snap_3', 'fem', 'pam']
+    power_switch = {True: 'on', False: 'off'}
 
     def __init__(self, nodes, redisServer="redishost", count=None):
         """
@@ -635,11 +636,8 @@ class NodeControl():
         pstat = self.get_power_status()
         change_node = []
         for cnode in self.connected_nodes:
-            if command != pstat[cnode][hw]:
+            if command != self.power_switch[pstat[cnode][hw]]:
                 change_node.append(cnode)
-        print("NCM640  ",pstat)
-        print(command, hw)
-        print("NMC640  ",change_node)
         if print_stat:
             prhw = hw.strip('power_').replace('_', ' ')
             if len(change_node):
