@@ -6,25 +6,23 @@ parser = argparse.ArgumentParser(description='Turn on SNAP relay, SNAPs, FEM and
                                  formatter_class=argparse.ArgumentDefaultsHelpFormatter)
 
 parser.add_argument('command', help="Specify 'on', 'off', 'start', 'stop' or 'reset'.  "
-                    "start/stop turns everything on/off.  start/stop/reset don't use any "
-                    "other arguments.  start/stop also raise the error fraction to 1.0",
+                    "start/stop turns everything on/off.",
                     choices=['on', 'off', 'start', 'stop', 'reset'])
 parser.add_argument('node', help="Specify the list of nodes (csv list of int) or 'all' (default)",
                     nargs='?', default='all')
+parser.add_argument('-p', '--pam', action='store_true', help='Turn on/off the PAMs')
+parser.add_argument('-f', '--fem', action='store_true', help='Turn on/off the FEMs')
 parser.add_argument('-s', '--snaps', action='store_true',
                     help='Turn on/off all the snaps.  Equivalent to -0 -1 -2 -3')
 parser.add_argument('-0', '--snap0', action='store_true', help='Turn on/off SNAP 0')
 parser.add_argument('-1', '--snap1', action='store_true', help='Turn on/off SNAP 1')
 parser.add_argument('-2', '--snap2', action='store_true', help='Turn on/off SNAP 2')
 parser.add_argument('-3', '--snap3', action='store_true', help='Turn on/off SNAP 3')
-parser.add_argument('-p', '--pam', action='store_true', help='Turn on/off the PAMs')
-parser.add_argument('-f', '--fem', action='store_true', help='Turn on/off the FEMs')
-parser.add_argument('-r', '--snap-relay', dest='snap_relay', action='store_true',
-                    help="Turn on/off the snap-relay - generally not needed since "
-                    "redundant if turning on _any_ snap or off _all_ snaps in one call; "
-                    "needed when turning off the last snap if done separately")
 parser.add_argument('-a', '--all_hardware', action='store_true',
                     help='Turn on/off snaps, pams and fems.  Equivalent to -s -p -f')
+parser.add_argument('-r', '--snap-relay', dest='snap_relay', action='store_true',
+                    help="Turn on/off the snap-relay - not needed except "
+                         "when turning off the last snap if done separately")
 parser.add_argument('--throttle', help='Throttle time in sec for udp_sender (0.2s)',
                     type=float, default=0.2)
 parser.add_argument('--quiet', help="Don't print verification.", action='store_true')
@@ -33,7 +31,7 @@ parser.add_argument('--hold-for-verify', dest='hold_for_verify',
                     default=90, type=int)
 parser.add_argument('--verify-mode', dest='verify_mode', help='Type of verify mode.',
                     choices=['time', 'agree', 'cmd', 'stat', 'all'], default='all')
-parser.add_argument('--error-threshold', dest='error_threshold', default=0.0, type=float,
+parser.add_argument('--error-threshold', dest='error_threshold', default=1.0, type=float,
                     help='Fractional failure rate for error (0->any, 1->none) (default 0.0).')
 parser.add_argument('--show-success', dest='show_success', action='store_true',
                     help='Show successful commands in addition to failures.')
@@ -62,11 +60,9 @@ if args.command == 'reset':
 elif args.command == 'start':
     args.command = 'on'
     args.all_hardware = True
-    args.error_threshold = 1.0
 elif args.command == 'stop':
     args.command = 'off'
     args.all_hardware = True
-    args.error_threshold = 1.0
 
 keystates = {}
 if args.all_hardware:
