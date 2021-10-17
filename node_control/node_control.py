@@ -159,10 +159,9 @@ class NodeControl():
                                 .format(_ping['rcvd'], _ping['sent'], _ping['avg']))
                 else:
                     self.r.hset(hkey, 'udp_status', 'not connected')
-        if len(self.connected_nodes) > 0:
-            s = 's' if len(self.connected_nodes) > 0 else ''
+        if len(self.connected_nodes):
+            s = 's' if len(self.connected_nodes) > 1 else ''
             self.sc_node = "Node{} {}".format(s, ', '.join([str(x) for x in self.connected_nodes]))
-            self.initial_pstat = self.get_power_status()
         else:
             self.sc_node = "No nodes connected."
 
@@ -641,11 +640,11 @@ class NodeControl():
         if print_stat:
             prhw = hw.strip('power').replace('_', ' ').strip()
             if len(change_node):
-                s = 's' if len(change_node) > 0 else ''
+                s = 's' if len(change_node) > 1 else ''
                 prnd = "Node{} {}".format(s, ', '.join([str(x) for x in change_node]))
                 print("Turning {} {}{} for {}".format(command, prhw, s, prnd))
             else:
-                s = 's' if len(self.connected_nodes) > 0 else ''
+                s = 's' if len(self.connected_nodes) > 1 else ''
                 print("{}{} already {}".format(prhw, s, command))
         return change_node
 
