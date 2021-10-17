@@ -158,10 +158,10 @@ class NodeControl():
                                 .format(_ping['rcvd'], _ping['sent'], _ping['avg']))
                 else:
                     self.r.hset(hkey, 'udp_status', 'not connected')
-        if len(self.connected_nodes) == 1:
-            self.sc_node = "Node {}".format(self.connected_nodes[0])
-        elif len(self.connected_nodes) > 1:
-            self.sc_node = "Nodes {}".format(', '.join([str(x) for x in self.connected_nodes]))
+        if len(self.connected_nodes) > 0:
+            s = 's' if len(self.connected_nodes) > 0 else ''
+            self.sc_node = "Node{} {}".format(s, ', '.join([str(x) for x in self.connected_nodes]))
+            self.initial_pstat = self.get_power_status()
         else:
             self.sc_node = "No nodes connected."
 
@@ -429,7 +429,7 @@ class NodeControl():
         return wrstat
 
     def verdict(self, hwcmd, verbose=True, hold_for_verify=120, verify_mode='all',
-                log_verdict=True):
+                log_verdict=True, show_success=False):
         """
         Checks if commands are actually carried out - needs hera-node-receiver service running.
 
@@ -446,6 +446,8 @@ class NodeControl():
             Type of verification to check (see _verify_states)
         log_verdict : bool
             Flag to log the final verdict to redis.
+        show_success : bool
+            Flag to also show success rather than just failure.
         """
         if verbose:
             print("...Verifying...", end='')
@@ -488,11 +490,11 @@ class NodeControl():
         if verbose:
             for node in self.connected_nodes:
                 for this_hw in _verdict[node].keys():
-                    if _verdict[node][this_hw][verify_mode]:
-                        print("SUCCESS Node {} turned {} {}".format(
-                                node, this_hw, hwcmd[this_hw]))
-                    else:
+                    if not _verdict[node][this_hw][verify_mode]:
                         print("FAIL Node {} turned {} {}".format(
+                                node, this_hw, hwcmd[this_hw]))
+                    elif show_success:
+                        print("SUCCESS Node {} turned {} {}".format(
                                 node, this_hw, hwcmd[this_hw]))
         return node_counter
 
@@ -626,6 +628,26 @@ class NodeControl():
         cmp = "{}_cmd".format(component)
         self.r.hset(key, cmp, val)
 
+    def _change_state_nodes(self, command, hw, print_stat=False):
+        if not len(self.connected_nodes):
+            print("No nodes connected.")
+            return []
+        pstat = self.get_power_status()
+        change_node = []
+        for cnode in self.connected_nodes:
+            if command != pstat[cnode][hw]:
+                change_node.append(cnode)
+        if print_stat:
+            prhw = hw.strip('power_').replace('_', ' ')
+            if len(change_node):
+                s = 's' if len(change_node) > 0 else ''
+                prnd = "Node{} {}".format(s, ', '.join([str(x) for x in change_node]))
+                print("Turning {} {}{} for {}".format(command, prhw, s, prnd))
+            else:
+                s = 's' if len(self.connected_nodes) > 0 else ''
+                print("{}{} already {}".format(prhw, s, command))
+        return change_node
+
     def power_snap_relay(self, command, hold_for_verify=120, verify_mode='all'):
         """
         Controls the node snap relay via arduino.
@@ -644,12 +666,11 @@ class NodeControl():
         verify_mode : str
             One of the keys in the verification dict
         """
-        if not len(self.connected_nodes):
-            print("No nodes connected.")
+        change_node = self._change_state_nodes(command, 'power_snap_relay', print_stat=True)
+        if not len(change_node):
             return
         tstamp = int(time.time())
-        print("Turning {} snap relay for {}".format(command, self.sc_node))
-        for node in self.connected_nodes:
+        for node in change_node:
             self._log_cmd_to_redis(node, 'power_snap_relay', tstamp, command)
             self.senders[node].power_snap_relay(command)
         if command == 'on' and hold_for_verify > 0:
@@ -670,13 +691,13 @@ class NodeControl():
         command : str
             on or off
         """
-        if not len(self.connected_nodes):
-            print("No nodes connected.")
+        this_snap = f"power_snap_{snap_n}"
+        change_node = self._change_state_nodes(command, this_snap, print_stat=True)
+        if not len(change_node):
             return
         tstamp = int(time.time())
-        print("Turning {} snap{} for {}".format(command, snap_n, self.sc_node))
-        for node in self.connected_nodes:
-            self._log_cmd_to_redis(node, 'power_snap_{}'.format(snap_n), tstamp, command)
+        for node in change_node:
+            self._log_cmd_to_redis(node, this_snap, tstamp, command)
             self.senders[node].power_snap(snap_n, command)
 
     def power_fem(self, command):
@@ -690,12 +711,11 @@ class NodeControl():
         command : str
             on or off
         """
-        if not len(self.connected_nodes):
-            print("No nodes connected.")
+        change_node = self._change_state_nodes(command, 'power_fem', print_stat=True)
+        if not len(change_node):
             return
         tstamp = int(time.time())
-        print("Turning {} fem for {}".format(command, self.sc_node))
-        for node in self.connected_nodes:
+        for node in change_node:
             self._log_cmd_to_redis(node, 'power_fem', tstamp, command)
             self.senders[node].power_fem(command)
 
@@ -710,12 +730,11 @@ class NodeControl():
         command : str
             on or off
         """
-        if not len(self.connected_nodes):
-            print("No nodes connected.")
+        change_node = self._change_state_nodes(command, 'power_pam', print_stat=True)
+        if not len(change_node):
             return
         tstamp = int(time.time())
-        print("Turning {} pam for {}".format(command, self.sc_node))
-        for node in self.connected_nodes:
+        for node in change_node:
             self._log_cmd_to_redis(node, 'power_pam', tstamp, command)
             self.senders[node].power_pam(command)
 
@@ -729,7 +748,7 @@ class NodeControl():
             print("No nodes connected.")
             return
         tstamp = int(time.time())
-        print("Resetting nodes {}".format(self.sc_node))
+        print("Resetting {}".format(self.sc_node))
         for node in self.connected_nodes:
             self._log_cmd_to_redis(node, 'reset', tstamp, 'reset')
             self.senders[node].reset()

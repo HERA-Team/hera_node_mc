@@ -35,6 +35,8 @@ parser.add_argument('--verify-mode', dest='verify_mode', help='Type of verify mo
                     choices=['time', 'agree', 'cmd', 'stat', 'all'], default='all')
 parser.add_argument('--error-threshold', dest='error_threshold', default=0.0, type=float,
                     help='Fractional failure rate for error (0->any, 1->none) (default 0.0).')
+parser.add_argument('--show-success', dest='show_success', action='store_true',
+                    help='Show successful commands in addition to failures.')
 parser.add_argument('--redisServer', help='Name of redis server', default='redishost')
 
 args = parser.parse_args()
@@ -107,5 +109,5 @@ if args.hold_for_verify > 0:
     results = nc.verdict(keystates, verbose=verbose,
                          hold_for_verify=args.hold_for_verify,
                          verify_mode=args.verify_mode,
-                         log_verdict=True)
+                         log_verdict=True, show_success=args.show_success)
     nc.sentence(results, args.error_threshold, purge=False)
