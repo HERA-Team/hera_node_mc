@@ -637,6 +637,9 @@ class NodeControl():
         for cnode in self.connected_nodes:
             if command != pstat[cnode][hw]:
                 change_node.append(cnode)
+        print("NCM640  ",pstat)
+        print(command, hw)
+        print("NMC640  ",change_node)
         if print_stat:
             prhw = hw.strip('power_').replace('_', ' ')
             if len(change_node):
