@@ -54,7 +54,7 @@ class Check:
                     except KeyError:
                         row.append('')
                     try:
-                        row.append(data.white_rabbit[_e]])
+                        row.append(data.white_rabbit[_e])
                     except KeyError:
                         row.append('')
                     try:
