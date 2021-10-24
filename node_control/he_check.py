@@ -4,51 +4,57 @@ import socket
 
 
 class Check:
-    def __init__(self):
-        self.hosts = hosts_ethers.HostsEthers('/etc/hosts')
-        self.ethers = hosts_ethers.HostsEthers('/etc/ethers')
-        self.hostname = socket.gethostname()
-
-    def parse_data(self):
+    def __init__(self, files='server'):
+        if isinstance(files, str):  # any string, but use server
+            hostname = socket.gethostname()
+            self.hosts[hostname] = hosts_ethers.HostsEthers('/etc/hosts')
+            self.ethers[hostname] = hosts_ethers.HostsEthers('/etc/ethers')
+        else:  # I've downloaded local versions from node-head and snap-head
+            for fn in files:
+                if 'hosts' in fn:
+                    hn = fn.split('_')[1]
+                    self.hosts[hn] = hosts_ethers.HostsEthers(fn)
+                elif 'ethers' in fn:
+                    hn = fn.split('_')[1]
+                    self.ethers[hn] = hosts_ethers.HostsEthers(fn)
         self.data = {}
         for i in range(30):
             key = f"N{i:02d}"
             self.data[key] = Namespace(arduino={}, white_rabbit={}, snap={})
-            node_data = False
-            for alias, ip in self.hosts.by_alias.items():
-                if alias == f"heraNode{i}":
-                    self.data[key].arduino['ip'] = ip
-                    for _x in self.hosts.by_id[ip]:
-                        if _x.startswith('arduino'):
-                            node_data = True
-                            self.data[key].arduino['serial'] = _x
-                            self.data[key].arduino['mac'] = self.ethers.by_alias[_x]
-                            break
-                elif alias == f"heraNode{i}wr":
-                    self.data[key].white_rabbit['ip'] = ip
-                    for _x in self.hosts.by_id[ip]:
-                        if _x.startswith('WR'):
-                            node_data = True
-                            self.data[key].white_rabbit['serial'] = _x
-                            self.data[key].white_rabbit['mac'] = self.ethers.by_alias[_x]
-                            break
-                elif f"heraNode{i}Snap" in alias:
-                    sno = alias[-1]
-                    self.data[key].snap[sno] = {'ip': ip}
-                    for _x in self.hosts.by_id['ip']:
-                        if _x.startswith('SNP'):
-                            node_data = True
-                            self.data[key].snap[sno]['serial'] = _x
-                            self.data[key].snap[sno]['mac'] = self.ethers.by_alias[_x]
-            if not node_data:
-                del self.data[key]
+
+    def parse_data(self):
+        for key in self.data.keys():
+            this_node = key[1:]
+            for hfn in self.hosts.keys():
+                for alias, ip in self.hosts[hfn].by_alias.items():
+                    if alias == f"heraNode{this_node}":
+                        self.data[key].arduino['ip'] = ip
+                        for _x in self.hosts[hfn].by_id[ip]:
+                            if _x.startswith('arduino'):
+                                self.data[key].arduino['serial'] = _x
+                                self.data[key].arduino['mac'] = self.ethers[hfn].by_alias[_x]
+                                break
+                    elif alias == f"heraNode{this_node}wr":
+                        self.data[key].white_rabbit['ip'] = ip
+                        for _x in self.hosts[hfn].by_id[ip]:
+                            if _x.startswith('WR'):
+                                self.data[key].white_rabbit['serial'] = _x
+                                self.data[key].white_rabbit['mac'] = self.ethers[hfn].by_alias[_x]
+                                break
+                    elif f"heraNode{this_node}Snap" in alias:
+                        sno = alias[-1]
+                        self.data[key].snap[sno] = {'ip': ip}
+                        for _x in self.hosts[hfn].by_id['ip']:
+                            if _x.startswith('SNP'):
+                                self.data[key].snap[sno]['serial'] = _x
+                                self.data[key].snap[sno]['mac'] = self[hfn].ethers.by_alias[_x]
 
     def write_csv(self, filename='hosts_ethers.csv'):
         with open(filename, 'w') as fp:
             for node, data in self.data.items():
                 print(','.join(7 * [node]), file=fp)
                 for _e in ['serial', 'mac', 'ip']:
-                    row = [self.hostname]
+                    row = ['hosts']
                     try:
                         row.append(data.arduino[_e])
                     except KeyError:
