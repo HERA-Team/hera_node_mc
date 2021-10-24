@@ -52,14 +52,14 @@ class Check:
                     try:
                         row.append(data.arduino[_e])
                     except KeyError:
-                        row.append('')
+                        row.append('-')
                     try:
                         row.append(data.white_rabbit[_e])
                     except KeyError:
-                        row.append('')
+                        row.append('-')
                     try:
                         for sno in range(4):
                             row.append(data.snap[str(sno)][_e])
                     except KeyError:
-                        row.append('')
+                        row.append('-')
                     print(','.join(row))
