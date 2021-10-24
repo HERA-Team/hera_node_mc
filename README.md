@@ -7,6 +7,11 @@ See the 'Monitor and Control Subsystem Description' document for more details: h
 
 pip install .
 
+Install on:
+  hera-node-head (needed - hera env)
+  qmaster (needed - HERA env)
+  hera-snap-head (only used for an initialize script that isn't currently used - DDB)
+
 # Usage
 
 There are basically only two user scripts:  `hera_node_power.py` and `hera_node_get_status.py`.
