@@ -42,7 +42,10 @@ class Check:
             for node, data in self.data.items():
                 print(','.join(7 * node))
                 for _e in ['serial', 'mac', 'ip']:
-                    row = [self.hostname, data.arduino[_e], data.white_rabbit[_e]]
-                    for sno in range(4):
-                        row.append(data.snap[str(sno)][_e])
-                    print(','.join(row))
+                    try:
+                        row = [self.hostname, data.arduino[_e], data.white_rabbit[_e]]
+                        for sno in range(4):
+                            row.append(data.snap[str(sno)][_e])
+                        print(','.join(row))
+                    except KeyError:
+                        continue
