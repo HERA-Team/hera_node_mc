@@ -41,7 +41,7 @@ class Check:
                             self.data[key].snap[sno]['serial'] = _x
                             self.data[key].snap[sno]['mac'] = self.ethers.by_alias[_x]
             if not node_data:
-                del self.dat[key]
+                del self.data[key]
 
     def write_csv(self, filename='hosts_ethers.csv'):
         with open(filename, 'w'):
