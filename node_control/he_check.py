@@ -44,9 +44,9 @@ class Check:
                 del self.data[key]
 
     def write_csv(self, filename='hosts_ethers.csv'):
-        with open(filename, 'w'):
+        with open(filename, 'w') as fp:
             for node, data in self.data.items():
-                print(','.join(7 * [node]))
+                print(','.join(7 * [node]), file=fp)
                 for _e in ['serial', 'mac', 'ip']:
                     row = [self.hostname]
                     try:
@@ -57,9 +57,9 @@ class Check:
                         row.append(data.white_rabbit[_e])
                     except KeyError:
                         row.append('-')
-                    try:
-                        for sno in range(4):
+                    for sno in range(4):
+                        try:
                             row.append(data.snap[str(sno)][_e])
-                    except KeyError:
-                        row.append('-')
-                    print(','.join(row))
+                        except KeyError:
+                            row.append('-')
+                    print(','.join(row), file=fp)
