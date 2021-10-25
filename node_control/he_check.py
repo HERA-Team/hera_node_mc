@@ -64,22 +64,37 @@ class Check:
                                 self.data[key].snap[sno]['mac'] = self.ethers[hfn].by_alias[_x]
 
     def write_csv(self, filename='hosts_ethers.csv'):
-        with open(filename, 'w') as fp:
-            for node, data in self.data.items():
-                print(','.join(7 * [node]), file=fp)
-                for _e in ['serial', 'mac', 'ip']:
-                    row = ['hosts']
+        table_dict = {}
+        table_data = []
+        for node, data in self.data.items():
+            table_data.append(7 * [node])
+            table_dict[node] = {}
+            for _e in ['serial', 'mac', 'ip']:
+                row = ['hosts']
+                table_dict[node][_e] = {}
+                try:
+                    val = data.arduino[_e]
+                except KeyError:
+                    val = '-'
+                row.append(val)
+                table_dict[node][_e]['arduino'] = val
+                try:
+                    val = data.white_rabbit[_e]
+                except KeyError:
+                    val = '-'
+                row.append(val)
+                table_dict[node][_e]['white_rabbit'] = val
+                for sno in range(4):
                     try:
-                        row.append(data.arduino[_e])
+                        val = data.snap[str(sno)][_e]
                     except KeyError:
-                        row.append('-')
-                    try:
-                        row.append(data.white_rabbit[_e])
-                    except KeyError:
-                        row.append('-')
-                    for sno in range(4):
-                        try:
-                            row.append(data.snap[str(sno)][_e])
-                        except KeyError:
-                            row.append('-')
+                        val = '-'
+                    row.append(val)
+                    table_dict[node][_e][f"snap{sno}"] = val
+                table_data.append(row)
+        if filename == 'return_only':
+            return table_dict
+        else:
+            with open(filename, 'w') as fp:
+                for row in table_data:
                     print(','.join(row), file=fp)
