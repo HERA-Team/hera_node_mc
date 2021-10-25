@@ -7,7 +7,7 @@ class HostsEthers:
     def __init__(self, file, read_from_string=False):
         if read_from_string:
             self.filename = 'from_string'
-            if len is None:
+            if file is None:
                 self.file_contents_by_line = []
             else:
                 self.file_contents_by_line = file.splitlines()
