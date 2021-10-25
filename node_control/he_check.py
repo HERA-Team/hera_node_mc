@@ -4,8 +4,10 @@ import socket
 
 
 class Check:
-    def __init__(self, files='server'):
-        if isinstance(files, str):  # any string, but use server
+    def __init__(self, files='local'):
+        self.hosts = {}
+        self.ethers = {}
+        if isinstance(files, str):  # any string, but use 'local'
             hostname = socket.gethostname()
             self.hosts[hostname] = hosts_ethers.HostsEthers('/etc/hosts')
             self.ethers[hostname] = hosts_ethers.HostsEthers('/etc/ethers')
@@ -24,7 +26,7 @@ class Check:
 
     def parse_data(self):
         for key in self.data.keys():
-            this_node = key[1:]
+            this_node = int(key[1:])
             for hfn in self.hosts.keys():
                 for alias, ip in self.hosts[hfn].by_alias.items():
                     if alias == f"heraNode{this_node}":
@@ -44,10 +46,10 @@ class Check:
                     elif f"heraNode{this_node}Snap" in alias:
                         sno = alias[-1]
                         self.data[key].snap[sno] = {'ip': ip}
-                        for _x in self.hosts[hfn].by_id['ip']:
+                        for _x in self.hosts[hfn].by_id[ip]:
                             if _x.startswith('SNP'):
                                 self.data[key].snap[sno]['serial'] = _x
-                                self.data[key].snap[sno]['mac'] = self[hfn].ethers.by_alias[_x]
+                                self.data[key].snap[sno]['mac'] = self.ethers[hfn].by_alias[_x]
 
     def write_csv(self, filename='hosts_ethers.csv'):
         with open(filename, 'w') as fp:
