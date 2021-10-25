@@ -8,6 +8,7 @@ import redis
 import argparse
 import socket
 import subprocess
+import sys
 
 
 parser = argparse.ArgumentParser(description='hosts/ethers file upload to redis',
@@ -20,9 +21,10 @@ args = parser.parse_args()
 
 r = redis.Redis(args.redishost, decode_responses=True)
 hostname = socket.gethostname()
+current_env = sys.executable.split('/')[-3]
 
 crontab = subprocess.check_output(['crontab', '-l']).decode()
-r.hset('crontab', hostname, crontab)
+r.hset('crontab', f"{hostname}:{current_env}", crontab)
 r.expire('crontab', args.expire)
 
 if hostname != 'qmaster':
