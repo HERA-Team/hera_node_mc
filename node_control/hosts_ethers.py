@@ -7,7 +7,10 @@ class HostsEthers:
     def __init__(self, file, read_from_string=False):
         if read_from_string:
             self.filename = 'from_string'
-            self.file_contents_by_line = file.splitlines()
+            if len(file):
+                self.file_contents_by_line = file.splitlines()
+            else:
+                self.file_contents_by_line = []
         else:
             self.filename = file
             with open(file, 'r') as fp:
