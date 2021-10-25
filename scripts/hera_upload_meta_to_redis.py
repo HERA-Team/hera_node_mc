@@ -28,7 +28,10 @@ r.expire('crontab', args.expire)
 if hostname != 'qmaster':
     for cfile in ['/etc/hosts', '/etc/ethers']:
         ctype = cfile.split('/')[-1]
-        with open(cfile, 'r') as fh:
-            config = fh.read()
-            r.hset(ctype, hostname, config)
-            r.expire(ctype, args.expire)
+        try:
+            with open(cfile, 'r') as fh:
+                config = fh.read()
+                r.hset(ctype, hostname, config)
+                r.expire(ctype, args.expire)
+        except FileNotFoundError:
+            continue
