@@ -4,10 +4,14 @@ import warnings
 
 
 class HostsEthers:
-    def __init__(self, filename):
-        self.filename = filename
-        with open(filename, 'r') as fp:
-            self.file_contents_by_line = fp.read().splitlines()
+    def __init__(self, file, read_from_string=False):
+        if read_from_string:
+            self.filename = 'from_string'
+            self.file_contents_by_line = file.splitlines()
+        else:
+            self.filename = file
+            with open(file, 'r') as fp:
+                self.file_contents_by_line = fp.read().splitlines()
         self.original_contents_by_line = []
         for line in self.file_contents_by_line:
             self.original_contents_by_line.append(line)

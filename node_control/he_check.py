@@ -7,11 +7,23 @@ class Check:
     def __init__(self, files='local'):
         self.hosts = {}
         self.ethers = {}
-        if isinstance(files, str):  # any string, but use 'local'
+        if isinstance(files, str) and files == 'local':
             hostname = socket.gethostname()
             self.hosts[hostname] = hosts_ethers.HostsEthers('/etc/hosts')
             self.ethers[hostname] = hosts_ethers.HostsEthers('/etc/ethers')
+        elif isinstance(files, str) and files == 'redis':
+            import redis
+            r = redis.Redis('redishost', decode_responses=True)
+            self.hosts['node'] = hosts_ethers.HostsEthers(r.hget('hosts', 'hera-node-head'),
+                                                          read_from_string=True)
+            self.ethers['node'] = hosts_ethers.HostsEthers(r.hget('ethers', 'hera-node-head'),
+                                                           read_from_string=True)
+            self.hosts['snap'] = hosts_ethers.HostsEthers(r.hget('hosts', 'hera-snap-head'),
+                                                          read_from_string=True)
+            self.ethers['snap'] = hosts_ethers.HostsEthers(r.hget('ethers', 'hera-snap-head'),
+                                                           read_from_string=True)
         else:  # I've downloaded local versions from node-head and snap-head
+            # files name host_node, host_snap, ethers_node, ethers_snap
             for fn in files:
                 if 'hosts' in fn:
                     hn = fn.split('_')[1]
