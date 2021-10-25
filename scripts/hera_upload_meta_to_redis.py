@@ -1,12 +1,14 @@
 #!/usr/env python
 
 """
-Upload hosts/ethers files to redis.
+Upload hosts/ethers/crontab files to redis.
 """
 
 import redis
 import argparse
 import socket
+import subprocess
+
 
 parser = argparse.ArgumentParser(description='hosts/ethers file upload to redis',
                                  formatter_class=argparse.ArgumentDefaultsHelpFormatter)
@@ -19,9 +21,14 @@ args = parser.parse_args()
 r = redis.Redis(args.redishost, decode_responses=True)
 hostname = socket.gethostname()
 
-for cfile in ['/etc/hosts', '/etc/ethers']:
-    ctype = cfile.split('/')[-1]
-    with open(cfile, 'r') as fh:
-        config = fh.read()
-        r.hset(ctype, hostname, config)
-        r.expire(ctype, args.expire)
+crontab = subprocess.check_output(['crontab', '-l']).decode()
+r.hset('crontab', hostname, crontab)
+r.expire('crontab', args.expire)
+
+if hostname != 'qmaster':
+    for cfile in ['/etc/hosts', '/etc/ethers']:
+        ctype = cfile.split('/')[-1]
+        with open(cfile, 'r') as fh:
+            config = fh.read()
+            r.hset(ctype, hostname, config)
+            r.expire(ctype, args.expire)
