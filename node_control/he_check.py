@@ -14,13 +14,13 @@ class Check:
         elif isinstance(files, str) and files == 'redis':
             import redis
             r = redis.Redis('redishost', decode_responses=True)
-            self.hosts['node'] = hosts_ethers.HostsEthers(r.hget('hosts', 'hera-node-head'),
+            self.hosts['node'] = hosts_ethers.HostsEthers(r.hget('check:hosts', 'hera-node-head'),
                                                           read_from_string=True)
-            self.ethers['node'] = hosts_ethers.HostsEthers(r.hget('ethers', 'hera-node-head'),
+            self.ethers['node'] = hosts_ethers.HostsEthers(r.hget('check:ethers', 'hera-node-head'),
                                                            read_from_string=True)
-            self.hosts['snap'] = hosts_ethers.HostsEthers(r.hget('hosts', 'hera-snap-head'),
+            self.hosts['snap'] = hosts_ethers.HostsEthers(r.hget('check:hosts', 'hera-snap-head'),
                                                           read_from_string=True)
-            self.ethers['snap'] = hosts_ethers.HostsEthers(r.hget('ethers', 'hera-snap-head'),
+            self.ethers['snap'] = hosts_ethers.HostsEthers(r.hget('check:ethers', 'hera-snap-head'),
                                                            read_from_string=True)
         else:  # I've downloaded local versions from node-head and snap-head
             # files name host_node, host_snap, ethers_node, ethers_snap
