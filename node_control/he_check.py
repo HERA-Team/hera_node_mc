@@ -83,7 +83,7 @@ class Check:
                 except KeyError:
                     val = '-'
                 row.append(val)
-                table_dict[node][_e]['white_rabbit'] = val
+                table_dict[node][_e]['wr'] = val
                 for sno in range(4):
                     try:
                         val = data.snap[str(sno)][_e]

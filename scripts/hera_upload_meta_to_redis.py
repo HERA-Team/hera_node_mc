@@ -23,13 +23,19 @@ r = redis.Redis(args.redishost, decode_responses=True)
 hostname = socket.gethostname()
 current_env = sys.executable.split('/')[-3]
 
-crontab = subprocess.check_output(['crontab', '-l']).decode()
-r.hset('check:crontab', f"{hostname}:{current_env}", crontab)
-r.expire('check:crontab', args.expire)
+try:
+    crontab = subprocess.check_output(['crontab', '-l']).decode()
+    r.hset('check:crontab', f"{hostname}:{current_env}", crontab)
+    r.expire('check:crontab', args.expire)
+except subprocess.CalledProcessError:
+    pass
 
-daemon = subprocess.check_output(['systemctl']).decode()
-r.hset('check:daemon', f"{hostname}:{current_env}", daemon)
-r.expire('check:daemon', args.expire)
+try:
+    daemon = subprocess.check_output(['systemctl']).decode()
+    r.hset('check:daemon', f"{hostname}:{current_env}", daemon)
+    r.expire('check:daemon', args.expire)
+except subprocess.CalledProcessError:
+    pass
 
 if hostname != 'qmaster':
     for cfile in ['/etc/hosts', '/etc/ethers']:
