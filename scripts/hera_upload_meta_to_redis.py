@@ -34,7 +34,7 @@ try:
     daemon = subprocess.check_output(['systemctl']).decode()
     r.hset('check:daemon', f"{hostname}:{current_env}", daemon)
     r.expire('check:daemon', args.expire)
-except subprocess.CalledProcessError:
+except (subprocess.CalledProcessError, FileNotFoundError):
     pass
 
 if hostname != 'qmaster':
