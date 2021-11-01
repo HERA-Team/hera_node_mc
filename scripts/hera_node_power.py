@@ -5,9 +5,8 @@ from node_control import node_control
 parser = argparse.ArgumentParser(description='Turn on SNAP relay, SNAPs, FEM and PAM',
                                  formatter_class=argparse.ArgumentDefaultsHelpFormatter)
 
-parser.add_argument('command', help="Specify 'on', 'off', 'start', 'stop' or 'reset'.  "
-                    "start/stop turns everything on/off.",
-                    choices=['on', 'off', 'start', 'stop', 'reset'])
+parser.add_argument('command', help="Specify 'on', 'off', or 'reset'.",
+                    choices=['on', 'off', 'reset'])
 parser.add_argument('node', help="Specify the list of nodes (csv list of int) or 'all' (default)",
                     nargs='?', default='all')
 parser.add_argument('-p', '--pam', action='store_true', help='Turn on/off the PAMs')
@@ -40,7 +39,7 @@ parser.add_argument('--redisServer', help='Name of redis server', default='redis
 args = parser.parse_args()
 
 if args.node.lower() == 'all':
-    nodes2use = list(range(30))
+    nodes2use = 'all'
 else:
     nodes2use = [int(x) for x in args.node.split(',')]
 verbose = not args.quiet
@@ -57,12 +56,6 @@ if args.command == 'reset':
     nc.reset()
     import sys
     sys.exit()
-elif args.command == 'start':
-    args.command = 'on'
-    args.all_hardware = True
-elif args.command == 'stop':
-    args.command = 'off'
-    args.all_hardware = True
 
 keystates = {}
 if args.all_hardware:

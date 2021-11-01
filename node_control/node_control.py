@@ -46,10 +46,10 @@ class NodeControl():
 
         Parameters
         ----------
-        nodes : int, list of int or None
+        nodes : int, list of int, 'all', None
             ID numbers of the nodes with which this instance of NodeControl will interact.
-            If None, it will check them all (0-29).  If not list, it will make a list.
-            If a negative number, it will skip looking in redis.
+            If 'all', will try 0-29.
+            If None, it will _not_ get nodes_in_redis
         redisServer : str
             The hostname, or dotted quad IP address, of the machine running the node control and
             monitoring redis server
@@ -59,7 +59,7 @@ class NodeControl():
 
         Attributes
         ----------
-        request_nodes : list
+        request_nodes : list or None
             List of requested nodes (supplied)
         r : redis class
             Redis class to use
@@ -72,19 +72,14 @@ class NodeControl():
         status_node_keys : list
             List of the status:node keys
         """
-        if nodes is None or nodes == 'all':
+        if isinstance(nodes, str) and nodes.lower() == 'all':
             self.request_nodes = list(range(MAX_NODES))
-        elif isinstance(nodes, str):
-            self.request_nodes = [int(x) for x in nodes.split(',')]
-            if self.request_nodes[0] < 0:
-                self.request_nodes = None
         elif isinstance(nodes, (int, float)):
-            if nodes < 0:
-                self.request_nodes = None
-            else:
-                self.request_nodes = [int(nodes)]
-        else:
+            self.request_nodes = [int(nodes)]
+        elif isinstance(nodes, list) or nodes is None:
             self.request_nodes = nodes
+        else:
+            raise ValueError(f"Invalid 'nodes' type: {nodes}")
         self.r = node_util.get_redis_client(redisServer)
         self.nodes_in_redis = []
         self.connected_nodes = []
