@@ -2,7 +2,8 @@
 import argparse
 from node_control import node_control
 
-parser = argparse.ArgumentParser(description='Turn on SNAP relay, SNAPs, FEM and PAM',
+parser = argparse.ArgumentParser(description='Turn on SNAP relay, SNAPs, FEM and PAM. '
+                                 'No hardware choice turns all on/off.',
                                  formatter_class=argparse.ArgumentDefaultsHelpFormatter)
 
 parser.add_argument('command', help="Specify 'on', 'off', or 'reset'.",
@@ -56,7 +57,7 @@ if args.command == 'reset':
     sys.exit()
 
 # Preprocess hardware arguments.
-all_hardware = True  # Default is to turn everything on, unless something specific is set.
+all_hardware = True  # Default is to turn everything on/off, unless something specific is set.
 for hw in ['fem', 'pam', 'snaps', 'snap0', 'snap1', 'snap2', 'snap3', 'snap_relay']:
     if getattr(args, hw):
         all_hardware = False

@@ -591,7 +591,7 @@ class NodeControl():
                         break
         return verification
 
-    def _log_verdict_in_redis(self, vdt, nc):
+    def _log_verdict_in_redis(self, vdt, nc, expire_time_hr=24.0):
         """
         Log the final verification dictionary to redis under verdict:node:
         """
@@ -603,7 +603,8 @@ class NodeControl():
         for this_key in self.r.keys():  # purge all old values
             if this_key.startswith('verdict:node:'):
                 self.r.delete(this_key)
-        self.r.hmset('verdict:node:par'.format(), vpar)
+        self.r.hmset('verdict:node:par', vpar)
+        self.r.expire('verdict:node:par', expire_time_hr * 3600.0)
         for node, vals in vdt.items():
             for hw, _stg in vals.items():
                 _tvd = {}
@@ -611,12 +612,14 @@ class NodeControl():
                     _tvd[_aa] = 1 if _bb else 0
                 key = "verdict:node:{}:{}".format(node, hw)
                 self.r.hmset(key, _tvd)
+                self.r.expire(key, expire_time_hr * 3600.0)
         for node in self.connected_nodes:
             key = "verdict:node:{}:valid".format(node)
             if nc[node]:
                 self.r.set(key, 0)
             else:
                 self.r.set(key, 1)
+            self.r.expire(key, expire_time_hr * 3600.0)
 
     def _log_cmd_to_redis(self, node, component, tstamp, cmd):
         key = "{}{}".format(self.NC_CMD, node)
