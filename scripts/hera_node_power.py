@@ -17,10 +17,8 @@ parser.add_argument('-0', '--snap0', action='store_true', help='Turn on/off SNAP
 parser.add_argument('-1', '--snap1', action='store_true', help='Turn on/off SNAP 1')
 parser.add_argument('-2', '--snap2', action='store_true', help='Turn on/off SNAP 2')
 parser.add_argument('-3', '--snap3', action='store_true', help='Turn on/off SNAP 3')
-parser.add_argument('-a', '--all_hardware', action='store_true',
-                    help='Turn on/off snaps, pams and fems.  Equivalent to -s -p -f')
 parser.add_argument('-r', '--snap-relay', dest='snap_relay', action='store_true',
-                    help="Turn on/off the snap-relay - not needed except "
+                    help="Turn on/off the snap-relay - NOT NEEDED except "
                          "when turning off the last snap if done separately")
 parser.add_argument('--throttle', help='Throttle time in sec for udp_sender (0.2s)',
                     type=float, default=0.2)
@@ -57,8 +55,12 @@ if args.command == 'reset':
     import sys
     sys.exit()
 
-keystates = {}
-if args.all_hardware:
+# Preprocess hardware arguments.
+all_hardware = True  # Default is to turn everything on, unless something specific is set.
+for hw in ['fem', 'pam', 'snaps', 'snap0', 'snap1', 'snap2', 'snap3', 'snap_relay']:
+    if getattr(args, hw):
+        all_hardware = False
+if all_hardware:
     args.snap_relay = True
     args.snaps = True
     args.pam = True
@@ -73,6 +75,9 @@ else:
             snaps_to_set.append(i)
 any_snap = len(snaps_to_set) > 0
 all_snap = len(snaps_to_set) == 4
+
+# Run through commands.
+keystates = {}
 
 if args.command == 'on' and (args.snap_relay or any_snap):
     nc.power_snap_relay('on', args.hold_for_verify, args.verify_mode)
