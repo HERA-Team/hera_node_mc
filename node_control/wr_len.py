@@ -1,7 +1,6 @@
 import socket
 import json
 import datetime
-import time
 
 
 from py7slib.core.vuart import VUART_shell
@@ -55,17 +54,15 @@ class WrLen(VUART_shell):
                     except ValueError:
                         pass
             elif line.startswith('temp'):
-                rv['temperature'] = line.split(' ')[1]
+                rv['temp'] = line.split(' ')[1]
         return rv
 
-    def gather_keys(self, include_ver=False):
+    def gather_keys(self):
         rv = {}
-        if include_ver:
-            rv.update(self.process_ver())
-            rv['ver_timestamp'] = datetime.datetime.now().isoformat()
+        rv.update(self.process_ver())
         rv.update(self.process_stats())
         rv['ip'] = self.ip
-        rv['timestamp'] = time.time()
+        rv['timestamp'] = datetime.datetime.now().isoformat()
         rv['serial'] = self.serial
         rv['aliases'] = json.dumps(self.aliases)
         return rv
