@@ -35,8 +35,9 @@ class NodeControl():
         command hash prefix for redis
     """
 
-    NC_STAT = 'status:node:'
-    NC_CMD = 'commands:node:'
+    NC_KEY_INFO = {'wr_stat': ['status:wr:heraNode', 2],
+                   'nc_stat': ['status:node:', 0],
+                   'nc_cmd': ['commands:node:', 0]}
     hw = ['snap_relay', 'snap_0', 'snap_1', 'snap_2', 'snap_3', 'fem', 'pam']
     power_switch = {True: 'on', False: 'off'}
 
@@ -86,7 +87,21 @@ class NodeControl():
         self.senders = {}
         self.sc_node = ''
         self.status_node_keys = list(node_util.status_node(None, None).keys())
+        self.get_stat_keys()  # This has to come before nodes_in_redis.
         self.get_nodes_in_redis(count)
+
+    def get_stat_keys(self):
+        """Go through redis and get all keys that start with the desired patterns."""
+        for this_attr in self.NC_KEY_INFO:
+            setattr(self, this_attr, {})
+        for this_key in self.r.keys():
+            for this_attr, key_info in self.NC_KEY_INFO.items():
+                if this_key.startswith(key_info[0]):
+                    try:
+                        this_node = int(this_key[len(key_info[0]): len(this_key) - key_info[1]])
+                    except ValueError:
+                        continue
+                    getattr(self, this_attr)[this_node] = this_key
 
     def log_service_in_redis(self, this_file):
         rkey = "version:{}:{}".format(__package__, osp.basename(this_file))
@@ -116,7 +131,7 @@ class NodeControl():
             count = len(self.status_node_keys)
         self.nodes_in_redis = []
         for node in self.request_nodes:
-            if len(self.r.hgetall("{}{}".format(self.NC_STAT, node))) >= count:
+            if node in self.nc_stat and len(self.r.hgetall(self.nc_stat[node])) >= count:
                 self.nodes_in_redis.append(node)
 
     def reset_node_senders(self):
@@ -161,21 +176,6 @@ class NodeControl():
         else:
             self.sc_node = "No nodes connected."
 
-    def _get_raw_node_hash(self, this_key):
-        """
-        Return the raw content of a node status hash in redis,
-        via redis's `hgetall` call. Data are returned as a dictionary,
-        where the keys are the redis hash fields (strings) and the
-        values are the stored values (strings).
-
-        :returns: Whatever key-value pairs exist for this node's hash
-        """
-        rawstat = {}
-        for node in self.nodes_in_redis:
-            nkey = this_key.replace('*', str(node))
-            rawstat[node] = self.r.hgetall(nkey)
-        return rawstat
-
     def get_sensors(self):
         """
         Get the current node sensor values from redis.
@@ -207,7 +207,8 @@ class NodeControl():
         }
         sensors = {}
         now = time.time()
-        for node, stats in self._get_raw_node_hash("{}*".format(self.NC_STAT)).items():
+        for node, stat_key in self.nc_stat.items():
+            stats = self.r.hgetall(stat_key)
             sensors[node] = {'age': None}
             for key, convfunc in conv_methods.items():
                 try:
@@ -241,7 +242,8 @@ class NodeControl():
         valid = ["power_{}_cmd".format(x) for x in self.hw] + ['reset']
         power = {}
         now = time.time()
-        for node, statii in self._get_raw_node_hash("{}*".format(self.NC_CMD)).items():
+        for node, cmd_key in self.nc_cmd.items():
+            statii = self.r.hgetall(cmd_key)
             power[node] = {}
             for key in list(statii.keys()):
                 if key not in valid:
@@ -286,7 +288,8 @@ class NodeControl():
         """
         power = {}
         now = time.time()
-        for node, statii in self._get_raw_node_hash("{}*".format(self.NC_STAT)).items():
+        for node, stat_key in self.nc_stat.items():
+            statii = self.r.hgetall(stat_key)
             power[node] = {'age': None}
             for key in list(statii.keys()):
                 if key == 'timestamp':
@@ -404,7 +407,8 @@ class NodeControl():
             '_sec': int
         }
         wrstat = {}
-        for node, stats in self._get_raw_node_hash("status:wr:heraNode*wr").items():
+        for node, stat_key in self.wr_stat.items():
+            stats = self.r.hgetall(stat_key)
             wrstat[node] = {}
             for key, convfunc in conv_methods.items():
                 if key.startswith('_'):
@@ -418,10 +422,7 @@ class NodeControl():
                     try:
                         wrstat[node][key] = convfunc(stats[key])
                     except:  # noqa
-                        if key == 'timestamp':
-                            wrstat[node][key] = 0
-                        else:
-                            wrstat[node][key] = None
+                        wrstat[node][key] = None
         return wrstat
 
     def verdict(self, hwcmd, verbose=True, hold_for_verify=120, verify_mode='all',
