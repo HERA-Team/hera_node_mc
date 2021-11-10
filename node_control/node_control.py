@@ -30,16 +30,16 @@ class NodeControl():
     Attributes
     ----------
     NC_KEY_INFO : dict
-        Dictionary containing the redis prefixes.
+        Dictionary containing the redis status pre/post-fix information.
     hw : list
-        List of hardward to check.
+        List of hardware to check.
     power_switch : dict
         Power switch state.
     """
 
-    NC_KEY_INFO = {'wr_stat': ['status:wr:heraNode', 2],
-                   'nc_stat': ['status:node:', 0],
-                   'nc_cmd': ['commands:node:', 0]}
+    NC_KEY_INFO = {'wr_stat': ['status:wr:heraNode', 'wr'],
+                   'nc_stat': ['status:node:', ''],
+                   'nc_cmd': ['commands:node:', '']}
     hw = ['snap_relay', 'snap_0', 'snap_1', 'snap_2', 'snap_3', 'fem', 'pam']
     power_switch = {True: 'on', False: 'off'}
 
@@ -93,7 +93,24 @@ class NodeControl():
         self.get_nodes_in_redis(count)
 
     def get_stat_keys(self):
-        """Go through redis and get all keys that start with the desired patterns."""
+        """
+        Go through redis and get all keys that start with the desired patterns.
+
+        Attributes (from NC_KEY_INFO)
+        ----------
+        nc_stat : dict
+            Redis key entries for status per node.
+        nc_stat_prefix : str
+            Prefix used for nc_stat redis keys.
+        nc_cmd : dict
+            Redis key entries for commands per node.
+        nc_cmd_prefix : dict
+            Prefix used for nc_cmd redis keys.
+        nc_wrstat : dict
+            Redis key entries for wr status per node.
+        nc_wrstat_prefix : str
+            Prefix used for wr_stat redis keys.
+        """
         for this_attr, key_info in self.NC_KEY_INFO.items():
             setattr(self, this_attr, {})  # set dictionary for nodes present
             redis_prefix = f"{this_attr}_prefix"
@@ -101,8 +118,10 @@ class NodeControl():
         for this_key in self.r.keys():
             for this_attr, key_info in self.NC_KEY_INFO.items():
                 if this_key.startswith(key_info[0]):
+                    lstart = len(key_info[0])
+                    lstop = len(this_key) - len(key_info[1])
                     try:
-                        this_node = int(this_key[len(key_info[0]): len(this_key) - key_info[1]])
+                        this_node = int(this_key[lstart: lstop])
                     except ValueError:
                         continue
                     getattr(self, this_attr)[this_node] = this_key
