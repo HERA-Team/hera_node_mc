@@ -29,10 +29,12 @@ class NodeControl():
 
     Attributes
     ----------
-    NC_STAT : str
-        status hash prefix for redis
-    NC_CMD : str
-        command hash prefix for redis
+    NC_KEY_INFO : dict
+        Dictionary containing the redis prefixes.
+    hw : list
+        List of hardward to check.
+    power_switch : dict
+        Power switch state.
     """
 
     NC_KEY_INFO = {'wr_stat': ['status:wr:heraNode', 2],
@@ -92,8 +94,10 @@ class NodeControl():
 
     def get_stat_keys(self):
         """Go through redis and get all keys that start with the desired patterns."""
-        for this_attr in self.NC_KEY_INFO:
-            setattr(self, this_attr, {})
+        for this_attr, key_info in self.NC_KEY_INFO.items():
+            setattr(self, this_attr, {})  # set dictionary for nodes present
+            redis_prefix = f"{this_attr}_prefix"
+            setattr(self, redis_prefix, key_info[0])  # pull out prefix for status
         for this_key in self.r.keys():
             for this_attr, key_info in self.NC_KEY_INFO.items():
                 if this_key.startswith(key_info[0]):
@@ -159,7 +163,7 @@ class NodeControl():
                 if self.senders[node].node_is_connected:
                     self.connected_nodes.append(node)
             else:
-                hkey = "{}{}".format(self.NC_STAT, node)
+                hkey = "{}{}".format(self.nc_stat_prefix, node)
                 # ip = self.r.hget(hkey, 'ip')  # use name not number
                 ip = f"heraNode{node}"
                 self.senders[node] = send_receive.UdpSenderReceiver(ip, throttle=throttle)
@@ -623,7 +627,7 @@ class NodeControl():
             self.r.expire(key, expire_time_hr * 3600.0)
 
     def _log_cmd_to_redis(self, node, component, tstamp, cmd):
-        key = "{}{}".format(self.NC_CMD, node)
+        key = "{}{}".format(self.self.nc_cmd_prefix, node)
         val = "{}|{}".format(cmd, tstamp)
         cmp = "{}_cmd".format(component)
         self.r.hset(key, cmp, val)
