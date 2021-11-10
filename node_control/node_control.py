@@ -37,7 +37,7 @@ class NodeControl():
         Power switch state.
     """
 
-    NC_KEY_INFO = {'wr_stat': ['status:wr:heraNode', 'wr'],
+    NC_KEY_INFO = {'wr_stat': ['status:wr:heraNode', 'wr', 'status:wr:'],
                    'nc_stat': ['status:node:', ''],
                    'nc_cmd': ['commands:node:', '']}
     hw = ['snap_relay', 'snap_0', 'snap_1', 'snap_2', 'snap_3', 'fem', 'pam']
@@ -89,10 +89,10 @@ class NodeControl():
         self.senders = {}
         self.sc_node = ''
         self.status_node_keys = list(node_util.status_node(None, None).keys())
-        self.get_stat_keys()  # This has to come before nodes_in_redis.
+        self.get_stat_keys_from_redis()
         self.get_nodes_in_redis(count)
 
-    def get_stat_keys(self):
+    def get_stat_keys_from_redis(self):
         """
         Go through redis and get all keys that start with the desired patterns.
 
@@ -100,21 +100,14 @@ class NodeControl():
         ----------
         nc_stat : dict
             Redis key entries for status per node.
-        nc_stat_prefix : str
-            Prefix used for nc_stat redis keys.
         nc_cmd : dict
             Redis key entries for commands per node.
-        nc_cmd_prefix : dict
-            Prefix used for nc_cmd redis keys.
-        nc_wrstat : dict
+        wr_stat : dict
             Redis key entries for wr status per node.
-        nc_wrstat_prefix : str
-            Prefix used for wr_stat redis keys.
+
         """
         for this_attr, key_info in self.NC_KEY_INFO.items():
             setattr(self, this_attr, {})  # set dictionary for nodes present
-            redis_prefix = f"{this_attr}_prefix"
-            setattr(self, redis_prefix, key_info[0])  # pull out prefix for status
         for this_key in self.r.keys():
             for this_attr, key_info in self.NC_KEY_INFO.items():
                 if this_key.startswith(key_info[0]):
@@ -125,6 +118,11 @@ class NodeControl():
                     except ValueError:
                         continue
                     getattr(self, this_attr)[this_node] = this_key
+
+    def redis_keygen(self, rtype, nodeID):
+        if rtype == 'wr_stat' and str(nodeID).startswith('heraNode'):
+            return "{}{}".format(self.NC_KEY_INFO[rtype][2], nodeID)
+        return "{}{}{}".format(self.NC_KEY_INFO[rtype][0], nodeID, self.NC_KEY_INFO[rtype][1])
 
     def log_service_in_redis(self, this_file):
         rkey = "version:{}:{}".format(__package__, osp.basename(this_file))
@@ -182,7 +180,7 @@ class NodeControl():
                 if self.senders[node].node_is_connected:
                     self.connected_nodes.append(node)
             else:
-                hkey = "{}{}".format(self.nc_stat_prefix, node)
+                hkey = self.redis_keygen('nc_stat', node)
                 # ip = self.r.hget(hkey, 'ip')  # use name not number
                 ip = f"heraNode{node}"
                 self.senders[node] = send_receive.UdpSenderReceiver(ip, throttle=throttle)
@@ -646,7 +644,7 @@ class NodeControl():
             self.r.expire(key, expire_time_hr * 3600.0)
 
     def _log_cmd_to_redis(self, node, component, tstamp, cmd):
-        key = "{}{}".format(self.self.nc_cmd_prefix, node)
+        key = self.redis_keygen('nc_cmd', node)
         val = "{}|{}".format(cmd, tstamp)
         cmp = "{}_cmd".format(component)
         self.r.hset(key, cmp, val)
