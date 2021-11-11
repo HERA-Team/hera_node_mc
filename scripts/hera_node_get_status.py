@@ -42,30 +42,31 @@ else:
     sys.exit()
 
 powers = nc.get_power_status()
-sensors = nc.get_sensors()
-
 print("\nNode power states")
 print("-----------------")
-for nd, pwr in powers.items():
+for nd in sorted(list(powers.keys())):
+    pwr = powers[nd]
     if node_util.stale_data(pwr, 'age', args.stale, f"Node {nd} -- ") and not args.show_stale:
         continue
     print(node_util.node_power_entry(nd, pwr))
 
 if args.temperature:
+    sensors = nc.get_sensors()
     print("\nNode values")
     print("-----------")
-    for nd, sens in sensors.items():
+    for nd in sorted(list(sensors.keys())):
+        sens = sensors[nd]
         if node_util.stale_data(sens, 'age', args.stale, f"Node {nd} -- ") and not args.show_stale:
             continue
         print(node_util.node_sensor_entry(nd, sens))
-
 
 if args.wr:
     wr = nc.get_wr_status()
     print("\nWhite Rabbit")
     print("------------")
     args.show_stale = True  # Always show (but maybe will change when update hera_wr_cm)
-    for nd, wrs in wr.items():
+    for nd in sorted(list(wr.keys())):
+        wrs = wr[nd]
         print("Node {} -- ".format(nd), end='')
         if node_util.stale_data(wrs, 'age', args.stale, True) and not args.show_stale:
             continue
