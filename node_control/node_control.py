@@ -626,7 +626,7 @@ class NodeControl():
             if this_key.startswith('verdict:node:'):
                 self.r.delete(this_key)
         self.r.hmset('verdict:node:par', vpar)
-        self.r.expire('verdict:node:par', expire_time_hr * 3600.0)
+        self.r.expire('verdict:node:par', int(expire_time_hr * 3600.0))
         for node, vals in vdt.items():
             for hw, _stg in vals.items():
                 _tvd = {}
@@ -634,14 +634,14 @@ class NodeControl():
                     _tvd[_aa] = 1 if _bb else 0
                 key = "verdict:node:{}:{}".format(node, hw)
                 self.r.hmset(key, _tvd)
-                self.r.expire(key, expire_time_hr * 3600.0)
+                self.r.expire(key, int(expire_time_hr * 3600.0))
         for node in self.connected_nodes:
             key = "verdict:node:{}:valid".format(node)
             if nc[node]:
                 self.r.set(key, 0)
             else:
                 self.r.set(key, 1)
-            self.r.expire(key, expire_time_hr * 3600.0)
+            self.r.expire(key, int(expire_time_hr * 3600.0))
 
     def _log_cmd_to_redis(self, node, component, tstamp, cmd):
         key = self.redis_keygen('nc_cmd', node)
