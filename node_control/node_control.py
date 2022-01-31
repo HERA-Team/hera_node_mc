@@ -152,6 +152,8 @@ class NodeControl():
             count = len(self.status_node_keys)
         self.nodes_in_redis = []
         for node in self.request_nodes:
+            if node not in self.nc_stat:
+                continue
             try:
                 ts = self.r.hget(self.nc_stat[node], 'timestamp')
             except KeyError:
