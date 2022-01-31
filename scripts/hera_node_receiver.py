@@ -7,7 +7,7 @@ import sys
 import node_control
 
 
-nc = node_control.node_control.NodeControl(-1, 'redishost')
+nc = node_control.node_control.NodeControl('all', 'redishost')
 nc.log_service_in_redis(__file__)
 heartbeat = 60
 
