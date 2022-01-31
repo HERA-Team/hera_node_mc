@@ -1,7 +1,6 @@
 #! /usr/bin/env python
 import argparse
 import os
-import time
 import socket
 from node_control import hosts_ethers
 from node_control import send_receive
@@ -75,7 +74,7 @@ if send_receive.is_node_control_host(hostname):
     ncm = 'NCM{:02d}'.format(args.ncm)
     rd['node'] = 'heraNode{}'.format(args.node_num)
     rd['node_ID'] = args.node_num
-    rd['timestamp'] = time.time()
+    rd['timestamp'] = 'initialize'
     rd['ncm'] = ncm
     rd['sn'] = 'arduino{}'.format(int(RDmap[ncm][2:]))
     rd['mac'] = ethers.by_alias[rd['sn']]

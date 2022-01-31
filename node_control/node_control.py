@@ -152,7 +152,16 @@ class NodeControl():
             count = len(self.status_node_keys)
         self.nodes_in_redis = []
         for node in self.request_nodes:
-            if node in self.nc_stat and len(self.r.hgetall(self.nc_stat[node])) >= count:
+            try:
+                ts = self.nc_stat[node]['timestamp']
+            except KeyError:
+                ts = 'not present'
+            if ts == 'initialize':
+                len_entries = 1000
+                self.nc_stat[node]['timestamp'] = time.time()
+            else:
+                len_entries = len(self.r.hgetall(self.nc_stat[node]))
+            if node in self.nc_stat and len_entries >= count:
                 self.nodes_in_redis.append(node)
 
     def reset_node_senders(self):
