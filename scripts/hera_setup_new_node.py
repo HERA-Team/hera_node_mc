@@ -6,6 +6,7 @@ import socket
 from node_control import hosts_ethers
 from node_control import send_receive
 from node_control.node_util import get_redis_client
+import yaml
 
 
 # These are dumped from hera_mc on October 27, 2020
@@ -60,7 +61,11 @@ if args.snaps is not None and send_receive.is_snap_control_host(hostname):
         snaps[i]['sn'] = 'SNP{}{:06d}'.format(snap_rev[i], _snp[i])
         snaps[i]['mac'] = ethers.by_alias[snaps[i]['sn']]
         snaps[i]['ip'] = hosts.by_alias[snaps[i]['sn']]
-        hosts.update_id(snaps[i]['ip'], '{}  {}'.format(snaps[i]['sn'], snaps[i]['node']))
+        if args.modify:
+            hosts.update_id(snaps[i]['ip'], '{}  {}'.format(snaps[i]['sn'], snaps[i]['node']))
+        else:
+            print("===SNAP===")
+            print(yaml.dump(snaps))
 if send_receive.is_node_control_host(hostname):
     from node_control.node_util import status_node
     status_node_keys = list(status_node(None, None).keys())
@@ -75,15 +80,24 @@ if send_receive.is_node_control_host(hostname):
     rd['sn'] = 'arduino{}'.format(int(RDmap[ncm][2:]))
     rd['mac'] = ethers.by_alias[rd['sn']]
     rd['ip'] = hosts.by_alias[rd['sn']]
-    hosts.update_id(rd['ip'], '{}  {}'.format(rd['sn'], rd['node']))
+    if args.modify:
+        hosts.update_id(rd['ip'], '{}  {}'.format(rd['sn'], rd['node']))
+    else:
+        print("===ARDUINO===")
+        print(yaml.dump(rd))
 
     # Set up white rabbit
     wr = {'node': 'heraNode{}wr'.format(args.node_num)}
     wr['sn'] = WRmap[ncm]
     wr['mac'] = ethers.by_alias[wr['sn']]
     wr['ip'] = hosts.by_alias[wr['sn']]
-    hosts.update_id(wr['ip'], '{}  {}'.format(wr['sn'], wr['node']))
+    if args.modify:
+        hosts.update_id(wr['ip'], '{}  {}'.format(wr['sn'], wr['node']))
+    else:
+        print("===WHITE-RABBIT===")
+        print(yaml.dump(wr))
 
+    print("Updating redis")
     r = get_redis_client()
     rkey = 'status:node:{}'.format(int(args.node_num))
     r.hmset(rkey, rd)
