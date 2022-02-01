@@ -75,26 +75,20 @@ class NodeControl():
         status_node_keys : list
             List of the status:node keys
         """
-        if isinstance(nodes, str) and nodes.lower() == 'all':
-            self.request_nodes = list(range(MAX_NODES))
-        elif isinstance(nodes, (int, float)):
-            self.request_nodes = [int(nodes)]
-        elif isinstance(nodes, list) or nodes is None:
-            self.request_nodes = nodes
-        else:
-            raise ValueError(f"Invalid 'nodes' type: {nodes}")
+        self.set_request(nodes)
         self.r = node_util.get_redis_client(redisServer)
         self.nodes_in_redis = []
         self.connected_nodes = []
         self.senders = {}
         self.sc_node = ''
         self.status_node_keys = list(node_util.status_node(None, None).keys())
-        self.get_stat_keys_from_redis()
         self.get_nodes_in_redis(count)
 
-    def get_stat_keys_from_redis(self):
+    def _get_stat_keys_from_redis(self):
         """
         Go through redis and get all keys that start with the desired patterns.
+
+        Called in get_nodes_in_redis.
 
         Attributes (from NC_KEY_INFO)
         ----------
@@ -131,6 +125,16 @@ class NodeControl():
         self.r.hmset(rkey, rval)
         self.status_scriptname = "status:script:{}:{}".format(send_receive.THIS_HOST, this_file)
 
+    def set_request(self, nodes):
+        if isinstance(nodes, str) and nodes.lower() == 'all':
+            self.request_nodes = list(range(MAX_NODES))
+        elif isinstance(nodes, (int, float)):
+            self.request_nodes = [int(nodes)]
+        elif isinstance(nodes, list) or nodes is None:
+            self.request_nodes = nodes
+        else:
+            raise ValueError(f"Invalid 'nodes' type: {nodes}")
+
     def get_nodes_in_redis(self, count=None):
         """
         Get redis nodes list for those in request_nodes.
@@ -139,7 +143,7 @@ class NodeControl():
         ----------
         count : int or None
             Number of status fields to make a node count as actually used.
-            If None, get from status_node_keys
+            If None, get length from status_node_keys (all)
 
         Attributes
         ----------
@@ -150,6 +154,7 @@ class NodeControl():
             return
         if count is None:
             count = len(self.status_node_keys)
+        self._get_stat_keys_from_redis()  # gets self.nc_stat (and self.wr_stat and self.nc_cmd)
         self.nodes_in_redis = []
         for node in self.request_nodes:
             if node not in self.nc_stat:
@@ -205,7 +210,7 @@ class NodeControl():
             s = 's' if len(self.connected_nodes) > 1 else ''
             self.sc_node = "Node{} {}".format(s, ', '.join([str(x) for x in self.connected_nodes]))
         else:
-            self.sc_node = "No nodes connected."
+            self.sc_node = "No requested nodes connected."
 
     def get_sensors(self):
         """

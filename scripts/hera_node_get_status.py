@@ -34,9 +34,11 @@ if len(nc.nodes_in_redis):
     for _i in nodes2use:
         if _i not in nodes_present:
             nodes_missing.append(_i)
-    print("Requested nodes present:  {}".format(', '.join([str(x) for x in nodes_present])))
+    print("Requested nodes present in redis:  {}"
+          .format(', '.join([str(x) for x in nodes_present])))
     if len(nodes_missing):
-        print("Requested nodes missing:  {}".format(', '.join([str(x) for x in nodes_missing])))
+        print("Requested nodes missing in redis:  {}"
+              .format(', '.join([str(x) for x in nodes_missing])))
 else:
     print("None are present")
     sys.exit()

@@ -19,8 +19,8 @@ parser.add_argument('--poke_time_sec', type=float,
                     help="Extra time to wait between pokes", default=4.0)
 parser.add_argument('-r', '--redishost', default='redishost',
                     help='IP or hostname string of host running the monitor redis server.')
-parser.add_argument('--refresh', type=float, default=8.0,
-                    help="Sender connection refresh time in hours.")
+parser.add_argument('--refresh', type=float, default=10.0,
+                    help="Sender connection refresh time in minutes.")
 parser.add_argument('--throttle', type=float, default=0.1,
                     help="Throttle time within inner loop between node calls in sec.")
 parser.add_argument('--heartbeat', type=int, default=60,
@@ -30,10 +30,9 @@ args = parser.parse_args()
 
 nc = node_control.node_control.NodeControl('all', args.redishost)
 nc.log_service_in_redis(__file__)
-rfrsh_sec = args.refresh * 3600.0
+rfrsh_sec = args.refresh * 60.0
 t0 = time.time()
 t1 = t0
-nc.get_nodes_in_redis(count=None)
 nc.get_node_senders(throttle=args.throttle)
 nc.r.hset('poke_nodes', 'time', t1)
 nc.r.hset('poke_nodes', 'nodes', ','.join([str(x) for x in nc.connected_nodes]))
@@ -54,8 +53,8 @@ try:
             nc.r.hset('poke_nodes', 'nodes', ','.join([str(x) for x in nc.connected_nodes]))
             nc.reset_node_senders()
             t0 = t1
-        nc.get_nodes_in_redis(count=None)
-        nc.get_node_senders(throttle=args.throttle)
+            nc.get_nodes_in_redis(count=None)
+            nc.get_node_senders(throttle=args.throttle)
 
 except KeyboardInterrupt:
     print('Interrupted', file=sys.stderr)
