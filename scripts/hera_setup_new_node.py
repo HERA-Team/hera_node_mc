@@ -74,7 +74,7 @@ if send_receive.is_node_control_host(hostname):
     ncm = 'NCM{:02d}'.format(args.ncm)
     rd['node'] = 'heraNode{}'.format(args.node_num)
     rd['node_ID'] = args.node_num
-    rd['timestamp'] = 'initialize'
+    rd['timestamp'] = -1
     rd['ncm'] = ncm
     rd['sn'] = 'arduino{}'.format(int(RDmap[ncm][2:]))
     rd['mac'] = ethers.by_alias[rd['sn']]

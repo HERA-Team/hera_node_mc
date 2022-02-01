@@ -157,10 +157,9 @@ class NodeControl():
             try:
                 ts = self.r.hget(self.nc_stat[node], 'timestamp')
             except KeyError:
-                ts = 'not present'
-            if ts == 'initialize':
-                len_entries = 1000
-                self.r.hset(self.nc_stat[node], 'timestamp', time.time())
+                ts = 0
+            if ts == -1:
+                len_entries = len(self.status_node_keys) + 1
             else:
                 len_entries = len(self.r.hgetall(self.nc_stat[node]))
             if node in self.nc_stat and len_entries >= count:
