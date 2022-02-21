@@ -126,10 +126,10 @@ class NodeControl():
         self.status_scriptname = "status:script:{}:{}".format(send_receive.THIS_HOST, this_file)
 
     def set_request(self, nodes):
-        self.enable_monitoring_check = False
+        self.enable_snap_monitoring_check = False
         if isinstance(nodes, str) and nodes.lower() == 'all':
             self.request_nodes = list(range(MAX_NODES))
-            self.enable_monitoring_check = True
+            self.enable_snap_monitoring_check = True
         elif isinstance(nodes, (int, float)):
             self.request_nodes = [int(nodes)]
         elif isinstance(nodes, list) or nodes is None:
@@ -319,7 +319,7 @@ class NodeControl():
         age_cutoff : float
             time (sec) to use to cutoff using the power state
         """
-        if not self.enable_monitoring_check:
+        if not self.enable_snap_monitoring_check:
             return 'not_all'
         power_data = self.get_power_status()
         # check all snaps and snap relay to allow monitoring.
