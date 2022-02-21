@@ -11,6 +11,7 @@ nc = node_control.node_control.NodeControl('all', 'redishost')
 nc.log_service_in_redis(__file__)
 heartbeat = 60
 
+
 # Make udp object
 rcvr = node_control.send_receive.UdpSenderReceiver('receive')
 

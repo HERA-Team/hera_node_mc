@@ -126,8 +126,10 @@ class NodeControl():
         self.status_scriptname = "status:script:{}:{}".format(send_receive.THIS_HOST, this_file)
 
     def set_request(self, nodes):
+        self.enable_monitoring_check = False
         if isinstance(nodes, str) and nodes.lower() == 'all':
             self.request_nodes = list(range(MAX_NODES))
+            self.enable_monitoring_check = True
         elif isinstance(nodes, (int, float)):
             self.request_nodes = [int(nodes)]
         elif isinstance(nodes, list) or nodes is None:
@@ -303,6 +305,41 @@ class NodeControl():
                                          'age': this_age,
                                          'command': stad[0]}
         return power
+
+    def monitor_enable_snap_check_set(self, age_cutoff=120.0):
+        """
+        Check the powered state of all of the snaps and disable if appropriate.
+
+        If nodes to use is 'all' and all snaps are off, set disable_monitoring flag
+        in redis.  If any are on and the disable flag was set by this method, remove
+        the flag.
+
+        Parameter
+        =========
+        age_cutoff : float
+            time (sec) to use to cutoff using the power state
+        """
+        if not self.enable_monitoring_check:
+            return 'not_all'
+        power_data = self.get_power_status()
+        # check all snaps and snap relay to allow monitoring.
+        all_snap_off = True
+        for node, pwr in power_data.items():
+            if 'age' in pwr.keys() and pwr['age'] < age_cutoff:
+                for key in ['power_snap_0', 'power_snap_1', 'power_snap_2', 'power_snap_3']:
+                    if key in pwr.keys() and pwr[key] is True:
+                        all_snap_off = False
+                        break
+            if not all_snap_off:
+                break
+        if all_snap_off:
+            self.r.set('disable_monitoring', 'hera_node_mc.monitor_enable_snap_check_set')
+            return 'disabling'
+        disabled_by = self.r.get('disable_monitoring')
+        if disabled_by == 'hera_node_mc.monitor_enable_snap_check_set':
+            self.r.delete('disable_monitoring')
+            return 'enabling'
+        return disabled_by
 
     def get_power_status(self):
         """
