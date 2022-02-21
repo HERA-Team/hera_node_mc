@@ -335,13 +335,13 @@ class NodeControl():
         if all_snap_off:
             self.r.set('disable_monitoring', 'hera_node_mc.monitor_enable_snap_check_set')
             return 'disabling'
-        disabled_by = self.r.get('disable_monitoring')
-        if disabled_by == 'hera_node_mc.monitor_enable_snap_check_set':
-            self.r.delete('disable_monitoring')
-            return 'enabling'
-        if disabled_by is None:
-            return 'disabled_by_None'
-        return disabled_by
+        if self.r.exists('disable_monitoring'):
+            disabled_by = self.r.get('disable_monitoring')
+            if disabled_by == 'hera_node_mc.monitor_enable_snap_check_set':
+                self.r.delete('disable_monitoring')
+                return 'enabling'
+            return disabled_by
+        return 'enabled'
 
     def get_power_status(self):
         """
