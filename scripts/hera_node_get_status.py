@@ -46,7 +46,7 @@ else:
 powers = nc.get_power_status()
 print("\nNode power states")
 print("-----------------")
-for nd in sorted(list(powers.keys())):
+for nd in nc.requested_included['power']:
     pwr = powers[nd]
     if node_util.stale_data(pwr, 'age', args.stale, f"Node {nd} -- ") and not args.show_stale:
         continue
@@ -56,7 +56,7 @@ if args.temperature:
     sensors = nc.get_sensors()
     print("\nNode values")
     print("-----------")
-    for nd in sorted(list(sensors.keys())):
+    for nd in nc.requested_included['sensor']:
         sens = sensors[nd]
         if node_util.stale_data(sens, 'age', args.stale, f"Node {nd} -- ") and not args.show_stale:
             continue
@@ -67,7 +67,7 @@ if args.wr:
     print("\nWhite Rabbit")
     print("------------")
     args.show_stale = True  # Always show (but maybe will change when update hera_wr_cm)
-    for nd in sorted(list(wr.keys())):
+    for nd in nc.requested_included['wr']:
         wrs = wr[nd]
         print("Node {} -- ".format(nd), end='')
         if node_util.stale_data(wrs, 'age', args.stale, True) and not args.show_stale:

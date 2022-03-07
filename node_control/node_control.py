@@ -83,6 +83,7 @@ class NodeControl():
         self.sc_node = ''
         self.status_node_keys = list(node_util.status_node(None, None).keys())
         self.get_nodes_in_redis(count)
+        self.requested_included = {}
 
     def _get_stat_keys_from_redis(self):
         """
@@ -245,7 +246,10 @@ class NodeControl():
         }
         sensors = {}
         now = time.time()
+        self.requested_included['sensor'] = []
         for node, stat_key in self.nc_stat.items():
+            if self.request_nodes is not None and node in self.request_nodes:
+                self.requested_included['sensor'].append(node)
             stats = self.r.hgetall(stat_key)
             sensors[node] = {'age': None}
             for key, convfunc in conv_methods.items():
@@ -363,7 +367,10 @@ class NodeControl():
         """
         power = {}
         now = time.time()
+        self.requested_included['power'] = []
         for node, stat_key in self.nc_stat.items():
+            if self.request_nodes is not None and node in self.request_nodes:
+                self.requested_included['power'].append(node)
             statii = self.r.hgetall(stat_key)
             power[node] = {'age': None}
             for key in list(statii.keys()):
@@ -482,7 +489,10 @@ class NodeControl():
             '_sec': int
         }
         wrstat = {}
+        self.requested_included['wr'] = []
         for node, stat_key in self.wr_stat.items():
+            if self.request_nodes is not None and node in self.request_nodes:
+                self.requested_included['wr'].append(node)
             stats = self.r.hgetall(stat_key)
             wrstat[node] = {}
             for key, convfunc in conv_methods.items():
