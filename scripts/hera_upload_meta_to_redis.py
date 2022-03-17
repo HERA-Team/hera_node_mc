@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 
 """
-Upload hosts/ethers/crontab files to redis.
+Upload hosts/ethers/crontab/screens files to redis.
 """
 
 import redis
@@ -34,6 +34,13 @@ try:
     daemon = subprocess.check_output(['systemctl']).decode()
     r.hset('check:daemon', f"{hostname}:{current_env}", daemon)
     r.expire('check:daemon', args.expire)
+except (subprocess.CalledProcessError, FileNotFoundError):
+    pass
+
+try:
+    screens = subprocess.check_output(['screen', '-ls']).decode()
+    r.hset('check:screen', f"{hostname}:{current_env}", screens)
+    r.expire('check:screen', args.expire)
 except (subprocess.CalledProcessError, FileNotFoundError):
     pass
 
