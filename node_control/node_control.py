@@ -262,6 +262,7 @@ class NodeControl():
                             pass
                 except:  # noqa
                     sensors[node][key] = None
+        self.requested_included['sensor'] = sorted(self.requested_included['sensor'])
         return sensors
 
     def get_power_command_list(self):
@@ -383,6 +384,7 @@ class NodeControl():
                         power[node]['age'] = -99
                 elif key.startswith("power"):
                     power[node][key] = node_util.str2bool(statii[key])
+        self.requested_included['power'] = sorted(self.requested_included['power'])
         return power
 
     def get_wr_status(self):
@@ -508,6 +510,7 @@ class NodeControl():
                         wrstat[node][key] = convfunc(stats[key])
                     except:  # noqa
                         wrstat[node][key] = None
+        self.requested_included['wr'] = sorted(self.requested_included['wr'])
         return wrstat
 
     def verdict(self, hwcmd, verbose=True, hold_for_verify=120, verify_mode='all',
