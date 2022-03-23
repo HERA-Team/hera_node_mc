@@ -342,7 +342,7 @@ class NodeControl():
             return 'disabling'
         if self.r.exists('disable_monitoring'):
             disabled_by = self.r.get('disable_monitoring')
-            if disabled_by == 'hera_node_mc.monitor_enable_snap_check_set':
+            if disabled_by == 'hera_node_mc.monitor_enable_snap_check_set:IGNORE_FOR_NOW':
                 self.r.delete('disable_monitoring')
                 return 'enabling'
             return 'disabled by ' + disabled_by
