@@ -326,10 +326,11 @@ class NodeControl():
         Disable snap monitor attributing to <disabler>.
         """
         if not self.r.exists('disable_monitoring'):
-            self.r.set('disable_monitoring', )
+            distag = "{}:{}".format(disabler, datetime.now().isoformat())
+            self.r.set('disable_monitoring', distag)
             return 'Disabling'
         else:
-            disabled_by = self.r.get('disable_monitoring', disabler)
+            disabled_by = self.r.get('disable_monitoring')
             return f'Already disabled by {disabled_by}'
 
     def snap_monitor_check_and_set(self, age_cutoff=600.0):
