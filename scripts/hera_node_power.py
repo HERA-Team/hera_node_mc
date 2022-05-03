@@ -77,6 +77,10 @@ else:
 any_snap = len(snaps_to_set) > 0
 all_snap = len(snaps_to_set) == 4
 
+# Turn off snap monitoring if turning off all snaps.
+if args.command == 'off' and nodes2use == 'all' and all_snap:
+    nc.disable_snap_monitor()
+
 # Run through commands.
 keystates = {}
 
@@ -106,4 +110,6 @@ if args.hold_for_verify > 0:
                          verify_mode=args.verify_mode,
                          log_verdict=True, show_success=args.show_success)
     nc.sentence(results, args.error_threshold, purge=False)
-    nc.monitor_enable_snap_check_set()
+
+# Double-check snap monitoring
+nc.snap_monitor_check_and_set()
