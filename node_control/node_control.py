@@ -526,8 +526,8 @@ class NodeControl():
         self.requested_included['wr'] = sorted(self.requested_included['wr'])
         return wrstat
 
-    def verdict(self, hwcmd, verbose=True, hold_for_verify=120, verify_mode='all',
-                log_verdict=True, show_success=False):
+    def verdict(self, hwcmd, verbose=True, hold_for_verify=120,
+                verify_mode='all', show_success=False):
         """
         Checks if commands are actually carried out - needs hera-node-receiver service running.
 
@@ -542,8 +542,6 @@ class NodeControl():
             Length of time till timeout (seconds)
         verify_mode : str
             Type of verification to check (see _verify_states)
-        log_verdict : bool
-            Flag to log the final verdict to redis.
         show_success : bool
             Flag to also show success rather than just failure.
         """
@@ -583,8 +581,6 @@ class NodeControl():
         node_counter['timeout'] = hold_for_verify
         node_counter['age'] = age
         node_counter['time'] = time.time()
-        if log_verdict:
-            self._log_verdict_in_redis(_verdict, node_counter)
         if verbose:
             for node in self.connected_nodes:
                 for this_hw in _verdict[node].keys():
@@ -692,36 +688,6 @@ class NodeControl():
                         verification[node][vhw]['all'] = False
                         break
         return verification
-
-    def _log_verdict_in_redis(self, vdt, nc, expire_time_hr=24.0):
-        """
-        Log the final verification dictionary to redis under verdict:node:
-        """
-        vpar = {'mode': nc['mode'], 'timeout': nc['timeout'],
-                'time': nc['time'], 'age': nc['age']}
-        vpar['hw'] = ','.join(nc['hwcmd'].keys())
-        vpar['cmd'] = ','.join([nc['hwcmd'][x] for x in vpar['hw'].split(',')])
-
-        for this_key in self.r.keys():  # purge all old values
-            if this_key.startswith('verdict:node:'):
-                self.r.delete(this_key)
-        self.r.hmset('verdict:node:par', vpar)
-        self.r.expire('verdict:node:par', int(expire_time_hr * 3600.0))
-        for node, vals in vdt.items():
-            for hw, _stg in vals.items():
-                _tvd = {}
-                for _aa, _bb in _stg.items():
-                    _tvd[_aa] = 1 if _bb else 0
-                key = "verdict:node:{}:{}".format(node, hw)
-                self.r.hmset(key, _tvd)
-                self.r.expire(key, int(expire_time_hr * 3600.0))
-        for node in self.connected_nodes:
-            key = "verdict:node:{}:valid".format(node)
-            if nc[node]:
-                self.r.set(key, 0)
-            else:
-                self.r.set(key, 1)
-            self.r.expire(key, int(expire_time_hr * 3600.0))
 
     def _log_cmd_to_redis(self, node, component, tstamp, cmd):
         key = self.redis_keygen('nc_cmd', node)

@@ -108,7 +108,7 @@ if args.hold_for_verify > 0:
     results = nc.verdict(keystates, verbose=verbose,
                          hold_for_verify=args.hold_for_verify,
                          verify_mode=args.verify_mode,
-                         log_verdict=True, show_success=args.show_success)
+                         show_success=args.show_success)
     nc.sentence(results, args.error_threshold, purge=False)
 
 # Double-check snap monitoring
