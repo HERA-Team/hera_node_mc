@@ -13,7 +13,7 @@ RDmap = {'NCMP2': 'RD31', 'NCM02': 'RD46', 'NCM06': 'RD20', 'NCM10': 'RD43', 'NC
          'NCM15': 'RD04', 'NCM03': 'RD42', 'NCM07': 'RD15', 'NCM11': 'RD11', 'NCM04': 'RD41',
          'NCM01': 'RD45', 'NCM16': 'RD07', 'NCM05': 'RD06', 'NCM08': 'RD19', 'NCM12': 'RD17',
          'NCM09': 'RD40', 'NCM21': 'RD05', 'NCM22': 'RD09', 'NCM14': 'RD13', 'NCM20': 'RD14',
-         'NCM18': 'RD16', 'NCM17': 'RD47', 'NCM19': 'RD48', 'NCMP1': 'RD02', 'NCM23': 'RD29'
+         'NCM18': 'RD16', 'NCM17': 'RD47', 'NCM19': 'RD48', 'NCMP1': 'RD02', 'NCM23': 'RD30'
          }
 
 WRmap = {'NCMP2': 'WRA000028', 'NCM03': 'WRA000084', 'NCM06': 'WRA000093', 'NCM07': 'WRA000091',
@@ -35,9 +35,10 @@ ap.add_argument('-s', '--snaps', help='csv-list of snaps, if supplied 4-ints no 
                 default=None)
 ap.add_argument('--snap-rev', help="__Shouldn't need to change__  Rev letter of SNAP (csv-list).  "
                 "If one supplied, it applies to all.", dest='snap_rev', default='C')
-ap.add_argument('--actually-modify', dest='modify', action='store_true',
-                help='Flag to actually rewrite hosts/ethers and restart dnsmasq '
-                '(ignore for rfi machine)')
+ap.add_argument('--modify-files', dest='modify', action='store_true',
+                help='Flag to actually rewrite hosts/ethers (ignore for rfi machine)')
+ap.add_argument('--reset-dns', dest='reset_dnsmasq', action='store_true',
+                help='Flag to reset dnsmasq server')
 args = ap.parse_args()
 
 hostname = socket.gethostname()
@@ -127,7 +128,7 @@ if hostname == 'hera-mobile':
         os.chmod('CurrentNode.txt', 0o666)
 
 hosts.rewrite_file(check_only=not args.modify)
-if args.modify:
+if args.reset_dnsmasq:
     os.system('sudo /etc/init.d/dnsmasq stop')
     os.system('sudo rm /var/lib/misc/dnsmasq.leases')
     os.system('sudo /etc/init.d/dnsmasq start')

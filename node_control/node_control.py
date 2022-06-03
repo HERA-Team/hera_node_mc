@@ -175,11 +175,18 @@ class NodeControl():
         self.connected_nodes = []
         self.senders = {}
 
-    def get_node_senders(self, throttle=0.1):
+    def get_node_senders(self, throttle=0.1, explicit_ip=None):
         """
         Get udp node class for requested nodes that are in redis.
 
         Every node in redis gets a sender class, differ by sender.node_is_connected flag.
+
+        Parameters
+        ----------
+        throttle : float
+            waiting time
+        explicit_ip : dict or None
+            dictionary of explicit node IP addresses
 
         Attributes
         ----------
@@ -198,7 +205,10 @@ class NodeControl():
             else:
                 hkey = self.redis_keygen('nc_stat', node)
                 # ip = self.r.hget(hkey, 'ip')  # use name not number
-                ip = f"heraNode{node}"
+                if explicit_ip is None:
+                    ip = f"heraNode{node}"
+                else:
+                    ip = explicit_ip[node]
                 self.senders[node] = send_receive.UdpSenderReceiver(ip, throttle=throttle)
                 if self.senders[node].node_is_connected:
                     self.connected_nodes.append(node)
