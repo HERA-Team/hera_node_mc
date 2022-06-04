@@ -19,19 +19,14 @@ parser.add_argument('--show-stale', dest='show_stale', help="Flag to show stale 
 parser.add_argument('--redisServer', help='Name or redis server', default='redishost')
 args = parser.parse_args()
 
-if args.node.lower() == 'all':
-    nodes2use = list(range(30))
-else:
-    nodes2use = [int(x) for x in args.node.split(',')]
-
 print("Getting nodes.")
 sys.stdout.flush()
-nc = node_control.NodeControl(nodes2use, redisServer=args.redisServer, count=1)
+nc = node_control.NodeControl(args.node, redisServer=args.redisServer, count=1)
 
 if len(nc.nodes_in_redis):
     nodes_present = nc.nodes_in_redis
     nodes_missing = []
-    for _i in nodes2use:
+    for _i in nc.requested_nodes:
         if _i not in nodes_present:
             nodes_missing.append(_i)
     print("Requested nodes present in redis:  {}"

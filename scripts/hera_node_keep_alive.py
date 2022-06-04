@@ -28,7 +28,7 @@ parser.add_argument('--heartbeat', type=int, default=60,
 args = parser.parse_args()
 
 
-nc = node_control.node_control.NodeControl('all', args.redishost)
+nc = node_control.node_control.NodeControl('all', redisServer=args.redishost)
 nc.log_service_in_redis(__file__)
 rfrsh_sec = args.refresh * 60.0
 t0 = time.time()
