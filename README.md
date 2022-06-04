@@ -15,7 +15,6 @@ Install on:
 # Usage
 
 There are basically only two user scripts:  `hera_node_power.py` and `hera_node_get_status.py`.
-Simple use is `hera_node_power.py start` to turn everything on or `hera_node_power.py stop` to turn everything off.
 
 # Backend Instructions
 ### redis-server

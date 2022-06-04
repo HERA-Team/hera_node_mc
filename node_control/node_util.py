@@ -126,7 +126,7 @@ def node_sensor_entry(node, ss):
         nice_ts = datetime.datetime.fromtimestamp(ss['timestamp']).isoformat()
         sline += "updated at {}".format(nice_ts)
     if 'cpu_uptime_ms' in ss.keys() and ss['cpu_uptime_ms'] is not None:
-        sline += "   (cpu_uptime:  {:.5f}hr)".format(ss['cpu_uptime_ms']/1000.0/3600.0)
+        sline += "   (cpu_uptime:  {})".format(age_display(ss['cpu_uptime_ms']/1000.0))
     sline += "\n\tip:  {}\tmac:  {}\n".format(ss['ip'], ss['mac'])
     sline += "\thumidity:  {}%\n".format(ss['humid'])
     sline += "\tT [C]:  top        middle     bottom     humid\n"
@@ -134,6 +134,16 @@ def node_sensor_entry(node, ss):
                                                          str(ss['temp_bot']), str(ss['temp_humid']))
     sline += '\n'
     return sline
+
+
+def age_display(sec):
+    if sec > 86400 * 2.0:
+        return "{:.1f} days".format(sec / 86400.0)
+    if sec > 3600 * 3.0:
+        return "{:.1f} hours".format(sec / 3600.0)
+    if sec > 60.0 * 5.0:
+        return "{:.1f} minutes".format(sec / 60.0)
+    return "{:.1f} seconds".format(sec)
 
 
 def stale_data(data, key, stale=100.0, show_msg=True):
@@ -177,16 +187,7 @@ def stale_data(data, key, stale=100.0, show_msg=True):
         if show_msg:
             print("{}Invalid age format ({}).".format(prepend, age))
         return True
-    if age > stale:
-        if age > 86400:
-            dyage = age / 86400.0
-            w_msg = "{:.1f} days".format(dyage)
-        elif age > 3600:
-            hrage = age / 3600.0
-            w_msg = "{:.1f} hours".format(hrage)
-        else:
-            w_msg = "{} seconds".format(int(age))
-        if show_msg:
-            print("{}Data are {} old!!!".format(prepend, w_msg))
+    if age > stale and show_msg:
+        print("{}Data are {} old!!!".format(prepend, age_display(age)))
         return True
     return False
