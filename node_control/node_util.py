@@ -126,7 +126,7 @@ def node_sensor_entry(node, ss):
         nice_ts = datetime.datetime.fromtimestamp(ss['timestamp']).isoformat()
         sline += "updated at {}".format(nice_ts)
     if 'cpu_uptime_ms' in ss.keys() and ss['cpu_uptime_ms'] is not None:
-        sline += "   (cpu_uptime:  {:.1f}hr)".format(ss['cpu_uptime_ms']/1000.0/3600.0)
+        sline += "   (cpu_uptime:  {:.5f}hr)".format(ss['cpu_uptime_ms']/1000.0/3600.0)
     sline += "\n\tip:  {}\tmac:  {}\n".format(ss['ip'], ss['mac'])
     sline += "\thumidity:  {}%\n".format(ss['humid'])
     sline += "\tT [C]:  top        middle     bottom     humid\n"
