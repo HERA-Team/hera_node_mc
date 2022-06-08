@@ -33,9 +33,9 @@ if args.reset:
     import redis
     r = redis.Redis(args.redishost)
     expiry = int(1.5 * (args.poke_time_sec + 30.0 * args.throttle))
-    r.set(node_control.REDIS_KEEP_ALIVE_RESET_KEY, 1, ex=expiry)
+    r.set(node_control.node_control.REDIS_KEEP_ALIVE_RESET_KEY, 1, ex=expiry)
     sys.exit(0)
-print("NOPE")
+
 nc = node_control.node_control.NodeControl('all', args.redishost)
 nc.log_service_in_redis(__file__)
 rfrsh_sec = args.refresh * 60.0
@@ -56,7 +56,7 @@ try:
         if sleep_time > 0.0:
             time.sleep(sleep_time)
         t1 = time.time()
-        if t1 - t0 > rfrsh_sec or nc.r.get(node_control.REDIS_KEEP_ALIVE_RESET_KEY):
+        if t1 - t0 > rfrsh_sec or nc.r.get(node_control.node_control.REDIS_KEEP_ALIVE_RESET_KEY):
             nc.r.hset('poke_nodes', 'time', t1)
             nc.r.hset('poke_nodes', 'nodes', ','.join([str(x) for x in nc.connected_nodes]))
             nc.reset_node_senders()
