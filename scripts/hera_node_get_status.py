@@ -26,7 +26,7 @@ nc = node_control.NodeControl(args.node, redisServer=args.redisServer, count=1)
 if len(nc.nodes_in_redis):
     nodes_present = nc.nodes_in_redis
     nodes_missing = []
-    for _i in nc.requested_nodes:
+    for _i in nc.request_nodes:
         if _i not in nodes_present:
             nodes_missing.append(_i)
     print("Requested nodes present in redis:  {}"

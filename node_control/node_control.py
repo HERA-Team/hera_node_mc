@@ -156,11 +156,11 @@ class NodeControl():
         nodes_in_redis : list
             List of all request_nodes in redis with >count status fields
         """
+        self._get_stat_keys_from_redis()  # gets self.nc_stat (and self.wr_stat and self.nc_cmd)
         if self.request_nodes is None or self.explicit_ip:
             return
         if count is None:
             count = len(self.status_node_keys)
-        self._get_stat_keys_from_redis()  # gets self.nc_stat (and self.wr_stat and self.nc_cmd)
         self.nodes_in_redis = []
         for node in self.request_nodes:
             if node not in self.nc_stat:
