@@ -63,9 +63,9 @@ for node in nc.nodes_in_redis:
             try:
                 ethers_mac = ethers.by_alias[hpn]
                 if ethers_mac.strip() == redis_mac.strip():
-                    print("\t - tethers/redis macs agree at {}".format(redis_mac))
+                    print("\t - ethers/redis macs agree at {}".format(redis_mac))
                 else:
-                    print("\tX- tethers/redis macs disagree {}/{}".format(ethers_mac, redis_mac))
+                    print("\tX- ethers/redis macs disagree {}/{}".format(ethers_mac, redis_mac))
             except KeyError:
                 print("\tX- {} not in ethers.".format(hpn))
         wr_host = "{}wr".format(node_host)
