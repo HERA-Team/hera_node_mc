@@ -79,9 +79,8 @@ class NodeControl():
         self.explicit_ip = False
         self.set_request(nodes)
         self.r = node_util.get_redis_client(redisServer)
-        self.reset_node_senders()
+        self.reset_node_senders(full_reset=True)
         self.status_node_keys = list(node_util.status_node(None, None).keys())
-        self.nodes_in_redis = []
         self.get_nodes_in_redis(count)
 
     def _get_stat_keys_from_redis(self):
@@ -176,11 +175,13 @@ class NodeControl():
             if node in self.nc_stat and len_entries >= count:
                 self.nodes_in_redis.append(node)
 
-    def reset_node_senders(self):
+    def reset_node_senders(self, full_reset=False):
         self.connected_nodes = []
         self.senders = {}
         self.requested_included = {}
         self.sc_node = ''
+        if full_reset:
+            self.nodes_in_redis = []
 
     def get_node_senders(self, throttle=0.1):
         """
@@ -214,10 +215,10 @@ class NodeControl():
             else:
                 hkey = self.redis_keygen('nc_stat', node)
                 # ip = self.r.hget(hkey, 'ip')  # use name not number
-                if self.explicit_ip is None:
-                    ip = f"heraNode{node}"
-                else:
+                if self.explicit_ip:
                     ip = node
+                else:
+                    ip = f"heraNode{node}"
                 self.senders[node] = send_receive.UdpSenderReceiver(ip, throttle=throttle)
                 if self.senders[node].node_is_connected:
                     self.connected_nodes.append(node)
