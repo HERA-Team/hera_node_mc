@@ -2,17 +2,15 @@ from setuptools import setup
 import socket
 import glob
 
-hostname = socket.gethostname()
+hostname = socket.gethostname().lower()
 
-scripts = []
-if hostname in ['hera-node-head', 'hera-mobile']\
-   or hostname.startswith('DAVID') or hostname.startswith('ral'):
-    scripts = glob.glob('scripts/*')
-elif hostname == 'hera-snap-head':
+if hostname == 'hera-snap-head':
     scripts = ['scripts/hera_setup_new_node.py', 'scripts/hera_node_get_status.py',
                'scripts/hera_upload_meta_to_redis.py']
-else:
+elif hostname == 'hera-corr-head':
     scripts = ['scripts/hera_node_get_status.py', 'scripts/hera_upload_meta_to_redis.py']
+else:
+    scripts = glob.glob('scripts/*')
 
 setup(
     name='node_control',
