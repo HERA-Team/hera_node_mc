@@ -36,7 +36,7 @@ if args.reset:
     r.set(node_control.node_control.REDIS_KEEP_ALIVE_RESET_KEY, 1, ex=expiry)
     sys.exit(0)
 
-nc = node_control.node_control.NodeControl('all', args.redishost)
+nc = node_control.node_control.NodeControl('all', redisServer=args.redishost)
 nc.log_service_in_redis(__file__)
 rfrsh_sec = args.refresh * 60.0
 t0 = time.time()

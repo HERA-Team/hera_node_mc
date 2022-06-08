@@ -34,26 +34,13 @@ parser.add_argument('--error-threshold', dest='error_threshold', default=1.0, ty
 parser.add_argument('--show-success', dest='show_success', action='store_true',
                     help='Show successful commands in addition to failures.')
 parser.add_argument('--redisServer', help='Name of redis server', default='redishost')
-parser.add_argument('--ip', help="Provide explicit IP for each node", default=None)
 
 args = parser.parse_args()
 
-if args.node.lower() == 'all':
-    nodes2use = 'all'
-else:
-    nodes2use = [int(x) for x in args.node.split(',')]
-    if args.ip is not None:
-        args.ip = args.ip.split(',')
-        if len(nodes2use) != len(args.ip):
-            raise ValueError("Number of nodes and IP addresses must match.")
-        ips2use = {}
-        for i, node in enumerate(nodes2use):
-            ips2use[node] = args.ip[i]
-
 verbose = not args.quiet
 
-nc = node_control.NodeControl(nodes2use, redisServer=args.redisServer, count=None)
-nc.get_node_senders(throttle=args.throttle, explicit_ip=args.ip)
+nc = node_control.NodeControl(args.node, redisServer=args.redisServer, count=None)
+nc.get_node_senders(throttle=args.throttle)
 if not len(nc.connected_nodes):
     import sys
     print("No nodes are connected.")
@@ -87,7 +74,7 @@ any_snap = len(snaps_to_set) > 0
 all_snap = len(snaps_to_set) == 4
 
 # Turn off snap monitoring if turning off all snaps.
-if args.command == 'off' and nodes2use == 'all' and all_snap:
+if args.command == 'off' and args.node == 'all' and all_snap:
     nc.disable_snap_monitor()
 
 # Run through commands.

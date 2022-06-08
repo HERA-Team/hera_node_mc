@@ -52,6 +52,7 @@ class NodeControl():
         ----------
         nodes : int, list of int, 'all', None
             ID numbers of the nodes with which this instance of NodeControl will interact.
+            If an IP address (or csv-list), then will just use those for communicating out.
             If 'all', will try 0-29.
             If None, it will _not_ get nodes_in_redis
         redisServer : str
@@ -76,15 +77,12 @@ class NodeControl():
         status_node_keys : list
             List of the status:node keys
         """
+        self.explicit_ip = False
         self.set_request(nodes)
         self.r = node_util.get_redis_client(redisServer)
-        self.nodes_in_redis = []
-        self.connected_nodes = []
-        self.senders = {}
-        self.sc_node = ''
+        self.reset_node_senders(full_reset=True)
         self.status_node_keys = list(node_util.status_node(None, None).keys())
         self.get_nodes_in_redis(count)
-        self.requested_included = {}
 
     def _get_stat_keys_from_redis(self):
         """
@@ -128,8 +126,14 @@ class NodeControl():
         self.status_scriptname = "status:script:{}:{}".format(send_receive.THIS_HOST, this_file)
 
     def set_request(self, nodes):
-        if isinstance(nodes, str) and nodes.lower() == 'all':
-            self.request_nodes = list(range(MAX_NODES))
+        if isinstance(nodes, str):
+            if nodes.lower() == 'all':
+                self.request_nodes = list(range(MAX_NODES))
+            elif '.' in nodes:
+                self.explicit_ip = True
+                self.request_nodes = nodes.split(',')
+            else:
+                self.request_nodes = [int(x) for x in nodes.split(',')]
         elif isinstance(nodes, (int, float)):
             self.request_nodes = [int(nodes)]
         elif isinstance(nodes, list) or nodes is None:
@@ -152,7 +156,7 @@ class NodeControl():
         nodes_in_redis : list
             List of all request_nodes in redis with >count status fields
         """
-        if self.request_nodes is None:
+        if self.request_nodes is None or self.explicit_ip:
             return
         if count is None:
             count = len(self.status_node_keys)
@@ -172,11 +176,15 @@ class NodeControl():
             if node in self.nc_stat and len_entries >= count:
                 self.nodes_in_redis.append(node)
 
-    def reset_node_senders(self):
+    def reset_node_senders(self, full_reset=False):
         self.connected_nodes = []
         self.senders = {}
+        self.requested_included = {}
+        self.sc_node = ''
+        if full_reset:
+            self.nodes_in_redis = []
 
-    def get_node_senders(self, throttle=0.1, explicit_ip=None):
+    def get_node_senders(self, throttle=0.1):
         """
         Get udp node class for requested nodes that are in redis.
 
@@ -186,8 +194,6 @@ class NodeControl():
         ----------
         throttle : float
             waiting time
-        explicit_ip : dict or None
-            dictionary of explicit node IP addresses
 
         Attributes
         ----------
@@ -199,17 +205,21 @@ class NodeControl():
             String to print connected nodes
         """
         self.connected_nodes = []
-        for node in self.nodes_in_redis:
+        if self.explicit_ip:
+            nodes_to_check = self.request_nodes
+        else:
+            nodes_to_check = self.nodes_in_redis
+        for node in nodes_to_check:
             if node in self.senders.keys():
                 if self.senders[node].node_is_connected:
                     self.connected_nodes.append(node)
             else:
                 hkey = self.redis_keygen('nc_stat', node)
                 # ip = self.r.hget(hkey, 'ip')  # use name not number
-                if explicit_ip is None:
-                    ip = f"heraNode{node}"
+                if self.explicit_ip:
+                    ip = node
                 else:
-                    ip = explicit_ip[node]
+                    ip = f"heraNode{node}"
                 self.senders[node] = send_receive.UdpSenderReceiver(ip, throttle=throttle)
                 if self.senders[node].node_is_connected:
                     self.connected_nodes.append(node)
