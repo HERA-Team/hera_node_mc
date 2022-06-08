@@ -62,7 +62,7 @@ for node in nc.nodes_in_redis:
         if hpn is not None:
             try:
                 ethers_mac = ethers.by_alias[hpn]
-                if ethers_mac.strip() == redis_mac.strip():
+                if ethers_mac.strip().upper() == redis_mac.strip().upper():
                     print("\t - ethers/redis macs agree at {}".format(redis_mac))
                 else:
                     print("\tX- ethers/redis macs disagree {}/{}".format(ethers_mac, redis_mac))
