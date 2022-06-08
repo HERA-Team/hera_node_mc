@@ -6,6 +6,7 @@ from . import send_receive, node_util, __version__
 
 
 MAX_NODES = 30
+REDIS_KEEP_ALIVE_RESET_KEY = 'reset-keep-alive'
 
 
 def get_redis_nodes(redisServer='redishost', count=None):
