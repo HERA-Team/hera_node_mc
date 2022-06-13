@@ -6,27 +6,10 @@ from node_control import hosts_ethers
 from node_control import send_receive
 from node_control.node_util import get_redis_client
 import yaml
+from hera_cm import cm_gsheet
 
-
-RDmap = {'NCMP2': 'RD31', 'NCM02': 'RD46', 'NCM06': 'RD20', 'NCM10': 'RD43', 'NCM13': 'RD18',
-         'NCM15': 'RD04', 'NCM03': 'RD42', 'NCM07': 'RD15', 'NCM11': 'RD11', 'NCM04': 'RD41',
-         'NCM01': 'RD45', 'NCM16': 'RD07', 'NCM05': 'RD06', 'NCM08': 'RD19', 'NCM12': 'RD17',
-         'NCM09': 'RD40', 'NCM21': 'RD05', 'NCM22': 'RD09', 'NCM14': 'RD13', 'NCM20': 'RD14',
-         'NCM18': 'RD16', 'NCM17': 'RD47', 'NCM19': 'RD48', 'NCMP1': 'RD02', 'NCM23': 'RD30',
-         'NCM24': 'RD51', 'NCM25': 'RDXX', 'NCM26': 'RDXX', 'NCM26': 'RDXX', 'NCM27': 'RDXX',
-         'NCM28': 'RDXX', 'NCM29': 'RDXX', 'NCM30': 'RDXX', 'NCM31': 'RDXX'
-         }
-
-WRmap = {'NCMP2': 'WRA000028', 'NCM03': 'WRA000084', 'NCM06': 'WRA000093', 'NCM07': 'WRA000091',
-         'NCM10': 'WRA000097', 'NCM11': 'WRA000079', 'NCM13': 'WRA000096', 'NCM15': 'WRA000085',
-         'NCM04': 'WRA000087', 'NCM01': 'WRA000086', 'NCM16': 'WRA000090', 'NCM05': 'WRA000089',
-         'NCM08': 'WRA000094', 'NCM12': 'WRA000080', 'NCM02': 'WRA000083', 'NCM09': 'WRA000006',
-         'NCM18': 'WRA000101', 'NCM22': 'WRA000102', 'NCM20': 'WRA000151', 'NCM17': 'WRA000152',
-         'NCM21': 'WRA000153', 'NCM19': 'WRA000154', 'NCMP1': 'WR-len4p0', 'NCM14': 'WRA000201',
-         'NCM23': 'WRA000157', 'NCM24': 'WRA000099', 'NCM25': 'WRA000098',  # Matt's update 2/8/21
-         'NCM26': 'WRA000088', 'NCM27': 'WRA000155', 'NCM28': 'WRA000156',  # "
-         'NCM29': 'WRA000100', 'NCM30': 'WRA000158', 'NCM31': 'WRA000095'   # "
-         }
+ncm_info = cm_gsheet.SheetData()
+ncm_info.load_ncm()
 
 ap = argparse.ArgumentParser()
 ap.add_argument('node_num', help="Node number (int)", type=int)
@@ -78,7 +61,7 @@ if send_receive.is_node_control_host(hostname):
     rd['node_ID'] = args.node_num
     rd['timestamp'] = -1
     rd['ncm'] = ncm
-    rd['sn'] = 'arduino{}'.format(int(RDmap[ncm][2:]))
+    rd['sn'] = ncm_info.ncm[ncm].rd
     rd['mac'] = ethers.by_alias[rd['sn']]
     rd['ip'] = hosts.by_alias[rd['sn']]
     if args.modify:
@@ -89,7 +72,7 @@ if send_receive.is_node_control_host(hostname):
 
     # Set up white rabbit
     wr = {'node': 'heraNode{}wr'.format(args.node_num)}
-    wr['sn'] = WRmap[ncm]
+    wr['sn'] = ncm_info.ncm[ncm].rd
     wr['mac'] = ethers.by_alias[wr['sn']]
     wr['ip'] = hosts.by_alias[wr['sn']]
     if args.modify:
