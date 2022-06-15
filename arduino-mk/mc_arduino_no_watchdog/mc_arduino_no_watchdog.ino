@@ -1,20 +1,20 @@
-// This script, "sketch", is used to gather sensor data with an Arduino and 
-// send it over the White Rabbit Network to a server inside a HERA container. 
+// This script, "sketch", is used to gather sensor data with an Arduino and
+// send it over the White Rabbit Network to a server inside a HERA container.
 // On boot, Arduino will request to get an IP address along with a latest
 // sketch stored on the TFTP server in the container. Note that in order
 // to get an IP, the Arduino needs to specify its MAC address - which does
 // come with Arduino off the shelf. The initial bootloader MAC address
 // is hardwired into the arduino-netboot software available in the
 
-//================ EEPROM Memory Map ================= 
-// Address Byte       Data(8 bits)        Type                
-//      0              ---- ----       MAC byte 0       
-//      1              ---- ----       MAC byte 1       
+//================ EEPROM Memory Map =================
+// Address Byte       Data(8 bits)        Type
+//      0              ---- ----       MAC byte 0
+//      1              ---- ----       MAC byte 1
 //      2              ---- ----       MAC byte 2
 //      3              ---- ----       MAC byte 3
 //      4              ---- ----       MAC byte 4
 //      5              ---- ----       MAC byte 5
-//      6              ---- ----       unassigned 
+//      6              ---- ----       unassigned
 //      7              ---- ----       unassigned
 //      8              ---- ----       unassigned
 //      9              ---- ----       unassigned
@@ -30,10 +30,10 @@
 #include <SPI.h>
 #include <Adafruit_MCP9808.h>
 #include <Adafruit_HTU21DF.h>
-#include <SparkFunSX1509.h> 
+#include <SparkFunSX1509.h>
 
-// Define Arduino pins 
-#define SNAP_RELAY_PIN 2 
+// Define Arduino pins
+#define SNAP_RELAY_PIN 2
 #define FEM_PIN 8
 #define PAM_PIN 9
 #define SNAPv2_0_PIN 3
@@ -42,7 +42,7 @@
 #define SNAPv2_3_PIN 7
 #define RESET_PIN 4
 
-// Clarifying which pin states correspond to on/off for different components`  
+// Clarifying which pin states correspond to on/off for different components`
 // Note that some pins are active HIGH and others active LOW
 #define SNAP_RELAY_ON HIGH
 #define SNAP_RELAY_OFF LOW
@@ -55,9 +55,9 @@
 #define SNAPv2_1_ON LOW
 #define SNAPv2_1_OFF HIGH
 #define SNAPv2_2_ON LOW
-#define SNAPv2_2_OFF HIGH 
+#define SNAPv2_2_OFF HIGH
 #define SNAPv2_3_ON LOW
-#define SNAPv2_3_OFF HIGH 
+#define SNAPv2_3_OFF HIGH
 #define RESET_OFF HIGH
 #define RESET_ON LOW
 
@@ -70,8 +70,8 @@
 #define VERBOSE
 
 // Surely we can get the TFTP server address via DHCP?
-// IPAddress serverIp(10, 80, 2, 1); // RFI TFTP server IP address
-IPAddress serverIp(10, 1, 1, 1); //  digilab TFTP server IP address
+IPAddress serverIp(10, 80, 2, 1); // Site and RFI TFTP server IP address
+// IPAddress serverIp(10, 1, 1, 1); //  digilab TFTP server IP address
 EthernetUDP UdpRcv; // UDP object to receive packets
 EthernetUDP UdpSnd; // UDP object to send packets
 EthernetUDP UdpSer; // UDP object to send debug info
@@ -93,16 +93,16 @@ unsigned int eeadrMac = 0;
 const byte SX1509_ADDRESS = 0x3E;
 SX1509 io;
 
-// Used in statusStruct packet timing 
+// Used in statusStruct packet timing
 unsigned long last_sent = millis();
 
 // Sensor objects
-Adafruit_MCP9808 mcpTop = Adafruit_MCP9808(); 
-Adafruit_MCP9808 mcpMid = Adafruit_MCP9808(); 
-Adafruit_MCP9808 mcpBot = Adafruit_MCP9808(); 
+Adafruit_MCP9808 mcpTop = Adafruit_MCP9808();
+Adafruit_MCP9808 mcpMid = Adafruit_MCP9808();
+Adafruit_MCP9808 mcpBot = Adafruit_MCP9808();
 Adafruit_HTU21DF htu = Adafruit_HTU21DF();
 
-// Status struct will be sent in a UDP packet 
+// Status struct will be sent in a UDP packet
 struct status {
 	unsigned long cpu_uptime_ms = -99;  // Arduino uptime since last reset
 	float mcpTempTop = -99;             // Top temperature sensor value
@@ -111,7 +111,7 @@ struct status {
 	float htuTemp = -99;                // HTU21D sensor temperature value
 	float htuHumid = -99;               // HTU21D sensor humidity value
 	bool  snap_relay = false;           // Power status of SNAP relay
-	bool  fem = false;                  // Power status of FEM 
+	bool  fem = false;                  // Power status of FEM
 	bool  pam = false;                  // Power status of PAM
 	bool  snapv2_0 = false;           // Power status of SNAP 0 and 1
 	bool  snapv2_1 = false;           // Power status of SNAP 0 and 1
@@ -119,7 +119,7 @@ struct status {
 	bool  snapv2_3 = false;           // Power status of SNAP 2 and 3
 	byte  mac[6];                       // Arduino MAC address as assigned by arduino-netboot
 	byte  nodeID;                       // Digi I/O bits 0 through 7, first 6 give the node ID
-	byte  nodeID_metadata;	            // Digi I/O bits 8 through 15, bit 8 specifies if node is a prototype or production 	    
+	byte  nodeID_metadata;	            // Digi I/O bits 8 through 15, bit 8 specifies if node is a prototype or production
 } statusStruct;
 
 void bootReset();
@@ -136,8 +136,8 @@ void setup() {
 	Serial.println("Running Setup..");
 	// Setting pins appropriately. Very important to first deactivate the digital pins
 	// because setting the pin as OUTPUT changes it's state and has caused problems with the reset pin 4 before
-	// PSU that turns on White Rabbit is now hard wired to be turned on by the 5V Arduino signal, this prevents 
-	// indefinite power cycle in case of a reset loop (which happens when ping/poke fail, the reset command was sent 
+	// PSU that turns on White Rabbit is now hard wired to be turned on by the 5V Arduino signal, this prevents
+	// indefinite power cycle in case of a reset loop (which happens when ping/poke fail, the reset command was sent
 	// or all four sensors are off line.
 
 	// Initialize and deactivate pins to avoid glitches
@@ -178,7 +178,7 @@ void setup() {
 
 	// Reset pin, Active LOW
 	digitalWrite(RESET_PIN, RESET_OFF);
-	pinMode(RESET_PIN, OUTPUT); 
+	pinMode(RESET_PIN, OUTPUT);
 	digitalWrite(RESET_PIN, RESET_OFF);
 
 	// Read MAC address from EEPROM (burned previously with macBurner.bin sketch)
@@ -202,7 +202,7 @@ void setup() {
 	delay(1500); // delay to give time for initialization
 
 	// Now that UDP is initialized, serialUdp can be used
-	serialUdp("Running Setup..."); 
+	serialUdp("Running Setup...");
 	serialUdp("Contents of the statusStruct.mac:");
 	serialUdp("Individual values:");
 	serialUdp(String(mac[0]));
@@ -212,7 +212,7 @@ void setup() {
 	serialUdp(String(mac[4]));
 	serialUdp(String(mac[5]));
 
-	// Find Digital IO card and initialize its pin modes 
+	// Find Digital IO card and initialize its pin modes
 	if (io.begin(SX1509_ADDRESS)) {
 		Serial.println("Digital IO card found!");
 		serialUdp("Digital IO card found!");
@@ -245,7 +245,7 @@ void setup() {
 		io.pinMode(14,OUTPUT);    //   .
 		io.pinMode(15,OUTPUT);    //   .
  		for (int i=0; i<6; i++){
-                	statusStruct.nodeID |= io.digitalRead(i) << i; 
+                	statusStruct.nodeID |= io.digitalRead(i) << i;
 			serialUdp("digiIO pin values 0 to 6");
 			serialUdp(String(statusStruct.nodeID));
       		}
@@ -270,12 +270,12 @@ void setup() {
 	serialUdp(String(endSetup-startSetup));
 }
 
- 
+
 void loop() {
 	unsigned long startLoop = millis();
 	// Find top temp sensor and read its value
 	if (mcpTop.begin(TEMP_TOP_ADDR)) {
-		statusStruct.mcpTempTop = mcpTop.readTempC();    
+		statusStruct.mcpTempTop = mcpTop.readTempC();
 	}
 	else {
 		Serial.println("MCP9808 TOP not found");
@@ -284,8 +284,8 @@ void loop() {
 		#endif
 		      statusStruct.mcpTempTop = -99;
 	}
- 
-    
+
+
 	// Find middle temp sensor and take read value
 	if (mcpMid.begin(TEMP_MID_ADDR)) {
 		statusStruct.mcpTempMid = mcpMid.readTempC();
@@ -293,12 +293,12 @@ void loop() {
 	else {
 		Serial.println("MCP9808 MID not found");
 		#ifdef VERBOSE
-			serialUdp("MCP9808 MID not found"); 
+			serialUdp("MCP9808 MID not found");
 		#endif
 		statusStruct.mcpTempMid = -99;
 	}
 
-    
+
 	// Find bottom temp sensor and take read value
 	if (mcpBot.begin(TEMP_BOT_ADDR)) {
 		statusStruct.mcpTempBot = mcpBot.readTempC();
@@ -306,12 +306,12 @@ void loop() {
 	else {
 		Serial.println("MCP9808 BOT not found");
 		#ifdef VERBOSE
-			serialUdp("MCP9808 BOT not found"); 
+			serialUdp("MCP9808 BOT not found");
 		#endif
 		statusStruct.mcpTempBot = -99;
 	}
 
-    
+
 	// Read humidity and temperature from HTU21DF sensor
 	if (htu.begin()) {
 		statusStruct.htuTemp = htu.readTemperature();
@@ -340,13 +340,13 @@ void loop() {
 		#ifdef VERBOSE
 			serialUdp("UDP packet sent...");
 		#endif
-		last_sent = time_now;   
+		last_sent = time_now;
 	}
 	// Check if request was sent to Arduino
 	packetSize = UdpRcv.parsePacket(); // Reads the packet size
 	if (packetSize > 0) { //if packetSize is >0, that means someone has sent a request
-		parseUdpPacket();    
-	} 
+		parseUdpPacket();
+	}
 	// Renew DHCP lease - not sure if necessary since Arduino IPs are static in dnsmasq.conf
 	Ethernet.maintain();
 	unsigned long endLoop = millis();
@@ -369,7 +369,7 @@ void parseUdpPacket(){
 		digitalWrite(SNAP_RELAY_PIN, SNAP_RELAY_ON);
 		statusStruct.snap_relay = true;
 		// Watchdog.reset();
-	}     
+	}
 	else if (command == "snapRelay_off") {
 		digitalWrite(SNAP_RELAY_PIN, SNAP_RELAY_OFF);
 		statusStruct.snap_relay = false;
@@ -453,7 +453,7 @@ void parseUdpPacket(){
 	}
 	else {
 		serialUdp("Unknown command received..");
-	}    
+	}
 	// Clear UDP packet buffer before sending another packet
 	memset(packetBuffer, 0, UDP_TX_PACKET_MAX_SIZE);
 }
@@ -463,7 +463,7 @@ void bootReset(){
 	Serial.println("Resetting Bootloader..");
 	serialUdp("Resetting Bootloader..");
 	delay(500);
-	digitalWrite(RESET_PIN, RESET_ON);  
+	digitalWrite(RESET_PIN, RESET_ON);
 }
 
 
