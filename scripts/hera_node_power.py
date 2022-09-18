@@ -6,7 +6,8 @@ parser = argparse.ArgumentParser(description='Turn on SNAP relay, SNAPs, FEM and
                                  'No hardware choice turns all on/off.',
                                  formatter_class=argparse.ArgumentDefaultsHelpFormatter)
 
-parser.add_argument('command', help="Specify 'on', 'off', or 'reset'.",
+parser.add_argument('command', help="Specify 'on' or 'off'.  "
+                    "Note 'reset' will reset the arduino - use with caution.",
                     choices=['on', 'off', 'reset'])
 parser.add_argument('node', help="Specify the list of nodes (csv list of int) or 'all' (default)",
                     nargs='?', default='all')
@@ -43,7 +44,7 @@ nc = node_control.NodeControl(args.node, redisServer=args.redisServer, count=Non
 nc.get_node_senders(throttle=args.throttle)
 if not len(nc.connected_nodes):
     import sys
-    print("No nodes are connected.")
+    print("No specified nodes are connected.")
     sys.exit()
 
 if args.command == 'reset':
