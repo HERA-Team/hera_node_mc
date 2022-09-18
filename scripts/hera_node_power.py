@@ -9,7 +9,7 @@ parser = argparse.ArgumentParser(description='Turn on SNAP relay, SNAPs, FEM and
 parser.add_argument('command', help="Specify 'on' or 'off'.  "
                     "Note 'reset' will reset the arduino - use with caution.",
                     choices=['on', 'off', 'reset'])
-parser.add_argument('node', help="Specify the list of nodes (csv list of int) or 'all' (default)",
+parser.add_argument('node', help="Specify the list of nodes (csv list of int) or 'all'",
                     nargs='?', default='all')
 parser.add_argument('-p', '--pam', action='store_true', help='Turn on/off the PAMs')
 parser.add_argument('-f', '--fem', action='store_true', help='Turn on/off the FEMs')
@@ -22,7 +22,7 @@ parser.add_argument('-3', '--snap3', action='store_true', help='Turn on/off SNAP
 parser.add_argument('-r', '--snap-relay', dest='snap_relay', action='store_true',
                     help="Turn on/off the snap-relay - NOT NEEDED except "
                          "when turning off the last snap if done separately")
-parser.add_argument('--throttle', help='Throttle time in sec for udp_sender (0.2s)',
+parser.add_argument('--throttle', help='Throttle time in sec for udp_sender',
                     type=float, default=0.2)
 parser.add_argument('--quiet', help="Don't print verification.", action='store_true')
 parser.add_argument('--hold-for-verify', dest='hold_for_verify',
@@ -31,7 +31,7 @@ parser.add_argument('--hold-for-verify', dest='hold_for_verify',
 parser.add_argument('--verify-mode', dest='verify_mode', help='Type of verify mode.',
                     choices=['time', 'agree', 'cmd', 'stat', 'all'], default='all')
 parser.add_argument('--error-threshold', dest='error_threshold', default=1.0, type=float,
-                    help='Fractional failure rate for error (0->any, 1->none) (default 0.0).')
+                    help='Fractional failure rate for error (0->any fail, 1->never)')
 parser.add_argument('--show-success', dest='show_success', action='store_true',
                     help='Show successful commands in addition to failures.')
 parser.add_argument('--redisServer', help='Name of redis server', default='redishost')
