@@ -44,6 +44,8 @@ verbose = not args.quiet
 if args.exclude_nodes:
     args.exclude_nodes = args.node.split(',')
     args.node = 'all'
+else:
+    args.exclude_nodes = []
 
 nc = node_control.NodeControl(args.node, redisServer=args.redisServer,
                               count=None, exclude_nodes=args.exclude_nodes)
