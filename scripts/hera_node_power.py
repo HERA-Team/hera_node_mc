@@ -11,6 +11,8 @@ parser.add_argument('command', help="Specify 'on' or 'off'.  "
                     choices=['on', 'off', 'reset'])
 parser.add_argument('node', help="Specify the list of nodes (csv list of int) or 'all'",
                     nargs='?', default='all')
+parser.add_argument('-E', '--exclude-nodes', dest='exclude_nodes', action='store_true',
+                    help="Flag to exclude the listed nodes from 'all' (invert sense of node arg).")
 parser.add_argument('-p', '--pam', action='store_true', help='Turn on/off the PAMs')
 parser.add_argument('-f', '--fem', action='store_true', help='Turn on/off the FEMs')
 parser.add_argument('-s', '--snaps', action='store_true',
@@ -27,7 +29,7 @@ parser.add_argument('--throttle', help='Throttle time in sec for udp_sender',
 parser.add_argument('--quiet', help="Don't print verification.", action='store_true')
 parser.add_argument('--hold-for-verify', dest='hold_for_verify',
                     help="Seconds to wait before timing out (use 0 to disable check)",
-                    default=90, type=int)
+                    default=30, type=int)
 parser.add_argument('--verify-mode', dest='verify_mode', help='Type of verify mode.',
                     choices=['time', 'agree', 'cmd', 'stat', 'all'], default='all')
 parser.add_argument('--error-threshold', dest='error_threshold', default=1.0, type=float,
@@ -39,8 +41,12 @@ parser.add_argument('--redisServer', help='Name of redis server', default='redis
 args = parser.parse_args()
 
 verbose = not args.quiet
+if args.exclude_nodes:
+    args.exclude_nodes = args.node.split(',')
+    args.node = 'all'
 
-nc = node_control.NodeControl(args.node, redisServer=args.redisServer, count=None)
+nc = node_control.NodeControl(args.node, redisServer=args.redisServer,
+                              count=None, exclude_nodes=args.exclude_nodes)
 nc.get_node_senders(throttle=args.throttle)
 if not len(nc.connected_nodes):
     import sys
@@ -58,6 +64,7 @@ all_hardware = True  # Default is to turn everything on/off, unless something sp
 for hw in ['fem', 'pam', 'snaps', 'snap0', 'snap1', 'snap2', 'snap3', 'snap_relay']:
     if getattr(args, hw):
         all_hardware = False
+        break
 if all_hardware:
     args.snap_relay = True
     args.snaps = True
@@ -74,7 +81,8 @@ else:
 any_snap = len(snaps_to_set) > 0
 all_snap = len(snaps_to_set) == 4
 
-# Turn off snap monitoring if turning off all snaps.
+# Turn off snap monitoring if turning off all snaps
+#  - this turns off the monitoring done in hera_corr_f by setting the redis key
 if args.command == 'off' and args.node == 'all' and all_snap:
     nc.disable_snap_monitor()
 

@@ -44,7 +44,7 @@ class NodeControl():
     hw = ['snap_relay', 'snap_0', 'snap_1', 'snap_2', 'snap_3', 'fem', 'pam']
     power_switch = {True: 'on', False: 'off'}
 
-    def __init__(self, nodes, redisServer="redishost", count=None):
+    def __init__(self, nodes, redisServer="redishost", count=None, exclude_nodes=[]):
         """
         Create a NodeControl class instance to query/control nodes.
 
@@ -61,6 +61,8 @@ class NodeControl():
         count : int or None
             Number of status fields to make a node count as actually used.
             If None, reads from node_util.status_node
+        exclude_nodes : list of ints (or empty)
+            Will exclude these nodes.
 
         Attributes
         ----------
@@ -78,7 +80,7 @@ class NodeControl():
             List of the status:node keys
         """
         self.explicit_ip = False
-        self.set_request(nodes)
+        self.set_request(nodes, exclude_nodes)
         self.r = node_util.get_redis_client(redisServer)
         self.reset_node_senders(full_reset=True)
         self.status_node_keys = list(node_util.status_node(None, None).keys())
@@ -125,7 +127,7 @@ class NodeControl():
         self.r.hmset(rkey, rval)
         self.status_scriptname = "status:script:{}:{}".format(send_receive.THIS_HOST, this_file)
 
-    def set_request(self, nodes):
+    def set_request(self, nodes, exclude_nodes):
         if isinstance(nodes, str):
             if nodes.lower() == 'all':
                 self.request_nodes = list(range(MAX_NODES))
@@ -140,6 +142,9 @@ class NodeControl():
             self.request_nodes = nodes
         else:
             raise ValueError(f"Invalid 'nodes' type: {nodes}")
+        for exno in exclude_nodes:
+            if exno in self.request_nodes:
+                self.request_nodes.remove(exno)
 
     def get_nodes_in_redis(self, count=None):
         """
