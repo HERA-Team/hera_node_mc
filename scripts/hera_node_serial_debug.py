@@ -9,7 +9,7 @@ import argparse
 from node_control import send_receive
 
 parser = argparse.ArgumentParser(description='This script dumps the serial output of all of '
-                                 'the Arduinos every x seconds - default is 300.',
+                                 'the Arduinos every x seconds - default is 1',
                                  formatter_class=argparse.ArgumentDefaultsHelpFormatter)
 parser.add_argument('-f', '--file_name', help='Specify the file name to dump Redis data to e.g '
                     'datasetMMDDYY.txt If None (default) dumps to screen', default=None)
