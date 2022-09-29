@@ -80,8 +80,8 @@ class NodeControl():
             List of the status:node keys
         """
         self.explicit_ip = False
-        self.set_request(nodes, exclude_nodes)
         self.r = node_util.get_redis_client(redisServer)
+        self.set_request(nodes, exclude_nodes)
         self.reset_node_senders(full_reset=True)
         self.status_node_keys = list(node_util.status_node(None, None).keys())
         self.get_nodes_in_redis(count)
