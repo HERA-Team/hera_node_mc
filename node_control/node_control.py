@@ -128,6 +128,7 @@ class NodeControl():
         self.status_scriptname = "status:script:{}:{}".format(send_receive.THIS_HOST, this_file)
 
     def set_request(self, nodes, exclude_nodes):
+        self.requested_nodes_query = nodes
         if isinstance(nodes, str):
             if nodes.lower() == 'all':
                 self.request_nodes = list(range(MAX_NODES))
@@ -135,7 +136,14 @@ class NodeControl():
                 self.explicit_ip = True
                 self.request_nodes = nodes.split(',')
             else:
-                self.request_nodes = [int(x) for x in nodes.split(',')]
+                try:
+                    self.request_nodes = [int(x) for x in nodes.split(',')]
+                except ValueError:
+                    list_from_redis = self.r.get(nodes)
+                    if list_from_redis is not None:
+                        self.request_nodes = json.loads(list_from_redis)
+                    else:
+                        self.request_nodes = list(range(MAX_NODES))
         elif isinstance(nodes, (int, float)):
             self.request_nodes = [int(nodes)]
         elif isinstance(nodes, list) or nodes is None:
@@ -145,6 +153,9 @@ class NodeControl():
         for exno in exclude_nodes:
             if exno in self.request_nodes:
                 self.request_nodes.remove(exno)
+
+    def get_nodes_list_from_redis(self, nodes):
+        self.r.get(nodes)
 
     def get_nodes_in_redis(self, count=None):
         """
