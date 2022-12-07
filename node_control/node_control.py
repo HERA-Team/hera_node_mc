@@ -660,6 +660,7 @@ class NodeControl():
             return 0.0  # All good (none failed)!
         failed = []
         incoming_total = len(self.connected_nodes)
+        if incoming_total==0: raise RuntimeError("Node_control.py:sentence No nodes connected.")
         for node in self.connected_nodes:
             if results[node]:  # there were some left over so didn't all work
                 failed.append(node)
