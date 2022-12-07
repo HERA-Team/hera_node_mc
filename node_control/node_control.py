@@ -663,7 +663,7 @@ class NodeControl():
                 if purge:
                     self.connected_nodes.remove(node)
         error_fraction = len(failed) / incoming_total
-        if error_threshold > 0.99 or error_fraction > error_threshold:
+        if error_threshold < 1.0 and error_fraction > error_threshold:
             msg = "{} of {} nodes failed.".format(len(failed), incoming_total)
             raise RuntimeError(msg)
         if purge and len(failed) > 0:
