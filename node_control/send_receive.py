@@ -124,6 +124,9 @@ class UdpSenderReceiver():
                     if self.pingable is None:
                         self.node_is_connected = False
         else:
+            print("----- YOU ARE NOT ON A NODE-CONTROL HOST -----")
+            print("-----            PLEASE GO TO            -----")
+            print("-----           hera-node-head           -----")
             self.node_is_connected = False
 
     def poke(self):
