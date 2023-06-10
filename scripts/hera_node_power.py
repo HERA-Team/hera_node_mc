@@ -42,7 +42,7 @@ args = parser.parse_args()
 
 verbose = not args.quiet
 if args.exclude_nodes:
-    args.exclude_nodes = args.node.split(',')
+    args.exclude_nodes = [int(x) for x in args.node.split(',')]
     args.node = 'all'
 else:
     args.exclude_nodes = []
