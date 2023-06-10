@@ -116,6 +116,8 @@ class NodeControl():
                     getattr(self, this_attr)[this_node] = this_key
 
     def redis_keygen(self, rtype, nodeID):
+        if nodeID > 29:
+            return "bad:nodeID:{}".format(nodeID)
         if rtype == 'wr_stat' and str(nodeID).startswith('heraNode'):
             return "{}{}".format(self.NC_KEY_INFO[rtype][2], nodeID)
         return "{}{}{}".format(self.NC_KEY_INFO[rtype][0], nodeID, self.NC_KEY_INFO[rtype][1])
