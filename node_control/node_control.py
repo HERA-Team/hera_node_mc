@@ -741,7 +741,10 @@ class NodeControl():
         pstat = self.get_power_status()
         change_node = []
         for cnode in self.connected_nodes:
-            if command != self.power_switch[pstat[cnode][hw]]:
+            try:
+                if command != self.power_switch[pstat[cnode][hw]]:
+                    change_node.append(cnode)
+            except KeyError:
                 change_node.append(cnode)
         if print_stat:
             prhw = hw.strip('power').replace('_', ' ').strip()
