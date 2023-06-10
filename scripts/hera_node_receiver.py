@@ -21,6 +21,7 @@ try:
         # Receive data continuously from the server (Arduino in this case)
         data, addr = rcvr.client_socket.recvfrom(1024)
         data_dict = node_control.node_util.status_node(data, addr)
+        print(data_dict['node_ID'], data_dict)
         nc.r.hmset(nc.redis_keygen('nc_stat', data_dict['node_ID']), data_dict)
 except KeyboardInterrupt:
     print('Interrupted', file=sys.stderr)
