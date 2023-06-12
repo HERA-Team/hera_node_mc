@@ -6,6 +6,7 @@ from . import send_receive, node_util, __version__
 
 
 MAX_NODES = 30
+OLD_AGE = 32000000  # old-age is just over a year seconds
 REDIS_KEEP_ALIVE_RESET_KEY = 'reset-node-keep-alive'
 
 
@@ -288,7 +289,7 @@ class NodeControl():
             if self.request_nodes is not None and node in self.request_nodes:
                 self.requested_included['sensor'].append(node)
             stats = self.r.hgetall(stat_key)
-            sensors[node] = {'age': None}
+            sensors[node] = {'age': OLD_AGE}
             for key, convfunc in conv_methods.items():
                 try:
                     sensors[node][key] = convfunc(stats[key])
@@ -425,7 +426,7 @@ class NodeControl():
             if self.request_nodes is not None and node in self.request_nodes:
                 self.requested_included['power'].append(node)
             statii = self.r.hgetall(stat_key)
-            power[node] = {'age': None}
+            power[node] = {'age': OLD_AGE}
             for key in list(statii.keys()):
                 if key == 'timestamp':
                     try:
