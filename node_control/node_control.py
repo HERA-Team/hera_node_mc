@@ -51,7 +51,7 @@ class NodeControl():
 
         Parameters
         ----------
-        nodes : int, list of int, 'all', None
+        nodes : int, list of int, 'all', 'redis:[key]', None
             ID numbers of the nodes with which this instance of NodeControl will interact.
             If an IP address (or csv-list), then will just use those for communicating out.
             If 'all', will try 0-29.
@@ -135,18 +135,17 @@ class NodeControl():
         if isinstance(nodes, str):
             if nodes.lower() == 'all':
                 self.request_nodes = list(range(MAX_NODES))
+            elif nodes.lower().startswith('redis:'):
+                list_from_redis = self.r.get(nodes.split(':')[1])
+                if list_from_redis is not None:
+                    self.request_nodes = json.loads(list_from_redis)
+                else:
+                    self.request_nodes = list(range(MAX_NODES))
             elif '.' in nodes:
                 self.explicit_ip = True
                 self.request_nodes = nodes.split(',')
             else:
-                try:
-                    self.request_nodes = [int(x) for x in nodes.split(',')]
-                except ValueError:
-                    list_from_redis = self.r.get(nodes)
-                    if list_from_redis is not None:
-                        self.request_nodes = json.loads(list_from_redis)
-                    else:
-                        self.request_nodes = list(range(MAX_NODES))
+                self.request_nodes = [int(x) for x in nodes.split(',')]
         elif isinstance(nodes, (int, float)):
             self.request_nodes = [int(nodes)]
         elif isinstance(nodes, list) or nodes is None:
