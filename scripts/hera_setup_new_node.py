@@ -116,3 +116,4 @@ if args.reset_dnsmasq:
     os.system('sudo /etc/init.d/dnsmasq stop')
     os.system('sudo rm /var/lib/misc/dnsmasq.leases')
     os.system('sudo /etc/init.d/dnsmasq start')
+    # os.system('pkill -HUP dnsmasq')  # Will re-read the 

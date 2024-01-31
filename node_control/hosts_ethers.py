@@ -1,6 +1,68 @@
 from datetime import datetime
 import os
 import warnings
+from tabulate import tabulate
+from copy import copy
+
+
+def get_hns(aliases):
+    other_aliases = copy(aliases)
+    for alias in aliases:
+        if alias.startswith('heraNode'):
+            hns = copy(alias)
+            other_aliases.remove(alias)
+            node_tuple = (int(hns.split('e')[2].split('S')[0]), int(hns[-1]))
+    return hns, node_tuple, ', '.join(other_aliases)
+
+
+def combine(hostsfile, ethersfile):
+    """
+    Takes a hosts file and ethers file and combines them.
+
+    """
+
+    hosts = HostsEthers(hostsfile)
+    ethers = HostsEthers(ethersfile)
+
+    # Go through all ethers alias and find hosts
+    table_data = []
+    heraNodeSnap = {}
+    remaining_ethers_aliases = list(ethers.by_alias.keys())
+    fnd = 0
+    for alias, mac in ethers.by_alias.items():
+        if alias in hosts.by_alias:
+            ip = hosts.by_alias[alias]
+            alias_csv = ', '.join(hosts.by_id[hosts.by_alias[alias]])
+            table_data.append([mac, ip, alias_csv])
+            fnd += 1
+            remaining_ethers_aliases.remove(alias)
+            if 'heraNode' in alias_csv:
+                hNS, node_tuple, other = get_hns(hosts.by_id[hosts.by_alias[alias]])
+                if node_tuple in heraNodeSnap:
+                    raise ValueError(f"{hNS} already in list.")
+                heraNodeSnap[node_tuple] = [hNS, other, mac, ip]
+    print("-----------------------------------------------------------------------------------------")
+    if True:
+        print(tabulate(table_data, headers=['mac', 'ip', 'aliases']))
+        print(f"Matched {fnd} aliases")
+        print(f"Unused aliases in ethers: {len(remaining_ethers_aliases)}")
+        print(', '.join(remaining_ethers_aliases))
+        print("-----------------------------------------------------------------------------------------")
+    table_data = []
+    all_tuples = []
+    for i in range(24):
+        for j in range(4):
+            all_tuples.append((i, j))
+    with open('hecombine.csv', 'w') as fp:
+        for nt in all_tuples:
+            if nt in heraNodeSnap:
+                table_data.append(heraNodeSnap[nt])
+                print(','.join(heraNodeSnap[nt]), file=fp)
+            else:
+                row = [f"heraNode{nt[0]}Snap{nt[1]}", '-', '-', '-']
+                table_data.append(row)
+                print(','.join(row), file=fp)
+    print(tabulate(table_data))
 
 
 class HostsEthers:
