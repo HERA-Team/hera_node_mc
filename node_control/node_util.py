@@ -103,7 +103,7 @@ def str2bool(x):
 
 def get_redis_client(redisServer='redishost'):
     connection_pool = redis.ConnectionPool(host=redisServer, decode_responses=True)
-    return redis.StrictRedis(connection_pool=connection_pool, charset='utf-8')
+    return redis.StrictRedis(connection_pool=connection_pool)
 
 
 def node_power_entry(node, pwr):
