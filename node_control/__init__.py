@@ -1,15 +1,14 @@
-from pkg_resources import get_distribution, DistributionNotFound
-from setuptools_scm import get_version
+import contextlib
+from importlib.metadata import PackageNotFoundError, version
 from pathlib import Path
 
+from setuptools_scm import get_version
 
 try:  # This is used for developer installs
     __version__ = get_version(Path(__file__).parent.parent)
 except (LookupError, ImportError):
-    try:
-        __version__ = get_distribution(__name__).version
-    except DistributionNotFound:
-        pass
+    with contextlib.suppress(PackageNotFoundError):
+        __version__ = version(__name__)
 
 from . import node_control
 from . import send_receive
